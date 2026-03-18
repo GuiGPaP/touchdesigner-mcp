@@ -66,6 +66,19 @@ export interface TdNodeErrorReport {
 }
 
 /**
+ * A single ruff lint diagnostic
+ */
+export interface LintDiagnostic {
+  code?: string;
+  message?: string;
+  line?: number;
+  column?: number;
+  endLine?: number;
+  endColumn?: number;
+  fixable?: boolean;
+}
+
+/**
  * Type of the Python entity
  */
 export type TdPythonClassDetailsType = typeof TdPythonClassDetailsType[keyof typeof TdPythonClassDetailsType];
@@ -609,25 +622,21 @@ export type LintDatBody = {
   nodePath: string;
   /** If true, apply auto-fixable corrections to the DAT */
   fix?: boolean;
-};
-
-export type LintDat200DataDiagnosticsItem = {
-  code?: string;
-  message?: string;
-  line?: number;
-  column?: number;
-  endLine?: number;
-  endColumn?: number;
-  fixable?: boolean;
+  /** Preview fix without applying (returns diff). Only meaningful with fix=true. */
+  dryRun?: boolean;
 };
 
 export type LintDat200Data = {
   path?: string;
   name?: string;
   diagnosticCount?: number;
-  diagnostics?: LintDat200DataDiagnosticsItem[];
+  diagnostics?: LintDiagnostic[];
   fixed?: boolean;
   fixedText?: string;
+  remainingDiagnosticCount?: number;
+  remainingDiagnostics?: LintDiagnostic[];
+  diff?: string;
+  applied?: boolean;
 };
 
 export type LintDat200 = {

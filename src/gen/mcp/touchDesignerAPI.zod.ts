@@ -193,10 +193,12 @@ export const SetDatTextResponse = zod.object({
  * @summary Lint DAT code with ruff
  */
 export const lintDatBodyFixDefault = false;
+export const lintDatBodyDryRunDefault = false;
 
 export const LintDatBody = zod.object({
   "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/script1\"'),
-  "fix": zod.boolean().default(lintDatBodyFixDefault).describe('If true, apply auto-fixable corrections to the DAT')
+  "fix": zod.boolean().default(lintDatBodyFixDefault).describe('If true, apply auto-fixable corrections to the DAT'),
+  "dryRun": zod.boolean().default(lintDatBodyDryRunDefault).describe('Preview fix without applying (returns diff). Only meaningful with fix=true.')
 })
 
 export const LintDatResponse = zod.object({
@@ -213,9 +215,21 @@ export const LintDatResponse = zod.object({
   "endLine": zod.number().optional(),
   "endColumn": zod.number().optional(),
   "fixable": zod.boolean().optional()
-})).optional(),
+}).describe('A single ruff lint diagnostic')).optional(),
   "fixed": zod.boolean().optional(),
-  "fixedText": zod.string().optional()
+  "fixedText": zod.string().optional(),
+  "remainingDiagnosticCount": zod.number().optional(),
+  "remainingDiagnostics": zod.array(zod.object({
+  "code": zod.string().optional(),
+  "message": zod.string().optional(),
+  "line": zod.number().optional(),
+  "column": zod.number().optional(),
+  "endLine": zod.number().optional(),
+  "endColumn": zod.number().optional(),
+  "fixable": zod.boolean().optional()
+}).describe('A single ruff lint diagnostic')).optional(),
+  "diff": zod.string().optional(),
+  "applied": zod.boolean().optional()
 }).optional()
 })
 

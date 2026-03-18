@@ -93,8 +93,37 @@ export function formatLintDat(
 			lines.push(`  ${loc} ${d.code ?? ""} ${d.message ?? ""}${fixable}`);
 		}
 	}
-	if (data.fixed) {
+	if (data.applied === false && data.diff) {
+		lines.push("[DRY RUN] Fix preview:");
+		lines.push(data.diff);
+	} else if (data.applied === true) {
 		lines.push("Auto-fix applied.");
+	} else if (data.fixed) {
+		lines.push("Auto-fix applied.");
+	}
+
+	if (
+		data.remainingDiagnosticCount !== undefined &&
+		data.remainingDiagnosticCount > 0
+	) {
+		lines.push(
+			`Remaining after fix: ${data.remainingDiagnosticCount} issue(s)`,
+		);
+		if (data.remainingDiagnostics && opts.detailLevel !== "minimal") {
+			for (const d of data.remainingDiagnostics) {
+				const loc = `L${d.line ?? "?"}:${d.column ?? "?"}`;
+				const fixable = d.fixable ? " (fixable)" : "";
+				lines.push(
+					`  ${loc} ${d.code ?? ""} ${d.message ?? ""}${fixable}`,
+				);
+			}
+		}
+	} else if (
+		data.remainingDiagnosticCount !== undefined &&
+		data.remainingDiagnosticCount === 0 &&
+		data.fixed
+	) {
+		lines.push("0 remaining issues after fix.");
 	}
 
 	return finalizeFormattedText(lines.join("\n"), opts, {

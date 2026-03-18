@@ -586,12 +586,16 @@ console.log(text.data?.text);`,
 	},
 	{
 		category: "dat",
-		description: "Lint DAT code with ruff and optionally auto-fix",
-		example: `const report = await lintDat({
+		description:
+			"Lint DAT code with ruff and optionally auto-fix. Supports dry-run mode and reports remaining diagnostics after fix.",
+		example: `// Dry-run: preview fix without applying
+const preview = await lintDat({
   nodePath: '/project1/script1',
-  fix: false,
+  fix: true,
+  dryRun: true,
 });
-console.log(report.data?.diagnosticCount);`,
+console.log(preview.data?.diff);
+console.log(preview.data?.remainingDiagnostics);`,
 		functionName: "lintDat",
 		modulePath: `${MODULE_ROOT}/lintDat.ts`,
 		parameters: [
@@ -610,6 +614,13 @@ console.log(report.data?.diagnosticCount);`,
 				type: "boolean",
 			},
 			{
+				description:
+					"Preview fix without applying (returns diff). Only meaningful with fix=true.",
+				name: "dryRun",
+				required: false,
+				type: "boolean",
+			},
+			{
 				description: "Formatter verbosity.",
 				name: "detailLevel",
 				required: false,
@@ -622,7 +633,8 @@ console.log(report.data?.diagnosticCount);`,
 				type: "'json' | 'yaml' | 'markdown'",
 			},
 		],
-		returns: "Lint diagnostics with code, message, line, column, and fixable flag.",
+		returns:
+			"Lint diagnostics with code, message, line, column, fixable flag. When fix=true: applied, diff (dry-run), remainingDiagnostics, remainingDiagnosticCount.",
 		tool: TOOL_NAMES.LINT_DAT,
 	},
 	{
