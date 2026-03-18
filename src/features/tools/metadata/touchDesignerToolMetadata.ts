@@ -866,6 +866,81 @@ console.log(candidates.data?.candidates);`,
 		returns: "Instancing configuration details.",
 		tool: TOOL_NAMES.CONFIGURE_INSTANCING,
 	},
+	{
+		category: "state",
+		description:
+			"Get parameter schema metadata (type, range, menu, default) for a node. Eliminates guessing parameter names.",
+		example: `await getNodeParameterSchema({ nodePath: "/project1/noise1", pattern: "instance*" });`,
+		functionName: "getNodeParameterSchema",
+		modulePath: `${MODULE_ROOT}/getNodeParameterSchema.ts`,
+		parameters: [
+			{ description: "Absolute path to the node.", name: "nodePath", required: true, type: "string" },
+			{ description: "Glob pattern to filter parameter names.", name: "pattern", required: false, type: "string" },
+		],
+		returns: "Parameter schema list with types, ranges, menus, and defaults.",
+		tool: TOOL_NAMES.GET_NODE_PARAMETER_SCHEMA,
+	},
+	{
+		category: "nodes",
+		description:
+			"Complete op() path references from a context node. Supports relative and absolute forms.",
+		example: `await completeOpPaths({ contextNodePath: "/project1/base1/script1", prefix: "noise" });`,
+		functionName: "completeOpPaths",
+		modulePath: `${MODULE_ROOT}/completeOpPaths.ts`,
+		parameters: [
+			{ description: "Absolute path to the context node.", name: "contextNodePath", required: true, type: "string" },
+			{ description: "Prefix to complete.", name: "prefix", required: false, type: "string" },
+			{ description: "Maximum results.", name: "limit", required: false, type: "number" },
+		],
+		returns: "Matching operator paths with relative references.",
+		tool: TOOL_NAMES.COMPLETE_OP_PATHS,
+	},
+	{
+		category: "state",
+		description:
+			"Get channel info for a CHOP node. Optionally includes per-channel statistics.",
+		example: `await getChopChannels({ nodePath: "/project1/noise1", includeStats: true });`,
+		functionName: "getChopChannels",
+		modulePath: `${MODULE_ROOT}/getChopChannels.ts`,
+		parameters: [
+			{ description: "Absolute path to the CHOP.", name: "nodePath", required: true, type: "string" },
+			{ description: "Glob pattern to filter channel names.", name: "pattern", required: false, type: "string" },
+			{ description: "Include min/max/avg statistics.", name: "includeStats", required: false, type: "boolean" },
+			{ description: "Maximum channels to return.", name: "limit", required: false, type: "number" },
+		],
+		returns: "Channel names and optional statistics.",
+		tool: TOOL_NAMES.GET_CHOP_CHANNELS,
+	},
+	{
+		category: "state",
+		description:
+			"Get dimensions and a content sample of a table DAT. Raw cell values only.",
+		example: `await getDatTableInfo({ nodePath: "/project1/table1" });`,
+		functionName: "getDatTableInfo",
+		modulePath: `${MODULE_ROOT}/getDatTableInfo.ts`,
+		parameters: [
+			{ description: "Absolute path to the table DAT.", name: "nodePath", required: true, type: "string" },
+			{ description: "Maximum preview rows.", name: "maxPreviewRows", required: false, type: "number" },
+			{ description: "Truncate cells longer than this.", name: "maxCellChars", required: false, type: "number" },
+		],
+		returns: "Table dimensions and sample data.",
+		tool: TOOL_NAMES.GET_DAT_TABLE_INFO,
+	},
+	{
+		category: "state",
+		description:
+			"Get extension classes, methods, and properties for a COMP.",
+		example: `await getCompExtensions({ compPath: "/project1/base1", includeDocs: true });`,
+		functionName: "getCompExtensions",
+		modulePath: `${MODULE_ROOT}/getCompExtensions.ts`,
+		parameters: [
+			{ description: "Absolute path to the COMP.", name: "compPath", required: true, type: "string" },
+			{ description: "Include method docstrings.", name: "includeDocs", required: false, type: "boolean" },
+			{ description: "Maximum methods per extension.", name: "maxMethods", required: false, type: "number" },
+		],
+		returns: "Extension method and property listings.",
+		tool: TOOL_NAMES.GET_COMP_EXTENSIONS,
+	},
 ];
 
 export function getTouchDesignerToolMetadata(): ToolMetadata[] {

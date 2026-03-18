@@ -41,10 +41,22 @@ Tools allow AI agents to perform actions in TouchDesigner.
 | `get_td_class_details`  | Gets details of a TouchDesigner Python class or module.            |
 | `get_td_classes`        | Gets a list of TouchDesigner Python classes.                       |
 | `get_td_info`           | Gets information about the TouchDesigner server environment.       |
-| `get_td_node_errors`    | Checks for errors on a specified node and its children. |
+| `get_td_node_errors`    | Checks for errors on a specified node and its children.            |
 | `get_td_node_parameters`| Gets the parameters of a specific node.                            |
 | `get_td_nodes`          | Gets nodes under a parent path, with optional filtering.           |
 | `update_td_node_parameters` | Updates the parameters of a specific node.                     |
+| `create_geometry_comp`  | Creates a Geometry COMP with In/Out operators.                     |
+| `create_feedback_loop`  | Creates a feedback TOP loop (init/feedback/process/out).           |
+| `configure_instancing`  | Configures GPU instancing on a Geometry COMP.                      |
+| `get_dat_text`          | Reads the .text content of a DAT operator.                         |
+| `set_dat_text`          | Writes .text content to a DAT operator.                            |
+| `lint_dat`              | Lints DAT code with ruff, optional auto-fix and dry-run.           |
+| `discover_dat_candidates` | Discovers DAT candidates under a parent, classified by kind.     |
+| `get_node_parameter_schema` | Gets parameter schema (type, range, menu, default) for a node. |
+| `complete_op_paths`     | Completes op() path references from a context node.                |
+| `get_chop_channels`     | Gets CHOP channel names and optional statistics.                   |
+| `get_dat_table_info`    | Gets table DAT dimensions and content sample.                      |
+| `get_comp_extensions`   | Gets COMP extension methods and properties.                        |
 
 ### Prompts
 

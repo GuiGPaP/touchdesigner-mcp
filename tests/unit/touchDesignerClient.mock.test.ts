@@ -13,6 +13,7 @@ import {
 
 vi.mock("../../src/gen/endpoints/TouchDesignerAPI", async () => {
 	return {
+		completeOpPaths: vi.fn(),
 		configureInstancing: vi.fn(),
 		createFeedbackLoop: vi.fn(),
 		createGeometryComp: vi.fn(),
@@ -21,10 +22,14 @@ vi.mock("../../src/gen/endpoints/TouchDesignerAPI", async () => {
 		discoverDatCandidates: vi.fn(),
 		execNodeMethod: vi.fn(),
 		execPythonScript: vi.fn(),
+		getChopChannels: vi.fn(),
+		getCompExtensions: vi.fn(),
+		getDatTableInfo: vi.fn(),
 		getDatText: vi.fn(),
 		getModuleHelp: vi.fn(),
 		getNodeDetail: vi.fn(),
 		getNodeErrors: vi.fn(),
+		getNodeParameterSchema: vi.fn(),
 		getNodes: vi.fn(),
 		getTdInfo: vi.fn(),
 		getTdPythonClassDetails: vi.fn(),
@@ -1130,6 +1135,63 @@ describe("TouchDesignerClient with mocks", () => {
 				"Cannot read property 'x' of undefined",
 			);
 			expect(mockGetTdInfo).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe("Introspection tools", () => {
+		test("getNodeParameterSchema should handle successful response", async () => {
+			vi.mocked(touchDesignerAPI.getNodeParameterSchema).mockResolvedValue({
+				success: true,
+				data: { nodePath: "/project1/noise1", opType: "noiseCHOP", count: 1, parameters: [] },
+				error: null,
+			});
+			const client = new TouchDesignerClient({ logger: nullLogger });
+			const result = await client.getNodeParameterSchema({ nodePath: "/project1/noise1" });
+			expect(result.success).toBe(true);
+		});
+
+		test("completeOpPaths should handle successful response", async () => {
+			vi.mocked(touchDesignerAPI.completeOpPaths).mockResolvedValue({
+				success: true,
+				data: { contextNodePath: "/p1/s1", prefix: "noise", count: 1, truncated: false, matches: [] },
+				error: null,
+			});
+			const client = new TouchDesignerClient({ logger: nullLogger });
+			const result = await client.completeOpPaths({ contextNodePath: "/p1/s1" });
+			expect(result.success).toBe(true);
+		});
+
+		test("getChopChannels should handle successful response", async () => {
+			vi.mocked(touchDesignerAPI.getChopChannels).mockResolvedValue({
+				success: true,
+				data: { nodePath: "/p1/noise1", numChannels: 2, numSamples: 100, sampleRate: 60, channels: [], truncated: false },
+				error: null,
+			});
+			const client = new TouchDesignerClient({ logger: nullLogger });
+			const result = await client.getChopChannels({ nodePath: "/p1/noise1" });
+			expect(result.success).toBe(true);
+		});
+
+		test("getDatTableInfo should handle successful response", async () => {
+			vi.mocked(touchDesignerAPI.getDatTableInfo).mockResolvedValue({
+				success: true,
+				data: { nodePath: "/p1/table1", numRows: 3, numCols: 2, sampleData: [], truncatedRows: false, truncatedCols: false, truncatedCells: false },
+				error: null,
+			});
+			const client = new TouchDesignerClient({ logger: nullLogger });
+			const result = await client.getDatTableInfo({ nodePath: "/p1/table1" });
+			expect(result.success).toBe(true);
+		});
+
+		test("getCompExtensions should handle successful response", async () => {
+			vi.mocked(touchDesignerAPI.getCompExtensions).mockResolvedValue({
+				success: true,
+				data: { compPath: "/p1/base1", extensions: [] },
+				error: null,
+			});
+			const client = new TouchDesignerClient({ logger: nullLogger });
+			const result = await client.getCompExtensions({ compPath: "/p1/base1" });
+			expect(result.success).toBe(true);
 		});
 	});
 });

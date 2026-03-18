@@ -12,6 +12,7 @@ import {
 	MIN_COMPATIBLE_API_VERSION,
 } from "../core/version.js";
 import {
+	completeOpPaths as apiCompleteOpPaths,
 	configureInstancing as apiConfigureInstancing,
 	createFeedbackLoop as apiCreateFeedbackLoop,
 	createGeometryComp as apiCreateGeometryComp,
@@ -20,10 +21,14 @@ import {
 	discoverDatCandidates as apiDiscoverDatCandidates,
 	execNodeMethod as apiExecNodeMethod,
 	execPythonScript as apiExecPythonScript,
+	getChopChannels as apiGetChopChannels,
+	getCompExtensions as apiGetCompExtensions,
+	getDatTableInfo as apiGetDatTableInfo,
 	getDatText as apiGetDatText,
 	getModuleHelp as apiGetModuleHelp,
 	getNodeDetail as apiGetNodeDetail,
 	getNodeErrors as apiGetNodeErrors,
+	getNodeParameterSchema as apiGetNodeParameterSchema,
 	getNodes as apiGetNodes,
 	getTdInfo as apiGetTdInfo,
 	getTdPythonClassDetails as apiGetTdPythonClassDetails,
@@ -31,6 +36,8 @@ import {
 	lintDat as apiLintDat,
 	setDatText as apiSetDatText,
 	updateNode as apiUpdateNode,
+	type CompleteOpPaths200Data,
+	type CompleteOpPathsParams,
 	type ConfigureInstancingRequest,
 	type CreateFeedbackLoopRequest,
 	type CreateGeometryCompRequest,
@@ -40,11 +47,19 @@ import {
 	type DiscoverDatCandidatesParams,
 	type ExecNodeMethodRequest,
 	type ExecPythonScriptRequest,
+	type GetChopChannels200Data,
+	type GetChopChannelsParams,
+	type GetCompExtensions200Data,
+	type GetCompExtensionsParams,
+	type GetDatTableInfo200Data,
+	type GetDatTableInfoParams,
 	type GetDatText200Data,
 	type GetDatTextParams,
 	type GetModuleHelpParams,
 	type GetNodeDetailParams,
 	type GetNodeErrorsParams,
+	type GetNodeParameterSchema200Data,
+	type GetNodeParameterSchemaParams,
 	type GetNodesParams,
 	type LintDat200Data,
 	type LintDatBody,
@@ -57,6 +72,7 @@ import {
  * Interface for TouchDesignerClient HTTP operations
  */
 export interface ITouchDesignerApi {
+	completeOpPaths: typeof apiCompleteOpPaths;
 	configureInstancing: typeof apiConfigureInstancing;
 	createFeedbackLoop: typeof apiCreateFeedbackLoop;
 	createGeometryComp: typeof apiCreateGeometryComp;
@@ -65,10 +81,14 @@ export interface ITouchDesignerApi {
 	discoverDatCandidates: typeof apiDiscoverDatCandidates;
 	execNodeMethod: typeof apiExecNodeMethod;
 	execPythonScript: typeof apiExecPythonScript;
+	getChopChannels: typeof apiGetChopChannels;
+	getCompExtensions: typeof apiGetCompExtensions;
+	getDatTableInfo: typeof apiGetDatTableInfo;
 	getDatText: typeof apiGetDatText;
 	getModuleHelp: typeof apiGetModuleHelp;
 	getNodeDetail: typeof apiGetNodeDetail;
 	getNodeErrors: typeof apiGetNodeErrors;
+	getNodeParameterSchema: typeof apiGetNodeParameterSchema;
 	getNodes: typeof apiGetNodes;
 	getTdInfo: typeof apiGetTdInfo;
 	getTdPythonClassDetails: typeof apiGetTdPythonClassDetails;
@@ -82,6 +102,7 @@ export interface ITouchDesignerApi {
  * Default implementation of ITouchDesignerApi using generated API clients
  */
 const defaultApiClient: ITouchDesignerApi = {
+	completeOpPaths: apiCompleteOpPaths,
 	configureInstancing: apiConfigureInstancing,
 	createFeedbackLoop: apiCreateFeedbackLoop,
 	createGeometryComp: apiCreateGeometryComp,
@@ -90,10 +111,14 @@ const defaultApiClient: ITouchDesignerApi = {
 	discoverDatCandidates: apiDiscoverDatCandidates,
 	execNodeMethod: apiExecNodeMethod,
 	execPythonScript: apiExecPythonScript,
+	getChopChannels: apiGetChopChannels,
+	getCompExtensions: apiGetCompExtensions,
+	getDatTableInfo: apiGetDatTableInfo,
 	getDatText: apiGetDatText,
 	getModuleHelp: apiGetModuleHelp,
 	getNodeDetail: apiGetNodeDetail,
 	getNodeErrors: apiGetNodeErrors,
+	getNodeParameterSchema: apiGetNodeParameterSchema,
 	getNodes: apiGetNodes,
 	getTdInfo: apiGetTdInfo,
 	getTdPythonClassDetails: apiGetTdPythonClassDetails,
@@ -573,6 +598,76 @@ export class TouchDesignerClient {
 			"Configuring instancing",
 			() => this.api.configureInstancing(params),
 			{ geoPath: params.geoPath },
+		);
+	}
+
+	/**
+	 * Get parameter schema for a node
+	 */
+	async getNodeParameterSchema(params: GetNodeParameterSchemaParams) {
+		return this.apiCall(
+			"Getting parameter schema",
+			() =>
+				this.api.getNodeParameterSchema(params) as Promise<
+					TdResponse<GetNodeParameterSchema200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
+		);
+	}
+
+	/**
+	 * Complete op() path references
+	 */
+	async completeOpPaths(params: CompleteOpPathsParams) {
+		return this.apiCall(
+			"Completing op paths",
+			() =>
+				this.api.completeOpPaths(params) as Promise<
+					TdResponse<CompleteOpPaths200Data | undefined>
+				>,
+			{ contextNodePath: params.contextNodePath },
+		);
+	}
+
+	/**
+	 * Get CHOP channel info
+	 */
+	async getChopChannels(params: GetChopChannelsParams) {
+		return this.apiCall(
+			"Getting CHOP channels",
+			() =>
+				this.api.getChopChannels(params) as Promise<
+					TdResponse<GetChopChannels200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
+		);
+	}
+
+	/**
+	 * Get table DAT info
+	 */
+	async getDatTableInfo(params: GetDatTableInfoParams) {
+		return this.apiCall(
+			"Getting DAT table info",
+			() =>
+				this.api.getDatTableInfo(params) as Promise<
+					TdResponse<GetDatTableInfo200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
+		);
+	}
+
+	/**
+	 * Get COMP extension info
+	 */
+	async getCompExtensions(params: GetCompExtensionsParams) {
+		return this.apiCall(
+			"Getting COMP extensions",
+			() =>
+				this.api.getCompExtensions(params) as Promise<
+					TdResponse<GetCompExtensions200Data | undefined>
+				>,
+			{ compPath: params.compPath },
 		);
 	}
 

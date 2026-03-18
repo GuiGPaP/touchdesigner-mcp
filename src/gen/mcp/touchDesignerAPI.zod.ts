@@ -269,6 +269,170 @@ export const DiscoverDatCandidatesResponse = zod.object({
 
 
 /**
+ * Return parameter schema metadata (type, range, menu, default) for a node. Eliminates guessing parameter names and valid values.
+ * @summary Get parameter schema for a node
+ */
+export const getNodeParameterSchemaQueryPatternDefault = `*`;
+
+export const GetNodeParameterSchemaQueryParams = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the node. e.g., \"\/project1\/noise1\"'),
+  "pattern": zod.string().default(getNodeParameterSchemaQueryPatternDefault).describe('Glob pattern to filter parameter names. e.g., \"instance\*\"')
+})
+
+export const GetNodeParameterSchemaResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "nodePath": zod.string().optional(),
+  "opType": zod.string().optional(),
+  "count": zod.number().optional(),
+  "parameters": zod.array(zod.object({
+  "name": zod.string().optional(),
+  "label": zod.string().optional(),
+  "style": zod.string().optional(),
+  "default": zod.unknown().optional(),
+  "val": zod.unknown().optional(),
+  "min": zod.number().nullish(),
+  "max": zod.number().nullish(),
+  "clampMin": zod.boolean().optional(),
+  "clampMax": zod.boolean().optional(),
+  "menuNames": zod.array(zod.string()).optional(),
+  "menuLabels": zod.array(zod.string()).optional(),
+  "isOP": zod.boolean().optional(),
+  "readOnly": zod.boolean().optional(),
+  "page": zod.string().optional()
+}).describe('Schema metadata for a single TouchDesigner parameter')).optional()
+}).optional()
+})
+
+
+/**
+ * Resolve op('...') style references from a context node. Supports relative (noise1, ./sub, ../foo) and absolute (/project1/geo*) forms.
+ * @summary Complete op() path references
+ */
+export const completeOpPathsQueryPrefixDefault = `*`;
+export const completeOpPathsQueryLimitDefault = 50;
+
+export const CompleteOpPathsQueryParams = zod.object({
+  "contextNodePath": zod.string().describe('Absolute path to the context node. e.g., \"\/project1\/base1\/script1\"'),
+  "prefix": zod.string().default(completeOpPathsQueryPrefixDefault).describe('Prefix to complete. e.g., \"noise\", \".\/sub\", \"..\/foo\", \"\/project1\/geo\*\"'),
+  "limit": zod.number().default(completeOpPathsQueryLimitDefault).describe('Maximum number of results to return')
+})
+
+export const CompleteOpPathsResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "contextNodePath": zod.string().optional(),
+  "prefix": zod.string().optional(),
+  "count": zod.number().optional(),
+  "truncated": zod.boolean().optional(),
+  "note": zod.string().optional(),
+  "matches": zod.array(zod.object({
+  "path": zod.string().optional(),
+  "name": zod.string().optional(),
+  "opType": zod.string().optional(),
+  "family": zod.string().optional(),
+  "relativeRef": zod.string().optional()
+})).optional()
+}).optional()
+})
+
+
+/**
+ * Return channel information for a CHOP node. Optionally includes per-channel statistics (min, max, avg).
+ * @summary Get CHOP channel info
+ */
+export const getChopChannelsQueryPatternDefault = `*`;
+export const getChopChannelsQueryIncludeStatsDefault = false;
+export const getChopChannelsQueryLimitDefault = 100;
+
+export const GetChopChannelsQueryParams = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the CHOP node. e.g., \"\/project1\/noise1\"'),
+  "pattern": zod.string().default(getChopChannelsQueryPatternDefault).describe('Glob pattern to filter channel names. e.g., \"chan\*\"'),
+  "includeStats": zod.boolean().default(getChopChannelsQueryIncludeStatsDefault).describe('Include per-channel min\/max\/avg statistics'),
+  "limit": zod.number().default(getChopChannelsQueryLimitDefault).describe('Maximum number of channels to return')
+})
+
+export const GetChopChannelsResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "nodePath": zod.string().optional(),
+  "numChannels": zod.number().optional(),
+  "numSamples": zod.number().optional(),
+  "sampleRate": zod.number().optional(),
+  "channels": zod.array(zod.object({
+  "name": zod.string().optional(),
+  "minVal": zod.number().optional(),
+  "maxVal": zod.number().optional(),
+  "avgVal": zod.number().optional()
+})).optional(),
+  "truncated": zod.boolean().optional()
+}).optional()
+})
+
+
+/**
+ * Return dimensions and a content sample of a table DAT. No type inference — raw cell values only.
+ * @summary Get table DAT dimensions and sample data
+ */
+export const getDatTableInfoQueryMaxPreviewRowsDefault = 6;
+export const getDatTableInfoQueryMaxCellCharsDefault = 200;
+
+export const GetDatTableInfoQueryParams = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the table DAT. e.g., \"\/project1\/table1\"'),
+  "maxPreviewRows": zod.number().default(getDatTableInfoQueryMaxPreviewRowsDefault).describe('Maximum number of rows to include in sample data'),
+  "maxCellChars": zod.number().default(getDatTableInfoQueryMaxCellCharsDefault).describe('Truncate cell values longer than this')
+})
+
+export const GetDatTableInfoResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "nodePath": zod.string().optional(),
+  "numRows": zod.number().optional(),
+  "numCols": zod.number().optional(),
+  "sampleData": zod.array(zod.array(zod.string())).optional(),
+  "truncatedRows": zod.boolean().optional(),
+  "truncatedCols": zod.boolean().optional(),
+  "truncatedCells": zod.boolean().optional()
+}).optional()
+})
+
+
+/**
+ * Return extension classes, methods, and properties for a COMP. Useful for discovering custom Python extensions on components.
+ * @summary Get COMP extension methods and properties
+ */
+export const getCompExtensionsQueryIncludeDocsDefault = false;
+export const getCompExtensionsQueryMaxMethodsDefault = 50;
+
+export const GetCompExtensionsQueryParams = zod.object({
+  "compPath": zod.string().describe('Absolute path to the COMP. e.g., \"\/project1\/base1\"'),
+  "includeDocs": zod.boolean().default(getCompExtensionsQueryIncludeDocsDefault).describe('Include method docstrings (truncated to 500 chars)'),
+  "maxMethods": zod.number().default(getCompExtensionsQueryMaxMethodsDefault).describe('Maximum methods per extension')
+})
+
+export const GetCompExtensionsResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "compPath": zod.string().optional(),
+  "extensions": zod.array(zod.object({
+  "name": zod.string().optional(),
+  "methodCount": zod.number().optional(),
+  "propertyCount": zod.number().optional(),
+  "methods": zod.array(zod.object({
+  "name": zod.string().optional(),
+  "signature": zod.string().optional(),
+  "doc": zod.string().optional()
+})).optional(),
+  "properties": zod.array(zod.object({
+  "name": zod.string().optional(),
+  "type": zod.string().optional()
+})).optional()
+})).optional()
+}).optional()
+})
+
+
+/**
  * Returns a list of Python classes, modules, and functions available in TouchDesigner
  * @summary Get a list of Python classes and modules
  */

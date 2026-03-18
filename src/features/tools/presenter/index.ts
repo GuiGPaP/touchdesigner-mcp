@@ -34,3 +34,10 @@ export {
 export type { ScriptResultData } from "./scriptResultFormatter.js";
 export { formatScriptResult } from "./scriptResultFormatter.js";
 export { formatToolMetadata } from "./toolMetadataFormatter.js";
+export {
+	formatChopChannels,
+	formatCompExtensions,
+	formatCompleteOpPaths,
+	formatDatTableInfo,
+	formatParameterSchema,
+} from "./introspectionFormatter.js";

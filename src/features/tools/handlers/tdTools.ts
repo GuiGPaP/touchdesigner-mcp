@@ -5,6 +5,7 @@ import { REFERENCE_COMMENT, TOOL_NAMES } from "../../../core/constants.js";
 import { handleToolError } from "../../../core/errorHandling.js";
 import type { ILogger } from "../../../core/logger.js";
 import {
+	CompleteOpPathsQueryParams,
 	ConfigureInstancingBody,
 	CreateFeedbackLoopBody,
 	CreateGeometryCompBody,
@@ -13,10 +14,14 @@ import {
 	DiscoverDatCandidatesQueryParams,
 	ExecNodeMethodBody,
 	ExecPythonScriptBody,
+	GetChopChannelsQueryParams,
+	GetCompExtensionsQueryParams,
+	GetDatTableInfoQueryParams,
 	GetDatTextQueryParams,
 	GetModuleHelpQueryParams,
 	GetNodeDetailQueryParams,
 	GetNodeErrorsQueryParams,
+	GetNodeParameterSchemaQueryParams,
 	GetNodesQueryParams,
 	GetTdPythonClassDetailsParams,
 	LintDatBody,
@@ -27,12 +32,16 @@ import type { TouchDesignerClient } from "../../../tdClient/touchDesignerClient.
 import type { ToolMetadata } from "../metadata/touchDesignerToolMetadata.js";
 import { getTouchDesignerToolMetadata } from "../metadata/touchDesignerToolMetadata.js";
 import {
+	formatChopChannels,
 	formatClassDetails,
 	formatClassList,
+	formatCompExtensions,
+	formatCompleteOpPaths,
 	formatConfigureInstancing,
 	formatCreateFeedbackLoop,
 	formatCreateGeometryComp,
 	formatCreateNodeResult,
+	formatDatTableInfo,
 	formatDatText,
 	formatDeleteNodeResult,
 	formatDiscoverDatCandidates,
@@ -42,6 +51,7 @@ import {
 	formatNodeDetails,
 	formatNodeErrors,
 	formatNodeList,
+	formatParameterSchema,
 	formatScriptResult,
 	formatSetDatText,
 	formatTdInfo,
@@ -150,6 +160,32 @@ const configureInstancingToolSchema = ConfigureInstancingBody.extend(
 type ConfigureInstancingToolParams = z.input<
 	typeof configureInstancingToolSchema
 >;
+
+const getNodeParameterSchemaToolSchema =
+	GetNodeParameterSchemaQueryParams.extend(detailOnlyFormattingSchema.shape);
+type GetNodeParameterSchemaToolParams = z.input<
+	typeof getNodeParameterSchemaToolSchema
+>;
+
+const completeOpPathsToolSchema = CompleteOpPathsQueryParams.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type CompleteOpPathsToolParams = z.input<typeof completeOpPathsToolSchema>;
+
+const getChopChannelsToolSchema = GetChopChannelsQueryParams.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type GetChopChannelsToolParams = z.input<typeof getChopChannelsToolSchema>;
+
+const getDatTableInfoToolSchema = GetDatTableInfoQueryParams.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type GetDatTableInfoToolParams = z.input<typeof getDatTableInfoToolSchema>;
+
+const getCompExtensionsToolSchema = GetCompExtensionsQueryParams.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type GetCompExtensionsToolParams = z.input<typeof getCompExtensionsToolSchema>;
 
 const describeToolsSchema = detailOnlyFormattingSchema.extend({
 	filter: z
@@ -731,6 +767,136 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.CONFIGURE_INSTANCING,
 					REFERENCE_COMMENT,
+				);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.GET_NODE_PARAMETER_SCHEMA,
+		"Get parameter schema metadata (type, range, menu, default) for a node",
+		getNodeParameterSchemaToolSchema.strict().shape,
+		async (params: GetNodeParameterSchemaToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...queryParams } = params;
+				const result = await tdClient.getNodeParameterSchema(queryParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatParameterSchema(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.GET_NODE_PARAMETER_SCHEMA,
+				);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.COMPLETE_OP_PATHS,
+		"Complete op() path references from a context node",
+		completeOpPathsToolSchema.strict().shape,
+		async (params: CompleteOpPathsToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...queryParams } = params;
+				const result = await tdClient.completeOpPaths(queryParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatCompleteOpPaths(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.COMPLETE_OP_PATHS,
+				);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.GET_CHOP_CHANNELS,
+		"Get channel information for a CHOP node",
+		getChopChannelsToolSchema.strict().shape,
+		async (params: GetChopChannelsToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...queryParams } = params;
+				const result = await tdClient.getChopChannels(queryParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatChopChannels(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.GET_CHOP_CHANNELS,
+				);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.GET_DAT_TABLE_INFO,
+		"Get table DAT dimensions and sample data",
+		getDatTableInfoToolSchema.strict().shape,
+		async (params: GetDatTableInfoToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...queryParams } = params;
+				const result = await tdClient.getDatTableInfo(queryParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatDatTableInfo(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.GET_DAT_TABLE_INFO,
+				);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.GET_COMP_EXTENSIONS,
+		"Get COMP extension methods and properties",
+		getCompExtensionsToolSchema.strict().shape,
+		async (params: GetCompExtensionsToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...queryParams } = params;
+				const result = await tdClient.getCompExtensions(queryParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatCompExtensions(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.GET_COMP_EXTENSIONS,
 				);
 			}
 		},

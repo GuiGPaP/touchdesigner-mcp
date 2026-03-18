@@ -7,6 +7,28 @@
  */
 import { customInstance } from '../../api/customInstance.js';
 import type { BodyType } from '../../api/customInstance.js';
+/**
+ * Schema metadata for a single TouchDesigner parameter
+ */
+export interface ParameterSchema {
+  name?: string;
+  label?: string;
+  style?: string;
+  default?: unknown;
+  val?: unknown;
+  /** @nullable */
+  min?: number | null;
+  /** @nullable */
+  max?: number | null;
+  clampMin?: boolean;
+  clampMax?: boolean;
+  menuNames?: string[];
+  menuLabels?: string[];
+  isOP?: boolean;
+  readOnly?: boolean;
+  page?: string;
+}
+
 export type TdNodeProperties = { [key: string]: unknown };
 
 /**
@@ -694,6 +716,180 @@ export type DiscoverDatCandidates200 = {
   data?: DiscoverDatCandidates200Data;
 };
 
+export type GetNodeParameterSchemaParams = {
+/**
+ * Absolute path to the node. e.g., "/project1/noise1"
+ */
+nodePath: string;
+/**
+ * Glob pattern to filter parameter names. e.g., "instance*"
+ */
+pattern?: string;
+};
+
+export type GetNodeParameterSchema200Data = {
+  nodePath?: string;
+  opType?: string;
+  count?: number;
+  parameters?: ParameterSchema[];
+};
+
+export type GetNodeParameterSchema200 = {
+  success?: boolean;
+  data?: GetNodeParameterSchema200Data;
+};
+
+export type CompleteOpPathsParams = {
+/**
+ * Absolute path to the context node. e.g., "/project1/base1/script1"
+ */
+contextNodePath: string;
+/**
+ * Prefix to complete. e.g., "noise", "./sub", "../foo", "/project1/geo*"
+ */
+prefix?: string;
+/**
+ * Maximum number of results to return
+ */
+limit?: number;
+};
+
+export type CompleteOpPaths200DataMatchesItem = {
+  path?: string;
+  name?: string;
+  opType?: string;
+  family?: string;
+  relativeRef?: string;
+};
+
+export type CompleteOpPaths200Data = {
+  contextNodePath?: string;
+  prefix?: string;
+  count?: number;
+  truncated?: boolean;
+  note?: string;
+  matches?: CompleteOpPaths200DataMatchesItem[];
+};
+
+export type CompleteOpPaths200 = {
+  success?: boolean;
+  data?: CompleteOpPaths200Data;
+};
+
+export type GetChopChannelsParams = {
+/**
+ * Absolute path to the CHOP node. e.g., "/project1/noise1"
+ */
+nodePath: string;
+/**
+ * Glob pattern to filter channel names. e.g., "chan*"
+ */
+pattern?: string;
+/**
+ * Include per-channel min/max/avg statistics
+ */
+includeStats?: boolean;
+/**
+ * Maximum number of channels to return
+ */
+limit?: number;
+};
+
+export type GetChopChannels200DataChannelsItem = {
+  name?: string;
+  minVal?: number;
+  maxVal?: number;
+  avgVal?: number;
+};
+
+export type GetChopChannels200Data = {
+  nodePath?: string;
+  numChannels?: number;
+  numSamples?: number;
+  sampleRate?: number;
+  channels?: GetChopChannels200DataChannelsItem[];
+  truncated?: boolean;
+};
+
+export type GetChopChannels200 = {
+  success?: boolean;
+  data?: GetChopChannels200Data;
+};
+
+export type GetDatTableInfoParams = {
+/**
+ * Absolute path to the table DAT. e.g., "/project1/table1"
+ */
+nodePath: string;
+/**
+ * Maximum number of rows to include in sample data
+ */
+maxPreviewRows?: number;
+/**
+ * Truncate cell values longer than this
+ */
+maxCellChars?: number;
+};
+
+export type GetDatTableInfo200Data = {
+  nodePath?: string;
+  numRows?: number;
+  numCols?: number;
+  sampleData?: string[][];
+  truncatedRows?: boolean;
+  truncatedCols?: boolean;
+  truncatedCells?: boolean;
+};
+
+export type GetDatTableInfo200 = {
+  success?: boolean;
+  data?: GetDatTableInfo200Data;
+};
+
+export type GetCompExtensionsParams = {
+/**
+ * Absolute path to the COMP. e.g., "/project1/base1"
+ */
+compPath: string;
+/**
+ * Include method docstrings (truncated to 500 chars)
+ */
+includeDocs?: boolean;
+/**
+ * Maximum methods per extension
+ */
+maxMethods?: number;
+};
+
+export type GetCompExtensions200DataExtensionsItemMethodsItem = {
+  name?: string;
+  signature?: string;
+  doc?: string;
+};
+
+export type GetCompExtensions200DataExtensionsItemPropertiesItem = {
+  name?: string;
+  type?: string;
+};
+
+export type GetCompExtensions200DataExtensionsItem = {
+  name?: string;
+  methodCount?: number;
+  propertyCount?: number;
+  methods?: GetCompExtensions200DataExtensionsItemMethodsItem[];
+  properties?: GetCompExtensions200DataExtensionsItemPropertiesItem[];
+};
+
+export type GetCompExtensions200Data = {
+  compPath?: string;
+  extensions?: GetCompExtensions200DataExtensionsItem[];
+};
+
+export type GetCompExtensions200 = {
+  success?: boolean;
+  data?: GetCompExtensions200Data;
+};
+
 export type GetModuleHelpParams = {
 /**
  * Module or class name (e.g., "noiseCHOP", "td.noiseCHOP", "tdu").
@@ -838,6 +1034,76 @@ export const discoverDatCandidates = (
  options?: SecondParameter<typeof customInstance<DiscoverDatCandidates200>>,) => {
       return customInstance<DiscoverDatCandidates200>(
       {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-discover`, method: 'GET',
+        params
+    },
+      options);
+    }
+  
+/**
+ * Return parameter schema metadata (type, range, menu, default) for a node. Eliminates guessing parameter names and valid values.
+ * @summary Get parameter schema for a node
+ */
+export const getNodeParameterSchema = (
+    params: GetNodeParameterSchemaParams,
+ options?: SecondParameter<typeof customInstance<GetNodeParameterSchema200>>,) => {
+      return customInstance<GetNodeParameterSchema200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/parameter-schema`, method: 'GET',
+        params
+    },
+      options);
+    }
+  
+/**
+ * Resolve op('...') style references from a context node. Supports relative (noise1, ./sub, ../foo) and absolute (/project1/geo*) forms.
+ * @summary Complete op() path references
+ */
+export const completeOpPaths = (
+    params: CompleteOpPathsParams,
+ options?: SecondParameter<typeof customInstance<CompleteOpPaths200>>,) => {
+      return customInstance<CompleteOpPaths200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/complete-paths`, method: 'GET',
+        params
+    },
+      options);
+    }
+  
+/**
+ * Return channel information for a CHOP node. Optionally includes per-channel statistics (min, max, avg).
+ * @summary Get CHOP channel info
+ */
+export const getChopChannels = (
+    params: GetChopChannelsParams,
+ options?: SecondParameter<typeof customInstance<GetChopChannels200>>,) => {
+      return customInstance<GetChopChannels200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/chop-channels`, method: 'GET',
+        params
+    },
+      options);
+    }
+  
+/**
+ * Return dimensions and a content sample of a table DAT. No type inference — raw cell values only.
+ * @summary Get table DAT dimensions and sample data
+ */
+export const getDatTableInfo = (
+    params: GetDatTableInfoParams,
+ options?: SecondParameter<typeof customInstance<GetDatTableInfo200>>,) => {
+      return customInstance<GetDatTableInfo200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-table-info`, method: 'GET',
+        params
+    },
+      options);
+    }
+  
+/**
+ * Return extension classes, methods, and properties for a COMP. Useful for discovering custom Python extensions on components.
+ * @summary Get COMP extension methods and properties
+ */
+export const getCompExtensions = (
+    params: GetCompExtensionsParams,
+ options?: SecondParameter<typeof customInstance<GetCompExtensions200>>,) => {
+      return customInstance<GetCompExtensions200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/comp-extensions`, method: 'GET',
         params
     },
       options);
@@ -994,6 +1260,11 @@ export type GetDatTextResult = NonNullable<Awaited<ReturnType<typeof getDatText>
 export type SetDatTextResult = NonNullable<Awaited<ReturnType<typeof setDatText>>>
 export type LintDatResult = NonNullable<Awaited<ReturnType<typeof lintDat>>>
 export type DiscoverDatCandidatesResult = NonNullable<Awaited<ReturnType<typeof discoverDatCandidates>>>
+export type GetNodeParameterSchemaResult = NonNullable<Awaited<ReturnType<typeof getNodeParameterSchema>>>
+export type CompleteOpPathsResult = NonNullable<Awaited<ReturnType<typeof completeOpPaths>>>
+export type GetChopChannelsResult = NonNullable<Awaited<ReturnType<typeof getChopChannels>>>
+export type GetDatTableInfoResult = NonNullable<Awaited<ReturnType<typeof getDatTableInfo>>>
+export type GetCompExtensionsResult = NonNullable<Awaited<ReturnType<typeof getCompExtensions>>>
 export type GetTdPythonClassesResult = NonNullable<Awaited<ReturnType<typeof getTdPythonClasses>>>
 export type GetTdPythonClassDetailsResult = NonNullable<Awaited<ReturnType<typeof getTdPythonClassDetails>>>
 export type GetModuleHelpResult = NonNullable<Awaited<ReturnType<typeof getModuleHelp>>>
