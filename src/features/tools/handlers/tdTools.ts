@@ -5,15 +5,22 @@ import { REFERENCE_COMMENT, TOOL_NAMES } from "../../../core/constants.js";
 import { handleToolError } from "../../../core/errorHandling.js";
 import type { ILogger } from "../../../core/logger.js";
 import {
+	ConfigureInstancingBody,
+	CreateFeedbackLoopBody,
+	CreateGeometryCompBody,
 	CreateNodeBody,
 	DeleteNodeQueryParams,
+	DiscoverDatCandidatesQueryParams,
 	ExecNodeMethodBody,
 	ExecPythonScriptBody,
+	GetDatTextQueryParams,
 	GetModuleHelpQueryParams,
 	GetNodeDetailQueryParams,
 	GetNodeErrorsQueryParams,
 	GetNodesQueryParams,
 	GetTdPythonClassDetailsParams,
+	LintDatBody,
+	SetDatTextBody,
 	UpdateNodeBody,
 } from "../../../gen/mcp/touchDesignerAPI.zod.js";
 import type { TouchDesignerClient } from "../../../tdClient/touchDesignerClient.js";
@@ -22,14 +29,21 @@ import { getTouchDesignerToolMetadata } from "../metadata/touchDesignerToolMetad
 import {
 	formatClassDetails,
 	formatClassList,
+	formatConfigureInstancing,
+	formatCreateFeedbackLoop,
+	formatCreateGeometryComp,
 	formatCreateNodeResult,
+	formatDatText,
 	formatDeleteNodeResult,
+	formatDiscoverDatCandidates,
 	formatExecNodeMethodResult,
+	formatLintDat,
 	formatModuleHelp,
 	formatNodeDetails,
 	formatNodeErrors,
 	formatNodeList,
 	formatScriptResult,
+	formatSetDatText,
 	formatTdInfo,
 	formatToolMetadata,
 	formatUpdateNodeResult,
@@ -95,6 +109,47 @@ const execNodeMethodToolSchema = ExecNodeMethodBody.extend(
 	detailOnlyFormattingSchema.shape,
 );
 type ExecNodeMethodToolParams = z.input<typeof execNodeMethodToolSchema>;
+
+const getDatTextToolSchema = GetDatTextQueryParams.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type GetDatTextToolParams = z.input<typeof getDatTextToolSchema>;
+
+const setDatTextToolSchema = SetDatTextBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type SetDatTextToolParams = z.input<typeof setDatTextToolSchema>;
+
+const lintDatToolSchema = LintDatBody.extend(detailOnlyFormattingSchema.shape);
+type LintDatToolParams = z.input<typeof lintDatToolSchema>;
+
+const discoverDatCandidatesToolSchema = DiscoverDatCandidatesQueryParams.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type DiscoverDatCandidatesToolParams = z.input<
+	typeof discoverDatCandidatesToolSchema
+>;
+
+const createGeometryCompToolSchema = CreateGeometryCompBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type CreateGeometryCompToolParams = z.input<
+	typeof createGeometryCompToolSchema
+>;
+
+const createFeedbackLoopToolSchema = CreateFeedbackLoopBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type CreateFeedbackLoopToolParams = z.input<
+	typeof createFeedbackLoopToolSchema
+>;
+
+const configureInstancingToolSchema = ConfigureInstancingBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type ConfigureInstancingToolParams = z.input<
+	typeof configureInstancingToolSchema
+>;
 
 const describeToolsSchema = detailOnlyFormattingSchema.extend({
 	filter: z
@@ -504,6 +559,179 @@ export function registerTdTools(
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
 				return handleToolError(error, logger, TOOL_NAMES.GET_TD_MODULE_HELP);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.GET_DAT_TEXT,
+		"Read the .text content of a DAT operator in TouchDesigner",
+		getDatTextToolSchema.strict().shape,
+		async (params: GetDatTextToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...queryParams } = params;
+				const result = await tdClient.getDatText(queryParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatDatText(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(error, logger, TOOL_NAMES.GET_DAT_TEXT);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.SET_DAT_TEXT,
+		"Write .text content to a DAT operator in TouchDesigner",
+		setDatTextToolSchema.strict().shape,
+		async (params: SetDatTextToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...bodyParams } = params;
+				const result = await tdClient.setDatText(bodyParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatSetDatText(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(error, logger, TOOL_NAMES.SET_DAT_TEXT);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.LINT_DAT,
+		"Lint DAT code with ruff and optionally auto-fix issues",
+		lintDatToolSchema.strict().shape,
+		async (params: LintDatToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...bodyParams } = params;
+				const result = await tdClient.lintDat(bodyParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatLintDat(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(error, logger, TOOL_NAMES.LINT_DAT);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.DISCOVER_DAT_CANDIDATES,
+		"Discover DAT candidates under a parent, classified by kind (python, glsl, text, data)",
+		discoverDatCandidatesToolSchema.strict().shape,
+		async (params: DiscoverDatCandidatesToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...queryParams } = params;
+				const result = await tdClient.discoverDatCandidates(queryParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatDiscoverDatCandidates(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.DISCOVER_DAT_CANDIDATES,
+				);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.CREATE_GEOMETRY_COMP,
+		"Create a Geometry COMP with In/Out operators inside it",
+		createGeometryCompToolSchema.strict().shape,
+		async (params: CreateGeometryCompToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...bodyParams } = params;
+				const result = await tdClient.createGeometryComp(bodyParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatCreateGeometryComp(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.CREATE_GEOMETRY_COMP,
+					REFERENCE_COMMENT,
+				);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.CREATE_FEEDBACK_LOOP,
+		"Create a Feedback TOP loop with cache, process, and feedback operators",
+		createFeedbackLoopToolSchema.strict().shape,
+		async (params: CreateFeedbackLoopToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...bodyParams } = params;
+				const result = await tdClient.createFeedbackLoop(bodyParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatCreateFeedbackLoop(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.CREATE_FEEDBACK_LOOP,
+					REFERENCE_COMMENT,
+				);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.CONFIGURE_INSTANCING,
+		"Configure GPU instancing on an existing Geometry COMP",
+		configureInstancingToolSchema.strict().shape,
+		async (params: ConfigureInstancingToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...bodyParams } = params;
+				const result = await tdClient.configureInstancing(bodyParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatConfigureInstancing(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.CONFIGURE_INSTANCING,
+					REFERENCE_COMMENT,
+				);
 			}
 		},
 	);

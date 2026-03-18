@@ -6,6 +6,17 @@
 
 export type { ClassDetailsData, ClassListData } from "./classListFormatter.js";
 export { formatClassDetails, formatClassList } from "./classListFormatter.js";
+export {
+	formatDatText,
+	formatDiscoverDatCandidates,
+	formatLintDat,
+	formatSetDatText,
+} from "./datFormatter.js";
+export {
+	formatConfigureInstancing,
+	formatCreateFeedbackLoop,
+	formatCreateGeometryComp,
+} from "./helperFormatter.js";
 export { formatModuleHelp } from "./moduleHelpFormatter.js";
 export type { NodeDetailsData } from "./nodeDetailsFormatter.js";
 export { formatNodeDetails } from "./nodeDetailsFormatter.js";

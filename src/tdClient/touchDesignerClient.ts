@@ -12,10 +12,15 @@ import {
 	MIN_COMPATIBLE_API_VERSION,
 } from "../core/version.js";
 import {
+	configureInstancing as apiConfigureInstancing,
+	createFeedbackLoop as apiCreateFeedbackLoop,
+	createGeometryComp as apiCreateGeometryComp,
 	createNode as apiCreateNode,
 	deleteNode as apiDeleteNode,
+	discoverDatCandidates as apiDiscoverDatCandidates,
 	execNodeMethod as apiExecNodeMethod,
 	execPythonScript as apiExecPythonScript,
+	getDatText as apiGetDatText,
 	getModuleHelp as apiGetModuleHelp,
 	getNodeDetail as apiGetNodeDetail,
 	getNodeErrors as apiGetNodeErrors,
@@ -23,15 +28,28 @@ import {
 	getTdInfo as apiGetTdInfo,
 	getTdPythonClassDetails as apiGetTdPythonClassDetails,
 	getTdPythonClasses as apiGetTdPythonClasses,
+	lintDat as apiLintDat,
+	setDatText as apiSetDatText,
 	updateNode as apiUpdateNode,
+	type ConfigureInstancingRequest,
+	type CreateFeedbackLoopRequest,
+	type CreateGeometryCompRequest,
 	type CreateNodeRequest,
 	type DeleteNodeParams,
+	type DiscoverDatCandidates200Data,
+	type DiscoverDatCandidatesParams,
 	type ExecNodeMethodRequest,
 	type ExecPythonScriptRequest,
+	type GetDatText200Data,
+	type GetDatTextParams,
 	type GetModuleHelpParams,
 	type GetNodeDetailParams,
 	type GetNodeErrorsParams,
 	type GetNodesParams,
+	type LintDat200Data,
+	type LintDatBody,
+	type SetDatText200Data,
+	type SetDatTextBody,
 	type UpdateNodeRequest,
 } from "../gen/endpoints/TouchDesignerAPI.js";
 
@@ -39,28 +57,40 @@ import {
  * Interface for TouchDesignerClient HTTP operations
  */
 export interface ITouchDesignerApi {
+	configureInstancing: typeof apiConfigureInstancing;
+	createFeedbackLoop: typeof apiCreateFeedbackLoop;
+	createGeometryComp: typeof apiCreateGeometryComp;
+	createNode: typeof apiCreateNode;
+	deleteNode: typeof apiDeleteNode;
+	discoverDatCandidates: typeof apiDiscoverDatCandidates;
 	execNodeMethod: typeof apiExecNodeMethod;
 	execPythonScript: typeof apiExecPythonScript;
-	getTdInfo: typeof apiGetTdInfo;
-	getNodes: typeof apiGetNodes;
+	getDatText: typeof apiGetDatText;
+	getModuleHelp: typeof apiGetModuleHelp;
 	getNodeDetail: typeof apiGetNodeDetail;
 	getNodeErrors: typeof apiGetNodeErrors;
-	createNode: typeof apiCreateNode;
-	updateNode: typeof apiUpdateNode;
-	deleteNode: typeof apiDeleteNode;
-	getTdPythonClasses: typeof apiGetTdPythonClasses;
+	getNodes: typeof apiGetNodes;
+	getTdInfo: typeof apiGetTdInfo;
 	getTdPythonClassDetails: typeof apiGetTdPythonClassDetails;
-	getModuleHelp: typeof apiGetModuleHelp;
+	getTdPythonClasses: typeof apiGetTdPythonClasses;
+	lintDat: typeof apiLintDat;
+	setDatText: typeof apiSetDatText;
+	updateNode: typeof apiUpdateNode;
 }
 
 /**
  * Default implementation of ITouchDesignerApi using generated API clients
  */
 const defaultApiClient: ITouchDesignerApi = {
+	configureInstancing: apiConfigureInstancing,
+	createFeedbackLoop: apiCreateFeedbackLoop,
+	createGeometryComp: apiCreateGeometryComp,
 	createNode: apiCreateNode,
 	deleteNode: apiDeleteNode,
+	discoverDatCandidates: apiDiscoverDatCandidates,
 	execNodeMethod: apiExecNodeMethod,
 	execPythonScript: apiExecPythonScript,
+	getDatText: apiGetDatText,
 	getModuleHelp: apiGetModuleHelp,
 	getNodeDetail: apiGetNodeDetail,
 	getNodeErrors: apiGetNodeErrors,
@@ -68,6 +98,8 @@ const defaultApiClient: ITouchDesignerApi = {
 	getTdInfo: apiGetTdInfo,
 	getTdPythonClassDetails: apiGetTdPythonClassDetails,
 	getTdPythonClasses: apiGetTdPythonClasses,
+	lintDat: apiLintDat,
+	setDatText: apiSetDatText,
 	updateNode: apiUpdateNode,
 };
 
@@ -452,6 +484,95 @@ export class TouchDesignerClient {
 			"Getting module help",
 			() => this.api.getModuleHelp(params),
 			{ moduleName: params.moduleName },
+		);
+	}
+
+	/**
+	 * Get DAT text content
+	 */
+	async getDatText(params: GetDatTextParams) {
+		return this.apiCall(
+			"Getting DAT text",
+			() =>
+				this.api.getDatText(params) as Promise<
+					TdResponse<GetDatText200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
+		);
+	}
+
+	/**
+	 * Set DAT text content
+	 */
+	async setDatText(params: SetDatTextBody) {
+		return this.apiCall(
+			"Setting DAT text",
+			() =>
+				this.api.setDatText(params) as Promise<
+					TdResponse<SetDatText200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
+		);
+	}
+
+	/**
+	 * Lint DAT code with ruff
+	 */
+	async lintDat(params: LintDatBody) {
+		return this.apiCall(
+			"Linting DAT",
+			() =>
+				this.api.lintDat(params) as Promise<
+					TdResponse<LintDat200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
+		);
+	}
+
+	/**
+	 * Discover DAT candidates under a parent
+	 */
+	async discoverDatCandidates(params: DiscoverDatCandidatesParams) {
+		return this.apiCall(
+			"Discovering DAT candidates",
+			() =>
+				this.api.discoverDatCandidates(params) as Promise<
+					TdResponse<DiscoverDatCandidates200Data | undefined>
+				>,
+			{ parentPath: params.parentPath },
+		);
+	}
+
+	/**
+	 * Create a Geometry COMP with In/Out operators
+	 */
+	async createGeometryComp(params: CreateGeometryCompRequest) {
+		return this.apiCall(
+			"Creating geometry COMP",
+			() => this.api.createGeometryComp(params),
+			{ parentPath: params.parentPath },
+		);
+	}
+
+	/**
+	 * Create a Feedback TOP loop
+	 */
+	async createFeedbackLoop(params: CreateFeedbackLoopRequest) {
+		return this.apiCall(
+			"Creating feedback loop",
+			() => this.api.createFeedbackLoop(params),
+			{ parentPath: params.parentPath },
+		);
+	}
+
+	/**
+	 * Configure instancing on a Geometry COMP
+	 */
+	async configureInstancing(params: ConfigureInstancingRequest) {
+		return this.apiCall(
+			"Configuring instancing",
+			() => this.api.configureInstancing(params),
+			{ geoPath: params.geoPath },
 		);
 	}
 

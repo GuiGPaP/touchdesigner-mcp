@@ -13,10 +13,15 @@ import {
 
 vi.mock("../../src/gen/endpoints/TouchDesignerAPI", async () => {
 	return {
+		configureInstancing: vi.fn(),
+		createFeedbackLoop: vi.fn(),
+		createGeometryComp: vi.fn(),
 		createNode: vi.fn(),
 		deleteNode: vi.fn(),
+		discoverDatCandidates: vi.fn(),
 		execNodeMethod: vi.fn(),
 		execPythonScript: vi.fn(),
+		getDatText: vi.fn(),
 		getModuleHelp: vi.fn(),
 		getNodeDetail: vi.fn(),
 		getNodeErrors: vi.fn(),
@@ -24,6 +29,8 @@ vi.mock("../../src/gen/endpoints/TouchDesignerAPI", async () => {
 		getTdInfo: vi.fn(),
 		getTdPythonClassDetails: vi.fn(),
 		getTdPythonClasses: vi.fn(),
+		lintDat: vi.fn(),
+		setDatText: vi.fn(),
 		updateNode: vi.fn(),
 	};
 });

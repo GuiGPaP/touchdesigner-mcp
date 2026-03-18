@@ -1,7 +1,14 @@
 import { TOOL_NAMES } from "../../../core/constants.js";
 import type { ToolNames } from "../index.js";
 
-export type ToolCategory = "system" | "python" | "nodes" | "classes" | "state";
+export type ToolCategory =
+	| "system"
+	| "python"
+	| "nodes"
+	| "classes"
+	| "state"
+	| "dat"
+	| "helpers";
 
 export interface ToolParameterMetadata {
 	name: string;
@@ -507,6 +514,345 @@ console.log(docs.helpText?.slice(0, 200));`,
 		],
 		returns: "Captured Python help() output with formatter context.",
 		tool: TOOL_NAMES.GET_TD_MODULE_HELP,
+	},
+	{
+		category: "dat",
+		description: "Read the .text content of a DAT operator",
+		example: `const text = await getDatText({ nodePath: '/project1/text1' });
+console.log(text.data?.text);`,
+		functionName: "getDatText",
+		modulePath: `${MODULE_ROOT}/getDatText.ts`,
+		parameters: [
+			{
+				description:
+					"Absolute path to the DAT (e.g., /project1/text1).",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns: "DAT path, name, and full text content.",
+		tool: TOOL_NAMES.GET_DAT_TEXT,
+	},
+	{
+		category: "dat",
+		description: "Write .text content to a DAT operator",
+		example: `await setDatText({
+  nodePath: '/project1/text1',
+  text: 'print("hello")',
+});`,
+		functionName: "setDatText",
+		modulePath: `${MODULE_ROOT}/setDatText.ts`,
+		parameters: [
+			{
+				description: "Absolute path to the DAT.",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Text content to write.",
+				name: "text",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns: "Confirmation with path and character count.",
+		tool: TOOL_NAMES.SET_DAT_TEXT,
+	},
+	{
+		category: "dat",
+		description: "Lint DAT code with ruff and optionally auto-fix",
+		example: `const report = await lintDat({
+  nodePath: '/project1/script1',
+  fix: false,
+});
+console.log(report.data?.diagnosticCount);`,
+		functionName: "lintDat",
+		modulePath: `${MODULE_ROOT}/lintDat.ts`,
+		parameters: [
+			{
+				description:
+					"Absolute path to the DAT node (e.g., /project1/script1).",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description:
+					"If true, apply auto-fixable corrections to the DAT.",
+				name: "fix",
+				required: false,
+				type: "boolean",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns: "Lint diagnostics with code, message, line, column, and fixable flag.",
+		tool: TOOL_NAMES.LINT_DAT,
+	},
+	{
+		category: "dat",
+		description:
+			"Discover DAT candidates under a parent, classified by kind",
+		example: `const candidates = await discoverDatCandidates({
+  parentPath: '/project1',
+  purpose: 'python',
+});
+console.log(candidates.data?.candidates);`,
+		functionName: "discoverDatCandidates",
+		modulePath: `${MODULE_ROOT}/discoverDatCandidates.ts`,
+		notes:
+			"Agent-friendly endpoint that eliminates N+1 round-trips when searching for DATs.",
+		parameters: [
+			{
+				description:
+					"Absolute path to the parent (e.g., /project1).",
+				name: "parentPath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Search recursively into descendants.",
+				name: "recursive",
+				required: false,
+				type: "boolean",
+			},
+			{
+				description:
+					"Filter by DAT kind: python, glsl, text, data, or any.",
+				name: "purpose",
+				required: false,
+				type: "'python' | 'glsl' | 'text' | 'data' | 'any'",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns:
+			"List of DAT candidates with kind guess, confidence, line count, and parent COMP.",
+		tool: TOOL_NAMES.DISCOVER_DAT_CANDIDATES,
+	},
+	{
+		category: "helpers",
+		description:
+			"Create a Geometry COMP with In/Out operators inside it",
+		example: `await createGeometryComp({
+  parentPath: '/project1',
+  name: 'geo1',
+  pop: false,
+});`,
+		functionName: "createGeometryComp",
+		modulePath: `${MODULE_ROOT}/createGeometryComp.ts`,
+		parameters: [
+			{
+				description: "Path to the parent node (e.g., /project1).",
+				name: "parentPath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Name for the geometry COMP.",
+				name: "name",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "X position in the network.",
+				name: "x",
+				required: false,
+				type: "number",
+			},
+			{
+				description: "Y position in the network.",
+				name: "y",
+				required: false,
+				type: "number",
+			},
+			{
+				description:
+					"Whether to use POP (point) topology instead of SOP.",
+				name: "pop",
+				required: false,
+				type: "boolean",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns: "Created geometry COMP details including path and child operators.",
+		tool: TOOL_NAMES.CREATE_GEOMETRY_COMP,
+	},
+	{
+		category: "helpers",
+		description:
+			"Create a Feedback TOP loop with cache, process, and feedback operators",
+		example: `await createFeedbackLoop({
+  parentPath: '/project1',
+  name: 'sim',
+  processType: 'glslTOP',
+});`,
+		functionName: "createFeedbackLoop",
+		modulePath: `${MODULE_ROOT}/createFeedbackLoop.ts`,
+		parameters: [
+			{
+				description: "Path to the parent node (e.g., /project1).",
+				name: "parentPath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Base name for the feedback loop operators.",
+				name: "name",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "X position in the network.",
+				name: "x",
+				required: false,
+				type: "number",
+			},
+			{
+				description: "Y position in the network.",
+				name: "y",
+				required: false,
+				type: "number",
+			},
+			{
+				description:
+					"Operator type for the process step (e.g., glslTOP, compositeTOP).",
+				name: "processType",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns:
+			"Created feedback loop details including cache, process, and feedback operator paths.",
+		tool: TOOL_NAMES.CREATE_FEEDBACK_LOOP,
+	},
+	{
+		category: "helpers",
+		description: "Configure GPU instancing on an existing Geometry COMP",
+		example: `await configureInstancing({
+  geoPath: '/project1/geo1',
+  instanceOpName: 'noise1',
+  tx: 'tx', ty: 'ty', tz: 'tz',
+});`,
+		functionName: "configureInstancing",
+		modulePath: `${MODULE_ROOT}/configureInstancing.ts`,
+		parameters: [
+			{
+				description:
+					"Path to the Geometry COMP (e.g., /project1/geo1).",
+				name: "geoPath",
+				required: true,
+				type: "string",
+			},
+			{
+				description:
+					"Name of the operator providing instance data.",
+				name: "instanceOpName",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Column name for translate X.",
+				name: "tx",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Column name for translate Y.",
+				name: "ty",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Column name for translate Z.",
+				name: "tz",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns: "Instancing configuration details.",
+		tool: TOOL_NAMES.CONFIGURE_INSTANCING,
 	},
 ];
 
