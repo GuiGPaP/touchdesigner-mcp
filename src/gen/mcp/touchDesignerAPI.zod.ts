@@ -290,6 +290,30 @@ export const LintDatsResponse = zod.object({
 
 
 /**
+ * @summary Typecheck DAT code with pyright
+ */
+export const TypecheckDatBody = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/script1\"')
+})
+
+export const TypecheckDatResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "path": zod.string().optional(),
+  "name": zod.string().optional(),
+  "diagnosticCount": zod.number().optional(),
+  "diagnostics": zod.array(zod.object({
+  "severity": zod.string().optional(),
+  "message": zod.string().optional(),
+  "line": zod.number().optional(),
+  "column": zod.number().optional(),
+  "rule": zod.string().optional()
+}).describe('A single pyright typecheck diagnostic')).optional()
+}).optional()
+})
+
+
+/**
  * @summary Format DAT code with ruff
  */
 export const formatDatBodyDryRunDefault = false;

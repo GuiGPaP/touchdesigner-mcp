@@ -666,6 +666,37 @@ console.log(preview.data?.remainingDiagnostics);`,
 	{
 		category: "dat",
 		description:
+			"Typecheck DAT code with pyright using td.pyi stubs",
+		example: `const result = await typecheckDat({ nodePath: '/project1/script1' });\nconsole.log(result.data?.diagnostics);`,
+		functionName: "typecheckDat",
+		modulePath: `${MODULE_ROOT}/typecheckDat.ts`,
+		parameters: [
+			{
+				description: "Absolute path to the DAT node.",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns:
+			"Typecheck diagnostics with severity, message, line, column, and rule.",
+		tool: TOOL_NAMES.TYPECHECK_DAT,
+	},
+	{
+		category: "dat",
+		description:
 			"Format DAT code with ruff format. Supports dry-run mode to preview changes without applying.",
 		example: `// Dry-run: preview formatting without applying
 const preview = await formatDat({

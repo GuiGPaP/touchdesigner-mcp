@@ -5,6 +5,7 @@ import type {
 	LintDat200Data,
 	LintDats200Data,
 	SetDatText200Data,
+	TypecheckDat200Data,
 	ValidateGlslDat200Data,
 	ValidateJsonDat200Data,
 } from "../../../gen/endpoints/TouchDesignerAPI.js";
@@ -132,6 +133,42 @@ export function formatLintDat(
 
 	return finalizeFormattedText(lines.join("\n"), opts, {
 		context: { path, title: "DAT Lint" },
+		structured: data,
+		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
+	});
+}
+
+export function formatTypecheckDat(
+	data: TypecheckDat200Data | undefined,
+	options?: FormatterOpts,
+): string {
+	const opts = mergeFormatterOptions(options);
+	if (!data) {
+		return finalizeFormattedText("Typecheck returned no data.", opts, {
+			context: { title: "DAT Typecheck" },
+		});
+	}
+	const path = data.path ?? "(unknown)";
+	const count = data.diagnosticCount ?? 0;
+
+	if (count === 0) {
+		return finalizeFormattedText(`OK ${path}: no type errors`, opts, {
+			context: { path, title: "DAT Typecheck" },
+			structured: data,
+		});
+	}
+
+	const lines = [`${path}: ${count} type issue(s)`];
+	if (data.diagnostics && opts.detailLevel !== "minimal") {
+		for (const d of data.diagnostics) {
+			const loc = `L${d.line ?? "?"}:${d.column ?? "?"}`;
+			const sev = d.severity ?? "error";
+			lines.push(`  ${loc} [${sev}] ${d.message ?? ""}`);
+		}
+	}
+
+	return finalizeFormattedText(lines.join("\n"), opts, {
+		context: { path, title: "DAT Typecheck" },
 		structured: data,
 		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
 	});

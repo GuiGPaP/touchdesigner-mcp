@@ -666,6 +666,31 @@ export type LintDat200 = {
   data?: LintDat200Data;
 };
 
+export type TypecheckDatBody = {
+  /** Absolute path to the DAT node. e.g., "/project1/script1" */
+  nodePath: string;
+};
+
+export type TypecheckDiagnostic = {
+  severity?: string;
+  message?: string;
+  line?: number;
+  column?: number;
+  rule?: string;
+};
+
+export type TypecheckDat200Data = {
+  path?: string;
+  name?: string;
+  diagnosticCount?: number;
+  diagnostics?: TypecheckDiagnostic[];
+};
+
+export type TypecheckDat200 = {
+  success?: boolean;
+  data?: TypecheckDat200Data;
+};
+
 export type FormatDatBody = {
   /** Absolute path to the DAT node. e.g., "/project1/script1" */
   nodePath: string;
@@ -1216,6 +1241,20 @@ export const lintDats = (
     }
 
 /**
+ * @summary Typecheck DAT code with pyright
+ */
+export const typecheckDat = (
+    typecheckDatBody: BodyType<TypecheckDatBody>,
+ options?: SecondParameter<typeof customInstance<TypecheckDat200>>,) => {
+      return customInstance<TypecheckDat200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-typecheck`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: typecheckDatBody
+    },
+      options);
+    }
+
+/**
  * @summary Format DAT code with ruff
  */
 export const formatDat = (
@@ -1525,4 +1564,5 @@ export type GetTdInfoResult = NonNullable<Awaited<ReturnType<typeof getTdInfo>>>
 export type CreateGeometryCompResult = NonNullable<Awaited<ReturnType<typeof createGeometryComp>>>
 export type CreateFeedbackLoopResult = NonNullable<Awaited<ReturnType<typeof createFeedbackLoop>>>
 export type GetCapabilitiesResult = NonNullable<Awaited<ReturnType<typeof getCapabilities>>>
+export type TypecheckDatResult = NonNullable<Awaited<ReturnType<typeof typecheckDat>>>
 export type ConfigureInstancingResult = NonNullable<Awaited<ReturnType<typeof configureInstancing>>>

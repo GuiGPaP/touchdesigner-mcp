@@ -40,6 +40,7 @@ import {
 	validateGlslDat as apiValidateGlslDat,
 	validateJsonDat as apiValidateJsonDat,
 	setDatText as apiSetDatText,
+	typecheckDat as apiTypecheckDat,
 	updateNode as apiUpdateNode,
 	type CompleteOpPaths200Data,
 	type CompleteOpPathsParams,
@@ -79,6 +80,8 @@ import {
 	type ValidateJsonDatBody,
 	type SetDatText200Data,
 	type SetDatTextBody,
+	type TypecheckDat200Data,
+	type TypecheckDatBody,
 	type UpdateNodeRequest,
 } from "../gen/endpoints/TouchDesignerAPI.js";
 
@@ -114,6 +117,7 @@ export interface ITouchDesignerApi {
 	validateGlslDat: typeof apiValidateGlslDat;
 	validateJsonDat: typeof apiValidateJsonDat;
 	setDatText: typeof apiSetDatText;
+	typecheckDat: typeof apiTypecheckDat;
 	updateNode: typeof apiUpdateNode;
 }
 
@@ -149,6 +153,7 @@ const defaultApiClient: ITouchDesignerApi = {
 	validateGlslDat: apiValidateGlslDat,
 	validateJsonDat: apiValidateJsonDat,
 	setDatText: apiSetDatText,
+	typecheckDat: apiTypecheckDat,
 	updateNode: apiUpdateNode,
 };
 
@@ -656,6 +661,20 @@ export class TouchDesignerClient {
 					TdResponse<DiscoverDatCandidates200Data | undefined>
 				>,
 			{ parentPath: params.parentPath },
+		);
+	}
+
+	/**
+	 * Typecheck DAT code with pyright
+	 */
+	async typecheckDat(params: TypecheckDatBody) {
+		return this.apiCall(
+			"Typechecking DAT",
+			() =>
+				this.api.typecheckDat(params) as Promise<
+					TdResponse<TypecheckDat200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
 		);
 	}
 

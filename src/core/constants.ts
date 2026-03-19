@@ -37,6 +37,7 @@ export const TOOL_NAMES = {
 	VALIDATE_JSON_DAT: "validate_json_dat",
 	LINT_DATS: "lint_dats",
 	SET_DAT_TEXT: "set_dat_text",
+	TYPECHECK_DAT: "typecheck_dat",
 	UPDATE_TD_NODE_PARAMETERS: "update_td_node_parameters",
 } as const;
 

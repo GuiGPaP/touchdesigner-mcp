@@ -41,6 +41,7 @@ vi.mock("../../src/gen/endpoints/TouchDesignerAPI", async () => {
 		validateGlslDat: vi.fn(),
 		validateJsonDat: vi.fn(),
 		setDatText: vi.fn(),
+		typecheckDat: vi.fn(),
 		updateNode: vi.fn(),
 	};
 });

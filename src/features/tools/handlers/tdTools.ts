@@ -28,6 +28,7 @@ import {
 	LintDatBody,
 	LintDatsBody,
 	ValidateGlslDatBody,
+	TypecheckDatBody,
 	ValidateJsonDatBody,
 	SetDatTextBody,
 	UpdateNodeBody,
@@ -56,6 +57,7 @@ import {
 	formatExecNodeMethodResult,
 	formatLintDat,
 	formatLintDats,
+	formatTypecheckDat,
 	formatModuleHelp,
 	formatNodeDetails,
 	formatNodeErrors,
@@ -144,6 +146,9 @@ type SetDatTextToolParams = z.input<typeof setDatTextToolSchema>;
 
 const lintDatToolSchema = LintDatBody.extend(detailOnlyFormattingSchema.shape);
 type LintDatToolParams = z.input<typeof lintDatToolSchema>;
+
+const typecheckDatToolSchema = TypecheckDatBody.extend(detailOnlyFormattingSchema.shape);
+type TypecheckDatToolParams = z.input<typeof typecheckDatToolSchema>;
 
 const lintDatsToolSchema = LintDatsBody.extend(
 	detailOnlyFormattingSchema.shape,
@@ -719,6 +724,28 @@ export function registerTdTools(
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
 				return handleToolError(error, logger, TOOL_NAMES.LINT_DAT);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.TYPECHECK_DAT,
+		"Typecheck DAT code with pyright using td.pyi stubs",
+		typecheckDatToolSchema.strict().shape,
+		async (params: TypecheckDatToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...bodyParams } = params;
+				const result = await tdClient.typecheckDat(bodyParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatTypecheckDat(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(error, logger, TOOL_NAMES.TYPECHECK_DAT);
 			}
 		},
 	);
