@@ -235,6 +235,61 @@ export const LintDatResponse = zod.object({
 
 
 /**
+ * @summary Batch lint DATs under a parent path
+ */
+export const lintDatsBodyPatternDefault = `*`;
+export const lintDatsBodyPurposeDefault = `python`;
+export const lintDatsBodyRecursiveDefault = false;
+
+export const LintDatsBody = zod.object({
+  "parentPath": zod.string().describe('Absolute path to the parent. e.g., \"\/project1\"'),
+  "pattern": zod.string().default(lintDatsBodyPatternDefault).describe('Glob pattern to filter DAT names'),
+  "purpose": zod.enum(['python', 'glsl', 'text', 'data', 'any']).default(lintDatsBodyPurposeDefault).describe('Filter by DAT kind'),
+  "recursive": zod.boolean().default(lintDatsBodyRecursiveDefault).describe('Search recursively into descendants')
+})
+
+export const LintDatsResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "parentPath": zod.string().optional(),
+  "summary": zod.object({
+  "totalDatsScanned": zod.number().optional(),
+  "datsWithErrors": zod.number().optional(),
+  "datsClean": zod.number().optional(),
+  "totalIssues": zod.number().optional(),
+  "fixableCount": zod.number().optional(),
+  "manualCount": zod.number().optional(),
+  "bySeverity": zod.object({
+  "error": zod.number().optional(),
+  "warning": zod.number().optional(),
+  "info": zod.number().optional()
+}).optional(),
+  "worstOffenders": zod.array(zod.object({
+  "path": zod.string().optional(),
+  "name": zod.string().optional(),
+  "diagnosticCount": zod.number().optional()
+})).optional()
+}).optional(),
+  "results": zod.array(zod.object({
+  "path": zod.string().optional(),
+  "name": zod.string().optional(),
+  "diagnosticCount": zod.number().optional(),
+  "diagnostics": zod.array(zod.object({
+  "code": zod.string().optional(),
+  "message": zod.string().optional(),
+  "line": zod.number().optional(),
+  "column": zod.number().optional(),
+  "endLine": zod.number().optional(),
+  "endColumn": zod.number().optional(),
+  "fixable": zod.boolean().optional()
+}).describe('A single ruff lint diagnostic')).optional(),
+  "error": zod.string().optional()
+}).describe('Per-DAT lint result in a batch operation')).optional()
+}).optional()
+})
+
+
+/**
  * @summary Format DAT code with ruff
  */
 export const formatDatBodyDryRunDefault = false;

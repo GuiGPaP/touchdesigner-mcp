@@ -710,6 +710,64 @@ console.log(preview.data?.diff);`,
 	{
 		category: "dat",
 		description:
+			"Batch lint all Python DATs under a parent path. Returns per-DAT diagnostics and aggregated summary with severity breakdown and worst offenders.",
+		example: `const report = await lintDats({
+  parentPath: '/project1',
+  recursive: true,
+  purpose: 'python',
+});
+console.log(report.data?.summary);`,
+		functionName: "lintDats",
+		modulePath: `${MODULE_ROOT}/lintDats.ts`,
+		notes:
+			"Combines discover_dat_candidates + lint_dat in a single call. Read-only (no fix/dry-run).",
+		parameters: [
+			{
+				description:
+					"Absolute path to the parent (e.g., /project1).",
+				name: "parentPath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Glob pattern to filter DAT names (default '*').",
+				name: "pattern",
+				required: false,
+				type: "string",
+			},
+			{
+				description:
+					"Filter by DAT kind: python, glsl, text, data, or any.",
+				name: "purpose",
+				required: false,
+				type: "'python' | 'glsl' | 'text' | 'data' | 'any'",
+			},
+			{
+				description: "Search recursively into descendants.",
+				name: "recursive",
+				required: false,
+				type: "boolean",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns:
+			"Aggregated report with totalDatsScanned, datsWithErrors, datsClean, totalIssues, fixableCount, manualCount, bySeverity, worstOffenders, and per-DAT results.",
+		tool: TOOL_NAMES.LINT_DATS,
+	},
+	{
+		category: "dat",
+		description:
 			"Discover DAT candidates under a parent, classified by kind",
 		example: `const candidates = await discoverDatCandidates({
   parentPath: '/project1',

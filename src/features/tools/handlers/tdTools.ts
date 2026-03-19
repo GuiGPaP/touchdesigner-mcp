@@ -26,6 +26,7 @@ import {
 	GetTdPythonClassDetailsParams,
 	FormatDatBody,
 	LintDatBody,
+	LintDatsBody,
 	SetDatTextBody,
 	UpdateNodeBody,
 } from "../../../gen/mcp/touchDesignerAPI.zod.js";
@@ -50,6 +51,7 @@ import {
 	formatFormatDat,
 	formatExecNodeMethodResult,
 	formatLintDat,
+	formatLintDats,
 	formatModuleHelp,
 	formatNodeDetails,
 	formatNodeErrors,
@@ -138,6 +140,11 @@ type SetDatTextToolParams = z.input<typeof setDatTextToolSchema>;
 
 const lintDatToolSchema = LintDatBody.extend(detailOnlyFormattingSchema.shape);
 type LintDatToolParams = z.input<typeof lintDatToolSchema>;
+
+const lintDatsToolSchema = LintDatsBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type LintDatsToolParams = z.input<typeof lintDatsToolSchema>;
 
 const formatDatToolSchema = FormatDatBody.extend(
 	detailOnlyFormattingSchema.shape,
@@ -698,6 +705,28 @@ export function registerTdTools(
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
 				return handleToolError(error, logger, TOOL_NAMES.LINT_DAT);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.LINT_DATS,
+		"Batch lint all Python DATs under a parent path with aggregated report",
+		lintDatsToolSchema.strict().shape,
+		async (params: LintDatsToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...bodyParams } = params;
+				const result = await tdClient.lintDats(bodyParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatLintDats(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(error, logger, TOOL_NAMES.LINT_DATS);
 			}
 		},
 	);

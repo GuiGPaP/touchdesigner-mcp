@@ -36,6 +36,7 @@ import {
 	getTdPythonClasses as apiGetTdPythonClasses,
 	formatDat as apiFormatDat,
 	lintDat as apiLintDat,
+	lintDats as apiLintDats,
 	setDatText as apiSetDatText,
 	updateNode as apiUpdateNode,
 	type CompleteOpPaths200Data,
@@ -68,6 +69,8 @@ import {
 	type FormatDatBody,
 	type LintDat200Data,
 	type LintDatBody,
+	type LintDats200Data,
+	type LintDatsBody,
 	type SetDatText200Data,
 	type SetDatTextBody,
 	type UpdateNodeRequest,
@@ -101,6 +104,7 @@ export interface ITouchDesignerApi {
 	getTdPythonClasses: typeof apiGetTdPythonClasses;
 	formatDat: typeof apiFormatDat;
 	lintDat: typeof apiLintDat;
+	lintDats: typeof apiLintDats;
 	setDatText: typeof apiSetDatText;
 	updateNode: typeof apiUpdateNode;
 }
@@ -133,6 +137,7 @@ const defaultApiClient: ITouchDesignerApi = {
 	getTdPythonClasses: apiGetTdPythonClasses,
 	formatDat: apiFormatDat,
 	lintDat: apiLintDat,
+	lintDats: apiLintDats,
 	setDatText: apiSetDatText,
 	updateNode: apiUpdateNode,
 };
@@ -571,6 +576,20 @@ export class TouchDesignerClient {
 					TdResponse<LintDat200Data | undefined>
 				>,
 			{ nodePath: params.nodePath },
+		);
+	}
+
+	/**
+	 * Batch lint DATs under a parent path
+	 */
+	async lintDats(params: LintDatsBody) {
+		return this.apiCall(
+			"Batch linting DATs",
+			() =>
+				this.api.lintDats(params) as Promise<
+					TdResponse<LintDats200Data | undefined>
+				>,
+			{ parentPath: params.parentPath },
 		);
 	}
 

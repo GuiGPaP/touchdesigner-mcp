@@ -3,6 +3,7 @@ import type {
 	FormatDat200Data,
 	GetDatText200Data,
 	LintDat200Data,
+	LintDats200Data,
 	SetDatText200Data,
 } from "../../../gen/endpoints/TouchDesignerAPI.js";
 import type { FormatterOptions } from "./responseFormatter.js";
@@ -170,6 +171,91 @@ export function formatFormatDat(
 
 	return finalizeFormattedText(lines.join("\n"), opts, {
 		context: { path, title: "DAT Format" },
+		structured: data,
+		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
+	});
+}
+
+export function formatLintDats(
+	data: LintDats200Data | undefined,
+	options?: FormatterOpts,
+): string {
+	const opts = mergeFormatterOptions(options);
+	if (!data) {
+		return finalizeFormattedText("Batch lint returned no data.", opts, {
+			context: { title: "DAT Batch Lint" },
+		});
+	}
+
+	const parentPath = data.parentPath ?? "(unknown)";
+	const summary = data.summary;
+
+	if (!summary) {
+		return finalizeFormattedText(
+			`Batch lint completed for ${parentPath} (no summary available)`,
+			opts,
+			{ context: { title: "DAT Batch Lint" } },
+		);
+	}
+
+	const lines: string[] = [];
+	lines.push(
+		`Batch lint: ${parentPath} — ${summary.totalDatsScanned ?? 0} DAT(s) scanned`,
+	);
+	lines.push(
+		`  Issues: ${summary.totalIssues ?? 0} (fixable: ${summary.fixableCount ?? 0}, manual: ${summary.manualCount ?? 0})`,
+	);
+	lines.push(
+		`  DATs with errors: ${summary.datsWithErrors ?? 0}, clean: ${summary.datsClean ?? 0}`,
+	);
+
+	if (summary.bySeverity) {
+		const sev = summary.bySeverity;
+		lines.push(
+			`  Severity: errors=${sev.error ?? 0}, warnings=${sev.warning ?? 0}, info=${sev.info ?? 0}`,
+		);
+	}
+
+	if (
+		summary.worstOffenders &&
+		summary.worstOffenders.length > 0 &&
+		opts.detailLevel !== "minimal"
+	) {
+		lines.push("  Worst offenders:");
+		for (const [i, w] of summary.worstOffenders.entries()) {
+			lines.push(
+				`    ${i + 1}. ${w.path ?? w.name ?? "?"} (${w.diagnosticCount ?? 0} issues)`,
+			);
+		}
+	}
+
+	if (data.results && opts.detailLevel === "detailed") {
+		lines.push("");
+		for (const r of data.results) {
+			const count = r.diagnosticCount ?? 0;
+			if (count === 0 && !r.error) {
+				lines.push(`  \u2713 ${r.path ?? r.name ?? "?"}: clean`);
+				continue;
+			}
+			if (r.error) {
+				lines.push(`  \u2717 ${r.path ?? r.name ?? "?"}: ${r.error}`);
+				continue;
+			}
+			lines.push(`  ${r.path ?? r.name ?? "?"}: ${count} issue(s)`);
+			if (r.diagnostics) {
+				for (const d of r.diagnostics) {
+					const loc = `L${d.line ?? "?"}:${d.column ?? "?"}`;
+					const fixable = d.fixable ? " (fixable)" : "";
+					lines.push(
+						`    ${loc} ${d.code ?? ""} ${d.message ?? ""}${fixable}`,
+					);
+				}
+			}
+		}
+	}
+
+	return finalizeFormattedText(lines.join("\n"), opts, {
+		context: { parentPath, title: "DAT Batch Lint" },
 		structured: data,
 		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
 	});

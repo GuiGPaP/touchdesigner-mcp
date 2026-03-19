@@ -688,6 +688,59 @@ export type FormatDat200 = {
   data?: FormatDat200Data;
 };
 
+export type LintDatsBody = {
+  /** Absolute path to the parent. e.g., "/project1" */
+  parentPath: string;
+  /** Glob pattern to filter DAT names */
+  pattern?: string;
+  /** Filter by DAT kind */
+  purpose?: string;
+  /** Search recursively into descendants */
+  recursive?: boolean;
+};
+
+export type BatchLintSummaryWorstOffendersItem = {
+  path?: string;
+  name?: string;
+  diagnosticCount?: number;
+};
+
+export type BatchLintSummaryBySeverity = {
+  error?: number;
+  warning?: number;
+  info?: number;
+};
+
+export type BatchLintSummary = {
+  totalDatsScanned?: number;
+  datsWithErrors?: number;
+  datsClean?: number;
+  totalIssues?: number;
+  fixableCount?: number;
+  manualCount?: number;
+  bySeverity?: BatchLintSummaryBySeverity;
+  worstOffenders?: BatchLintSummaryWorstOffendersItem[];
+};
+
+export type BatchLintDatResult = {
+  path?: string;
+  name?: string;
+  diagnosticCount?: number;
+  diagnostics?: LintDiagnostic[];
+  error?: string;
+};
+
+export type LintDats200Data = {
+  parentPath?: string;
+  summary?: BatchLintSummary;
+  results?: BatchLintDatResult[];
+};
+
+export type LintDats200 = {
+  success?: boolean;
+  data?: LintDats200Data;
+};
+
 export type DiscoverDatCandidatesParams = {
 /**
  * Absolute path to the parent. e.g., "/project1"
@@ -1071,6 +1124,20 @@ export const lintDat = (
     }
   
 /**
+ * @summary Batch lint DATs under a parent path
+ */
+export const lintDats = (
+    lintDatsBody: BodyType<LintDatsBody>,
+ options?: SecondParameter<typeof customInstance<LintDats200>>,) => {
+      return customInstance<LintDats200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-lint-batch`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: lintDatsBody
+    },
+      options);
+    }
+
+/**
  * @summary Format DAT code with ruff
  */
 export const formatDat = (
@@ -1331,6 +1398,7 @@ export type GetNodeErrorsResult = NonNullable<Awaited<ReturnType<typeof getNodeE
 export type GetDatTextResult = NonNullable<Awaited<ReturnType<typeof getDatText>>>
 export type SetDatTextResult = NonNullable<Awaited<ReturnType<typeof setDatText>>>
 export type LintDatResult = NonNullable<Awaited<ReturnType<typeof lintDat>>>
+export type LintDatsResult = NonNullable<Awaited<ReturnType<typeof lintDats>>>
 export type FormatDatResult = NonNullable<Awaited<ReturnType<typeof formatDat>>>
 export type DiscoverDatCandidatesResult = NonNullable<Awaited<ReturnType<typeof discoverDatCandidates>>>
 export type GetNodeParameterSchemaResult = NonNullable<Awaited<ReturnType<typeof getNodeParameterSchema>>>

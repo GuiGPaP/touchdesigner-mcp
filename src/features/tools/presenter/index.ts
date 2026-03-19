@@ -12,6 +12,7 @@ export {
 	formatDiscoverDatCandidates,
 	formatFormatDat,
 	formatLintDat,
+	formatLintDats,
 	formatSetDatText,
 } from "./datFormatter.js";
 export {
