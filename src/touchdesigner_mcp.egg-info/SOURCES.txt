@@ -1,8 +1,0 @@
-LICENSE
-README.md
-pyproject.toml
-src/touchdesigner_mcp.egg-info/PKG-INFO
-src/touchdesigner_mcp.egg-info/SOURCES.txt
-src/touchdesigner_mcp.egg-info/dependency_links.txt
-src/touchdesigner_mcp.egg-info/requires.txt
-src/touchdesigner_mcp.egg-info/top_level.txt
