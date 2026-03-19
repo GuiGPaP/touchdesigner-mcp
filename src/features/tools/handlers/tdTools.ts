@@ -32,6 +32,7 @@ import type { TouchDesignerClient } from "../../../tdClient/touchDesignerClient.
 import type { ToolMetadata } from "../metadata/touchDesignerToolMetadata.js";
 import { getTouchDesignerToolMetadata } from "../metadata/touchDesignerToolMetadata.js";
 import {
+	formatCapabilities,
 	formatChopChannels,
 	formatClassDetails,
 	formatClassList,
@@ -71,6 +72,9 @@ type ExecPythonScriptToolParams = z.input<typeof execPythonScriptToolSchema>;
 
 const tdInfoToolSchema = detailOnlyFormattingSchema;
 type TdInfoToolParams = z.input<typeof tdInfoToolSchema>;
+
+const capabilitiesToolSchema = detailOnlyFormattingSchema;
+type CapabilitiesToolParams = z.input<typeof capabilitiesToolSchema>;
 
 const getNodesToolSchema = GetNodesQueryParams.extend(
 	formattingOptionsSchema.shape,
@@ -271,6 +275,32 @@ export function registerTdTools(
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
 				return handleToolError(error, logger, TOOL_NAMES.GET_TD_INFO);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.GET_CAPABILITIES,
+		"Get available capabilities and tool versions from the TouchDesigner server",
+		capabilitiesToolSchema.strict().shape,
+		async (params: CapabilitiesToolParams = {}) => {
+			try {
+				const { detailLevel, responseFormat } = params;
+				const result = await tdClient.getCapabilities();
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatCapabilities(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.GET_CAPABILITIES,
+				);
 			}
 		},
 	);

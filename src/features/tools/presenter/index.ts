@@ -4,6 +4,7 @@
  * Central export point for all response formatters
  */
 
+export { formatCapabilities } from "./capabilitiesFormatter.js";
 export type { ClassDetailsData, ClassListData } from "./classListFormatter.js";
 export { formatClassDetails, formatClassList } from "./classListFormatter.js";
 export {

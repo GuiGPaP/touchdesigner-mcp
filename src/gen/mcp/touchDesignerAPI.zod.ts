@@ -433,6 +433,30 @@ export const GetCompExtensionsResponse = zod.object({
 
 
 /**
+ * Returns available features and tool versions
+ * @summary Get server capabilities
+ */
+export const GetCapabilitiesResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "lint_dat": zod.boolean().optional(),
+  "format_dat": zod.boolean().optional(),
+  "typecheck_dat": zod.boolean().optional(),
+  "tools": zod.object({
+  "ruff": zod.object({
+  "installed": zod.boolean().optional(),
+  "version": zod.string().nullish()
+}).optional(),
+  "pyright": zod.object({
+  "installed": zod.boolean().optional(),
+  "version": zod.string().nullish()
+}).optional()
+}).optional()
+}).optional()
+})
+
+
+/**
  * Returns a list of Python classes, modules, and functions available in TouchDesigner
  * @summary Get a list of Python classes and modules
  */

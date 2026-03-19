@@ -60,6 +60,32 @@ console.log(\`\${info.server} \${info.version}\`);`,
 		tool: TOOL_NAMES.GET_TD_INFO,
 	},
 	{
+		category: "system",
+		description:
+			"Get available capabilities and tool versions from the TD server",
+		example: `const caps = await getCapabilities();
+console.log(caps.lint_dat, caps.tools.ruff.version);`,
+		functionName: "getCapabilities",
+		modulePath: `${MODULE_ROOT}/getCapabilities.ts`,
+		parameters: [
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns:
+			"Capabilities report with feature flags and tool versions.",
+		tool: TOOL_NAMES.GET_CAPABILITIES,
+	},
+	{
 		category: "python",
 		description: "Execute arbitrary Python against the TouchDesigner session",
 		example: `import { executePythonScript } from './servers/touchdesigner/executePythonScript';

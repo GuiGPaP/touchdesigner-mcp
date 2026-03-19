@@ -14,6 +14,7 @@ import {
 import {
 	completeOpPaths as apiCompleteOpPaths,
 	configureInstancing as apiConfigureInstancing,
+	getCapabilities as apiGetCapabilities,
 	createFeedbackLoop as apiCreateFeedbackLoop,
 	createGeometryComp as apiCreateGeometryComp,
 	createNode as apiCreateNode,
@@ -38,6 +39,7 @@ import {
 	updateNode as apiUpdateNode,
 	type CompleteOpPaths200Data,
 	type CompleteOpPathsParams,
+	type GetCapabilities200Data,
 	type ConfigureInstancingRequest,
 	type CreateFeedbackLoopRequest,
 	type CreateGeometryCompRequest,
@@ -74,6 +76,7 @@ import {
 export interface ITouchDesignerApi {
 	completeOpPaths: typeof apiCompleteOpPaths;
 	configureInstancing: typeof apiConfigureInstancing;
+	getCapabilities: typeof apiGetCapabilities;
 	createFeedbackLoop: typeof apiCreateFeedbackLoop;
 	createGeometryComp: typeof apiCreateGeometryComp;
 	createNode: typeof apiCreateNode;
@@ -104,6 +107,7 @@ export interface ITouchDesignerApi {
 const defaultApiClient: ITouchDesignerApi = {
 	completeOpPaths: apiCompleteOpPaths,
 	configureInstancing: apiConfigureInstancing,
+	getCapabilities: apiGetCapabilities,
 	createFeedbackLoop: apiCreateFeedbackLoop,
 	createGeometryComp: apiCreateGeometryComp,
 	createNode: apiCreateNode,
@@ -417,6 +421,17 @@ export class TouchDesignerClient {
 	async getTdInfo() {
 		this.invalidateCompatibilityCache("tdInfo request");
 		return this.apiCall("Getting server info", () => this.api.getTdInfo());
+	}
+
+	/**
+	 * Get server capabilities and tool versions
+	 */
+	async getCapabilities() {
+		return this.apiCall("Getting capabilities", () =>
+			this.api.getCapabilities() as Promise<
+				TdResponse<GetCapabilities200Data | undefined>
+			>,
+		);
 	}
 
 	/**

@@ -890,6 +890,29 @@ export type GetCompExtensions200 = {
   data?: GetCompExtensions200Data;
 };
 
+export type GetCapabilities200DataTool = {
+  installed?: boolean;
+  /** @nullable */
+  version?: string | null;
+};
+
+export type GetCapabilities200DataTools = {
+  ruff?: GetCapabilities200DataTool;
+  pyright?: GetCapabilities200DataTool;
+};
+
+export type GetCapabilities200Data = {
+  lint_dat?: boolean;
+  format_dat?: boolean;
+  typecheck_dat?: boolean;
+  tools?: GetCapabilities200DataTools;
+};
+
+export type GetCapabilities200 = {
+  success?: boolean;
+  data?: GetCapabilities200Data;
+};
+
 export type GetModuleHelpParams = {
 /**
  * Module or class name (e.g., "noiseCHOP", "td.noiseCHOP", "tdu").
@@ -1110,6 +1133,19 @@ export const getCompExtensions = (
     }
   
 /**
+ * Returns available features and tool versions
+ * @summary Get server capabilities
+ */
+export const getCapabilities = (
+
+ options?: SecondParameter<typeof customInstance<GetCapabilities200>>,) => {
+      return customInstance<GetCapabilities200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/capabilities`, method: 'GET'
+    },
+      options);
+    }
+
+/**
  * Returns a list of Python classes, modules, and functions available in TouchDesigner
  * @summary Get a list of Python classes and modules
  */
@@ -1273,4 +1309,5 @@ export type ExecPythonScriptResult = NonNullable<Awaited<ReturnType<typeof execP
 export type GetTdInfoResult = NonNullable<Awaited<ReturnType<typeof getTdInfo>>>
 export type CreateGeometryCompResult = NonNullable<Awaited<ReturnType<typeof createGeometryComp>>>
 export type CreateFeedbackLoopResult = NonNullable<Awaited<ReturnType<typeof createFeedbackLoop>>>
+export type GetCapabilitiesResult = NonNullable<Awaited<ReturnType<typeof getCapabilities>>>
 export type ConfigureInstancingResult = NonNullable<Awaited<ReturnType<typeof configureInstancing>>>

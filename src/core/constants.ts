@@ -18,6 +18,7 @@ export const TOOL_NAMES = {
 	DISCOVER_DAT_CANDIDATES: "discover_dat_candidates",
 	EXECUTE_NODE_METHOD: "exec_node_method",
 	EXECUTE_PYTHON_SCRIPT: "execute_python_script",
+	GET_CAPABILITIES: "get_capabilities",
 	GET_CHOP_CHANNELS: "get_chop_channels",
 	GET_COMP_EXTENSIONS: "get_comp_extensions",
 	GET_DAT_TABLE_INFO: "get_dat_table_info",
