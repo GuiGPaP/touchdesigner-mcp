@@ -721,6 +721,51 @@ export type ValidateJsonDat200 = {
   data?: ValidateJsonDat200Data;
 };
 
+export type ValidateGlslDatBody = {
+  /** Absolute path to the DAT node. e.g., "/project1/glsl_pixel" */
+  nodePath: string;
+};
+
+export type ValidateGlslDat200DataDiagnosticsItem = {
+  line?: number;
+  column?: number;
+  message?: string;
+  severity?: string;
+};
+
+export type ValidateGlslDat200DataShaderType = typeof ValidateGlslDat200DataShaderType[keyof typeof ValidateGlslDat200DataShaderType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ValidateGlslDat200DataShaderType = {
+  pixel: 'pixel',
+  vertex: 'vertex',
+  compute: 'compute',
+  unknown: 'unknown',
+} as const;
+
+export type ValidateGlslDat200DataValidationMethod = typeof ValidateGlslDat200DataValidationMethod[keyof typeof ValidateGlslDat200DataValidationMethod];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ValidateGlslDat200DataValidationMethod = {
+  td_errors: 'td_errors',
+  glslangValidator: 'glslangValidator',
+  none: 'none',
+} as const;
+
+export type ValidateGlslDat200Data = {
+  path?: string;
+  name?: string;
+  shaderType?: ValidateGlslDat200DataShaderType;
+  valid?: boolean;
+  diagnostics?: ValidateGlslDat200DataDiagnosticsItem[];
+  validationMethod?: ValidateGlslDat200DataValidationMethod;
+};
+
+export type ValidateGlslDat200 = {
+  success?: boolean;
+  data?: ValidateGlslDat200Data;
+};
+
 export type LintDatsBody = {
   /** Absolute path to the parent. e.g., "/project1" */
   parentPath: string;
@@ -1200,6 +1245,21 @@ export const validateJsonDat = (
     }
 
 /**
+ * Validate GLSL shader code in a DAT
+ * @summary Validate GLSL shader code in a DAT
+ */
+export const validateGlslDat = (
+    validateGlslDatBody: BodyType<ValidateGlslDatBody>,
+ options?: SecondParameter<typeof customInstance<ValidateGlslDat200>>,) => {
+      return customInstance<ValidateGlslDat200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-validate-glsl`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: validateGlslDatBody
+    },
+      options);
+    }
+
+/**
  * Discover DAT candidates under a parent, classified by kind (python, glsl, text, data). Agent-friendly endpoint that eliminates N+1 round-trips.
  * @summary Discover DAT candidates for agent workflows
  */
@@ -1449,6 +1509,7 @@ export type LintDatResult = NonNullable<Awaited<ReturnType<typeof lintDat>>>
 export type LintDatsResult = NonNullable<Awaited<ReturnType<typeof lintDats>>>
 export type FormatDatResult = NonNullable<Awaited<ReturnType<typeof formatDat>>>
 export type ValidateJsonDatResult = NonNullable<Awaited<ReturnType<typeof validateJsonDat>>>
+export type ValidateGlslDatResult = NonNullable<Awaited<ReturnType<typeof validateGlslDat>>>
 export type DiscoverDatCandidatesResult = NonNullable<Awaited<ReturnType<typeof discoverDatCandidates>>>
 export type GetNodeParameterSchemaResult = NonNullable<Awaited<ReturnType<typeof getNodeParameterSchema>>>
 export type CompleteOpPathsResult = NonNullable<Awaited<ReturnType<typeof completeOpPaths>>>

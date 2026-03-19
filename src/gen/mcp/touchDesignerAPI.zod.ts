@@ -338,6 +338,32 @@ export const ValidateJsonDatResponse = zod.object({
 
 
 /**
+ * Validate GLSL shader code in a DAT
+ * @summary Validate GLSL shader code in a DAT
+ */
+export const ValidateGlslDatBody = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/glsl_pixel\"')
+})
+
+export const ValidateGlslDatResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "path": zod.string().optional(),
+  "name": zod.string().optional(),
+  "shaderType": zod.enum(['pixel', 'vertex', 'compute', 'unknown']).optional(),
+  "valid": zod.boolean().optional(),
+  "diagnostics": zod.array(zod.object({
+  "line": zod.number().optional(),
+  "column": zod.number().optional(),
+  "message": zod.string().optional(),
+  "severity": zod.string().optional()
+})).optional(),
+  "validationMethod": zod.enum(['td_errors', 'glslangValidator', 'none']).optional()
+}).optional()
+})
+
+
+/**
  * Discover DAT candidates under a parent, classified by kind (python, glsl, text, data). Agent-friendly endpoint that eliminates N+1 round-trips.
  * @summary Discover DAT candidates for agent workflows
  */

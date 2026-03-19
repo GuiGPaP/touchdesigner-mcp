@@ -37,6 +37,7 @@ import {
 	formatDat as apiFormatDat,
 	lintDat as apiLintDat,
 	lintDats as apiLintDats,
+	validateGlslDat as apiValidateGlslDat,
 	validateJsonDat as apiValidateJsonDat,
 	setDatText as apiSetDatText,
 	updateNode as apiUpdateNode,
@@ -72,6 +73,8 @@ import {
 	type LintDatBody,
 	type LintDats200Data,
 	type LintDatsBody,
+	type ValidateGlslDat200Data,
+	type ValidateGlslDatBody,
 	type ValidateJsonDat200Data,
 	type ValidateJsonDatBody,
 	type SetDatText200Data,
@@ -108,6 +111,7 @@ export interface ITouchDesignerApi {
 	formatDat: typeof apiFormatDat;
 	lintDat: typeof apiLintDat;
 	lintDats: typeof apiLintDats;
+	validateGlslDat: typeof apiValidateGlslDat;
 	validateJsonDat: typeof apiValidateJsonDat;
 	setDatText: typeof apiSetDatText;
 	updateNode: typeof apiUpdateNode;
@@ -142,6 +146,7 @@ const defaultApiClient: ITouchDesignerApi = {
 	formatDat: apiFormatDat,
 	lintDat: apiLintDat,
 	lintDats: apiLintDats,
+	validateGlslDat: apiValidateGlslDat,
 	validateJsonDat: apiValidateJsonDat,
 	setDatText: apiSetDatText,
 	updateNode: apiUpdateNode,
@@ -621,6 +626,20 @@ export class TouchDesignerClient {
 			() =>
 				this.api.validateJsonDat(params) as Promise<
 					TdResponse<ValidateJsonDat200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
+		);
+	}
+
+	/**
+	 * Validate GLSL shader code in a DAT
+	 */
+	async validateGlslDat(params: ValidateGlslDatBody) {
+		return this.apiCall(
+			"Validating GLSL DAT",
+			() =>
+				this.api.validateGlslDat(params) as Promise<
+					TdResponse<ValidateGlslDat200Data | undefined>
 				>,
 			{ nodePath: params.nodePath },
 		);

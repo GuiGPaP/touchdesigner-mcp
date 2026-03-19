@@ -5,6 +5,7 @@ import type {
 	LintDat200Data,
 	LintDats200Data,
 	SetDatText200Data,
+	ValidateGlslDat200Data,
 	ValidateJsonDat200Data,
 } from "../../../gen/endpoints/TouchDesignerAPI.js";
 import type { FormatterOptions } from "./responseFormatter.js";
@@ -294,6 +295,45 @@ export function formatValidateJsonDat(
 
 	return finalizeFormattedText(lines.join("\n"), opts, {
 		context: { path, title: "DAT JSON/YAML Validate" },
+		structured: data,
+		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
+	});
+}
+
+export function formatValidateGlslDat(
+	data: ValidateGlslDat200Data | undefined,
+	options?: FormatterOpts,
+): string {
+	const opts = mergeFormatterOptions(options);
+	if (!data) {
+		return finalizeFormattedText("GLSL validation returned no data.", opts, {
+			context: { title: "DAT GLSL Validate" },
+		});
+	}
+
+	const path = data.path ?? "(unknown)";
+	const shaderType = data.shaderType ?? "unknown";
+	const method = data.validationMethod ?? "none";
+
+	if (data.valid) {
+		const text = `\u2713 ${path}: valid GLSL (${shaderType}, via ${method})`;
+		return finalizeFormattedText(text, opts, {
+			context: { path, title: "DAT GLSL Validate" },
+			structured: data,
+		});
+	}
+
+	const lines: string[] = [`${path}: invalid GLSL (${shaderType}, via ${method})`];
+	if (data.diagnostics && opts.detailLevel !== "minimal") {
+		for (const d of data.diagnostics) {
+			const loc = `L${d.line ?? "?"}:${d.column ?? "?"}`;
+			const sev = d.severity ? `[${d.severity}]` : "";
+			lines.push(`  ${loc} ${sev} ${d.message ?? ""}`);
+		}
+	}
+
+	return finalizeFormattedText(lines.join("\n"), opts, {
+		context: { path, title: "DAT GLSL Validate" },
 		structured: data,
 		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
 	});

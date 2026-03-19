@@ -27,6 +27,7 @@ import {
 	FormatDatBody,
 	LintDatBody,
 	LintDatsBody,
+	ValidateGlslDatBody,
 	ValidateJsonDatBody,
 	SetDatTextBody,
 	UpdateNodeBody,
@@ -50,6 +51,7 @@ import {
 	formatDeleteNodeResult,
 	formatDiscoverDatCandidates,
 	formatFormatDat,
+	formatValidateGlslDat,
 	formatValidateJsonDat,
 	formatExecNodeMethodResult,
 	formatLintDat,
@@ -152,6 +154,11 @@ const formatDatToolSchema = FormatDatBody.extend(
 	detailOnlyFormattingSchema.shape,
 );
 type FormatDatToolParams = z.input<typeof formatDatToolSchema>;
+
+const validateGlslDatToolSchema = ValidateGlslDatBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type ValidateGlslDatToolParams = z.input<typeof validateGlslDatToolSchema>;
 
 const validateJsonDatToolSchema = ValidateJsonDatBody.extend(
 	detailOnlyFormattingSchema.shape,
@@ -781,6 +788,32 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.VALIDATE_JSON_DAT,
+				);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.VALIDATE_GLSL_DAT,
+		"Validate GLSL shader code in a DAT operator with structured diagnostics",
+		validateGlslDatToolSchema.strict().shape,
+		async (params: ValidateGlslDatToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...bodyParams } = params;
+				const result = await tdClient.validateGlslDat(bodyParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatValidateGlslDat(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.VALIDATE_GLSL_DAT,
 				);
 			}
 		},

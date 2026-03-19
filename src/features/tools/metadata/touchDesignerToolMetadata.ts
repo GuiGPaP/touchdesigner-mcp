@@ -745,6 +745,41 @@ console.log(result.data?.valid, result.data?.format);`,
 	{
 		category: "dat",
 		description:
+			"Validate GLSL shader code in a DAT operator. Checks connected GLSL TOP/MAT errors or falls back to glslangValidator.",
+		example: `const result = await validateGlslDat({
+  nodePath: '/project1/shader_pixel',
+});
+console.log(result.data?.valid, result.data?.shaderType);`,
+		functionName: "validateGlslDat",
+		modulePath: `${MODULE_ROOT}/validateGlslDat.ts`,
+		parameters: [
+			{
+				description:
+					"Absolute path to the GLSL DAT node (e.g., /project1/shader_pixel).",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns:
+			"Validation result with path, name, shaderType (pixel/vertex/compute/unknown), valid flag, diagnostics array with line/column/message/severity, and validationMethod (td_errors/glslangValidator/none).",
+		tool: TOOL_NAMES.VALIDATE_GLSL_DAT,
+	},
+	{
+		category: "dat",
+		description:
 			"Batch lint all Python DATs under a parent path. Returns per-DAT diagnostics and aggregated summary with severity breakdown and worst offenders.",
 		example: `const report = await lintDats({
   parentPath: '/project1',

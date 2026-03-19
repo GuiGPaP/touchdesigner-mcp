@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
 	formatLintDat,
 	formatLintDats,
+	formatValidateGlslDat,
 	formatValidateJsonDat,
 } from "../../../src/features/tools/presenter/datFormatter.js";
-import type { LintDat200Data, LintDats200Data, ValidateJsonDat200Data } from "../../../src/gen/endpoints/TouchDesignerAPI.js";
+import type { LintDat200Data, LintDats200Data, ValidateGlslDat200Data, ValidateJsonDat200Data } from "../../../src/gen/endpoints/TouchDesignerAPI.js";
 
 describe("datFormatter", () => {
 	describe("formatLintDat", () => {
@@ -141,6 +142,63 @@ describe("datFormatter", () => {
 		it("should handle no data", () => {
 			const result = formatValidateJsonDat(undefined);
 			expect(result).toContain("Validation returned no data.");
+		});
+	});
+
+	describe("formatValidateGlslDat", () => {
+		it("should show valid GLSL", () => {
+			const data: ValidateGlslDat200Data = {
+				path: "/project1/shader_pixel",
+				name: "shader_pixel",
+				shaderType: "pixel",
+				valid: true,
+				diagnostics: [],
+				validationMethod: "td_errors",
+			};
+
+			const result = formatValidateGlslDat(data);
+			expect(result).toContain("/project1/shader_pixel");
+			expect(result).toContain("valid GLSL");
+			expect(result).toContain("pixel");
+			expect(result).toContain("td_errors");
+		});
+
+		it("should show diagnostics for invalid GLSL", () => {
+			const data: ValidateGlslDat200Data = {
+				path: "/project1/shader_pixel",
+				name: "shader_pixel",
+				shaderType: "pixel",
+				valid: false,
+				diagnostics: [
+					{ line: 5, column: 1, message: "undeclared identifier 'bad'", severity: "error" },
+				],
+				validationMethod: "td_errors",
+			};
+
+			const result = formatValidateGlslDat(data);
+			expect(result).toContain("invalid GLSL");
+			expect(result).toContain("L5:1");
+			expect(result).toContain("[error]");
+			expect(result).toContain("undeclared identifier");
+		});
+
+		it("should handle no data", () => {
+			const result = formatValidateGlslDat(undefined);
+			expect(result).toContain("GLSL validation returned no data.");
+		});
+
+		it("should show validation method none", () => {
+			const data: ValidateGlslDat200Data = {
+				path: "/project1/shader_pixel",
+				name: "shader_pixel",
+				shaderType: "unknown",
+				valid: true,
+				diagnostics: [],
+				validationMethod: "none",
+			};
+
+			const result = formatValidateGlslDat(data);
+			expect(result).toContain("via none");
 		});
 	});
 
