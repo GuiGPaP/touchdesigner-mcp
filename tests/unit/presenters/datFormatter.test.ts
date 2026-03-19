@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
 	formatLintDat,
 	formatLintDats,
+	formatValidateJsonDat,
 } from "../../../src/features/tools/presenter/datFormatter.js";
-import type { LintDat200Data, LintDats200Data } from "../../../src/gen/endpoints/TouchDesignerAPI.js";
+import type { LintDat200Data, LintDats200Data, ValidateJsonDat200Data } from "../../../src/gen/endpoints/TouchDesignerAPI.js";
 
 describe("datFormatter", () => {
 	describe("formatLintDat", () => {
@@ -102,6 +103,44 @@ describe("datFormatter", () => {
 			expect(result).toContain("Auto-fix applied.");
 			expect(result).toContain("0 remaining issues after fix.");
 			expect(result).not.toContain("[DRY RUN]");
+		});
+	});
+
+	describe("formatValidateJsonDat", () => {
+		it("should show valid JSON", () => {
+			const data: ValidateJsonDat200Data = {
+				path: "/project1/data1",
+				name: "data1",
+				format: "json",
+				valid: true,
+				diagnostics: [],
+			};
+
+			const result = formatValidateJsonDat(data);
+			expect(result).toContain("/project1/data1");
+			expect(result).toContain("valid json");
+		});
+
+		it("should show diagnostics for invalid content", () => {
+			const data: ValidateJsonDat200Data = {
+				path: "/project1/data1",
+				name: "data1",
+				format: "unknown",
+				valid: false,
+				diagnostics: [
+					{ line: 1, column: 9, message: "Expecting value" },
+				],
+			};
+
+			const result = formatValidateJsonDat(data);
+			expect(result).toContain("invalid");
+			expect(result).toContain("L1:9");
+			expect(result).toContain("Expecting value");
+		});
+
+		it("should handle no data", () => {
+			const result = formatValidateJsonDat(undefined);
+			expect(result).toContain("Validation returned no data.");
 		});
 	});
 

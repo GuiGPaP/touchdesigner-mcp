@@ -688,6 +688,39 @@ export type FormatDat200 = {
   data?: FormatDat200Data;
 };
 
+export type ValidateJsonDatBody = {
+  /** Absolute path to the DAT node. e.g., "/project1/data1" */
+  nodePath: string;
+};
+
+export type ValidateJsonDat200DataDiagnosticsItem = {
+  line?: number;
+  column?: number;
+  message?: string;
+};
+
+export type ValidateJsonDat200DataFormat = typeof ValidateJsonDat200DataFormat[keyof typeof ValidateJsonDat200DataFormat];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ValidateJsonDat200DataFormat = {
+  json: 'json',
+  yaml: 'yaml',
+  unknown: 'unknown',
+} as const;
+
+export type ValidateJsonDat200Data = {
+  path?: string;
+  name?: string;
+  format?: ValidateJsonDat200DataFormat;
+  valid?: boolean;
+  diagnostics?: ValidateJsonDat200DataDiagnosticsItem[];
+};
+
+export type ValidateJsonDat200 = {
+  success?: boolean;
+  data?: ValidateJsonDat200Data;
+};
+
 export type LintDatsBody = {
   /** Absolute path to the parent. e.g., "/project1" */
   parentPath: string;
@@ -1152,6 +1185,21 @@ export const formatDat = (
     }
 
 /**
+ * Validate JSON or YAML content in a DAT operator
+ * @summary Validate JSON/YAML content in a DAT
+ */
+export const validateJsonDat = (
+    validateJsonDatBody: BodyType<ValidateJsonDatBody>,
+ options?: SecondParameter<typeof customInstance<ValidateJsonDat200>>,) => {
+      return customInstance<ValidateJsonDat200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-validate-json`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: validateJsonDatBody
+    },
+      options);
+    }
+
+/**
  * Discover DAT candidates under a parent, classified by kind (python, glsl, text, data). Agent-friendly endpoint that eliminates N+1 round-trips.
  * @summary Discover DAT candidates for agent workflows
  */
@@ -1400,6 +1448,7 @@ export type SetDatTextResult = NonNullable<Awaited<ReturnType<typeof setDatText>
 export type LintDatResult = NonNullable<Awaited<ReturnType<typeof lintDat>>>
 export type LintDatsResult = NonNullable<Awaited<ReturnType<typeof lintDats>>>
 export type FormatDatResult = NonNullable<Awaited<ReturnType<typeof formatDat>>>
+export type ValidateJsonDatResult = NonNullable<Awaited<ReturnType<typeof validateJsonDat>>>
 export type DiscoverDatCandidatesResult = NonNullable<Awaited<ReturnType<typeof discoverDatCandidates>>>
 export type GetNodeParameterSchemaResult = NonNullable<Awaited<ReturnType<typeof getNodeParameterSchema>>>
 export type CompleteOpPathsResult = NonNullable<Awaited<ReturnType<typeof completeOpPaths>>>

@@ -710,6 +710,41 @@ console.log(preview.data?.diff);`,
 	{
 		category: "dat",
 		description:
+			"Validate JSON or YAML content in a DAT operator. Auto-detects format and returns structured diagnostics with line/column positions.",
+		example: `const result = await validateJsonDat({
+  nodePath: '/project1/data1',
+});
+console.log(result.data?.valid, result.data?.format);`,
+		functionName: "validateJsonDat",
+		modulePath: `${MODULE_ROOT}/validateJsonDat.ts`,
+		parameters: [
+			{
+				description:
+					"Absolute path to the DAT node (e.g., /project1/data1).",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns:
+			"Validation result with path, name, detected format (json/yaml/unknown), valid flag, and diagnostics array with line/column/message.",
+		tool: TOOL_NAMES.VALIDATE_JSON_DAT,
+	},
+	{
+		category: "dat",
+		description:
 			"Batch lint all Python DATs under a parent path. Returns per-DAT diagnostics and aggregated summary with severity breakdown and worst offenders.",
 		example: `const report = await lintDats({
   parentPath: '/project1',

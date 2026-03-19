@@ -37,6 +37,7 @@ import {
 	formatDat as apiFormatDat,
 	lintDat as apiLintDat,
 	lintDats as apiLintDats,
+	validateJsonDat as apiValidateJsonDat,
 	setDatText as apiSetDatText,
 	updateNode as apiUpdateNode,
 	type CompleteOpPaths200Data,
@@ -71,6 +72,8 @@ import {
 	type LintDatBody,
 	type LintDats200Data,
 	type LintDatsBody,
+	type ValidateJsonDat200Data,
+	type ValidateJsonDatBody,
 	type SetDatText200Data,
 	type SetDatTextBody,
 	type UpdateNodeRequest,
@@ -105,6 +108,7 @@ export interface ITouchDesignerApi {
 	formatDat: typeof apiFormatDat;
 	lintDat: typeof apiLintDat;
 	lintDats: typeof apiLintDats;
+	validateJsonDat: typeof apiValidateJsonDat;
 	setDatText: typeof apiSetDatText;
 	updateNode: typeof apiUpdateNode;
 }
@@ -138,6 +142,7 @@ const defaultApiClient: ITouchDesignerApi = {
 	formatDat: apiFormatDat,
 	lintDat: apiLintDat,
 	lintDats: apiLintDats,
+	validateJsonDat: apiValidateJsonDat,
 	setDatText: apiSetDatText,
 	updateNode: apiUpdateNode,
 };
@@ -602,6 +607,20 @@ export class TouchDesignerClient {
 			() =>
 				this.api.formatDat(params) as Promise<
 					TdResponse<FormatDat200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
+		);
+	}
+
+	/**
+	 * Validate JSON/YAML content in a DAT
+	 */
+	async validateJsonDat(params: ValidateJsonDatBody) {
+		return this.apiCall(
+			"Validating JSON/YAML DAT",
+			() =>
+				this.api.validateJsonDat(params) as Promise<
+					TdResponse<ValidateJsonDat200Data | undefined>
 				>,
 			{ nodePath: params.nodePath },
 		);

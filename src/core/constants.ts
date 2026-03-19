@@ -33,6 +33,7 @@ export const TOOL_NAMES = {
 	GET_TD_NODES: "get_td_nodes",
 	FORMAT_DAT: "format_dat",
 	LINT_DAT: "lint_dat",
+	VALIDATE_JSON_DAT: "validate_json_dat",
 	LINT_DATS: "lint_dats",
 	SET_DAT_TEXT: "set_dat_text",
 	UPDATE_TD_NODE_PARAMETERS: "update_td_node_parameters",

@@ -27,6 +27,7 @@ import {
 	FormatDatBody,
 	LintDatBody,
 	LintDatsBody,
+	ValidateJsonDatBody,
 	SetDatTextBody,
 	UpdateNodeBody,
 } from "../../../gen/mcp/touchDesignerAPI.zod.js";
@@ -49,6 +50,7 @@ import {
 	formatDeleteNodeResult,
 	formatDiscoverDatCandidates,
 	formatFormatDat,
+	formatValidateJsonDat,
 	formatExecNodeMethodResult,
 	formatLintDat,
 	formatLintDats,
@@ -150,6 +152,11 @@ const formatDatToolSchema = FormatDatBody.extend(
 	detailOnlyFormattingSchema.shape,
 );
 type FormatDatToolParams = z.input<typeof formatDatToolSchema>;
+
+const validateJsonDatToolSchema = ValidateJsonDatBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type ValidateJsonDatToolParams = z.input<typeof validateJsonDatToolSchema>;
 
 const discoverDatCandidatesToolSchema = DiscoverDatCandidatesQueryParams.extend(
 	detailOnlyFormattingSchema.shape,
@@ -749,6 +756,32 @@ export function registerTdTools(
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
 				return handleToolError(error, logger, TOOL_NAMES.FORMAT_DAT);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.VALIDATE_JSON_DAT,
+		"Validate JSON or YAML content in a DAT operator with structured diagnostics",
+		validateJsonDatToolSchema.strict().shape,
+		async (params: ValidateJsonDatToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...bodyParams } = params;
+				const result = await tdClient.validateJsonDat(bodyParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatValidateJsonDat(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.VALIDATE_JSON_DAT,
+				);
 			}
 		},
 	);

@@ -14,6 +14,7 @@ export {
 	formatLintDat,
 	formatLintDats,
 	formatSetDatText,
+	formatValidateJsonDat,
 } from "./datFormatter.js";
 export {
 	formatConfigureInstancing,

@@ -5,6 +5,7 @@ import type {
 	LintDat200Data,
 	LintDats200Data,
 	SetDatText200Data,
+	ValidateJsonDat200Data,
 } from "../../../gen/endpoints/TouchDesignerAPI.js";
 import type { FormatterOptions } from "./responseFormatter.js";
 import {
@@ -256,6 +257,43 @@ export function formatLintDats(
 
 	return finalizeFormattedText(lines.join("\n"), opts, {
 		context: { parentPath, title: "DAT Batch Lint" },
+		structured: data,
+		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
+	});
+}
+
+export function formatValidateJsonDat(
+	data: ValidateJsonDat200Data | undefined,
+	options?: FormatterOpts,
+): string {
+	const opts = mergeFormatterOptions(options);
+	if (!data) {
+		return finalizeFormattedText("Validation returned no data.", opts, {
+			context: { title: "DAT JSON/YAML Validate" },
+		});
+	}
+
+	const path = data.path ?? "(unknown)";
+	const format = data.format ?? "unknown";
+
+	if (data.valid) {
+		const text = `\u2713 ${path}: valid ${format}`;
+		return finalizeFormattedText(text, opts, {
+			context: { path, title: "DAT JSON/YAML Validate" },
+			structured: data,
+		});
+	}
+
+	const lines: string[] = [`${path}: invalid ${format}`];
+	if (data.diagnostics && opts.detailLevel !== "minimal") {
+		for (const d of data.diagnostics) {
+			const loc = `L${d.line ?? "?"}:${d.column ?? "?"}`;
+			lines.push(`  ${loc} ${d.message ?? ""}`);
+		}
+	}
+
+	return finalizeFormattedText(lines.join("\n"), opts, {
+		context: { path, title: "DAT JSON/YAML Validate" },
 		structured: data,
 		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
 	});

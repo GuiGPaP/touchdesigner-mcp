@@ -314,6 +314,30 @@ export const FormatDatResponse = zod.object({
 
 
 /**
+ * Validate JSON or YAML content in a DAT operator
+ * @summary Validate JSON/YAML content in a DAT
+ */
+export const ValidateJsonDatBody = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/data1\"')
+})
+
+export const ValidateJsonDatResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "path": zod.string().optional(),
+  "name": zod.string().optional(),
+  "format": zod.enum(['json', 'yaml', 'unknown']).optional(),
+  "valid": zod.boolean().optional(),
+  "diagnostics": zod.array(zod.object({
+  "line": zod.number().optional(),
+  "column": zod.number().optional(),
+  "message": zod.string().optional()
+})).optional()
+}).optional()
+})
+
+
+/**
  * Discover DAT candidates under a parent, classified by kind (python, glsl, text, data). Agent-friendly endpoint that eliminates N+1 round-trips.
  * @summary Discover DAT candidates for agent workflows
  */

@@ -272,6 +272,52 @@ paths:
           description: Lint results
       summary: Lint DAT code with ruff
       x-openapi-router-controller: openapi_server.controllers.default_controller
+  /api/nodes/dat-validate-json:
+    post:
+      operationId: validate_json_dat
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - nodePath
+              properties:
+                nodePath:
+                  type: string
+                  description: "Absolute path to the DAT node. e.g., \"/project1/data1\""
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                      name:
+                        type: string
+                      format:
+                        type: string
+                        enum:
+                        - json
+                        - yaml
+                        - unknown
+                      valid:
+                        type: boolean
+                      diagnostics:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/JsonValidationDiagnostic'
+          description: Validation results
+      summary: Validate JSON/YAML content in a DAT
+      x-openapi-router-controller: openapi_server.controllers.default_controller
   /api/nodes/dat-discover:
     get:
       description: Discover DAT candidates under a parent, classified by kind (python,
@@ -1006,6 +1052,17 @@ components:
       - nodePath
       - opType
       title: TdNodeErrorReport
+      type: object
+    JsonValidationDiagnostic:
+      description: A single JSON/YAML validation diagnostic
+      properties:
+        line:
+          type: integer
+        column:
+          type: integer
+        message:
+          type: string
+      title: JsonValidationDiagnostic
       type: object
     LintDiagnostic:
       description: A single ruff lint diagnostic
