@@ -34,6 +34,7 @@ import {
 	getTdInfo as apiGetTdInfo,
 	getTdPythonClassDetails as apiGetTdPythonClassDetails,
 	getTdPythonClasses as apiGetTdPythonClasses,
+	formatDat as apiFormatDat,
 	lintDat as apiLintDat,
 	setDatText as apiSetDatText,
 	updateNode as apiUpdateNode,
@@ -63,6 +64,8 @@ import {
 	type GetNodeParameterSchema200Data,
 	type GetNodeParameterSchemaParams,
 	type GetNodesParams,
+	type FormatDat200Data,
+	type FormatDatBody,
 	type LintDat200Data,
 	type LintDatBody,
 	type SetDatText200Data,
@@ -96,6 +99,7 @@ export interface ITouchDesignerApi {
 	getTdInfo: typeof apiGetTdInfo;
 	getTdPythonClassDetails: typeof apiGetTdPythonClassDetails;
 	getTdPythonClasses: typeof apiGetTdPythonClasses;
+	formatDat: typeof apiFormatDat;
 	lintDat: typeof apiLintDat;
 	setDatText: typeof apiSetDatText;
 	updateNode: typeof apiUpdateNode;
@@ -127,6 +131,7 @@ const defaultApiClient: ITouchDesignerApi = {
 	getTdInfo: apiGetTdInfo,
 	getTdPythonClassDetails: apiGetTdPythonClassDetails,
 	getTdPythonClasses: apiGetTdPythonClasses,
+	formatDat: apiFormatDat,
 	lintDat: apiLintDat,
 	setDatText: apiSetDatText,
 	updateNode: apiUpdateNode,
@@ -564,6 +569,20 @@ export class TouchDesignerClient {
 			() =>
 				this.api.lintDat(params) as Promise<
 					TdResponse<LintDat200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
+		);
+	}
+
+	/**
+	 * Format DAT code with ruff
+	 */
+	async formatDat(params: FormatDatBody) {
+		return this.apiCall(
+			"Formatting DAT",
+			() =>
+				this.api.formatDat(params) as Promise<
+					TdResponse<FormatDat200Data | undefined>
 				>,
 			{ nodePath: params.nodePath },
 		);

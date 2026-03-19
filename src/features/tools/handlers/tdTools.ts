@@ -24,6 +24,7 @@ import {
 	GetNodeParameterSchemaQueryParams,
 	GetNodesQueryParams,
 	GetTdPythonClassDetailsParams,
+	FormatDatBody,
 	LintDatBody,
 	SetDatTextBody,
 	UpdateNodeBody,
@@ -46,6 +47,7 @@ import {
 	formatDatText,
 	formatDeleteNodeResult,
 	formatDiscoverDatCandidates,
+	formatFormatDat,
 	formatExecNodeMethodResult,
 	formatLintDat,
 	formatModuleHelp,
@@ -136,6 +138,11 @@ type SetDatTextToolParams = z.input<typeof setDatTextToolSchema>;
 
 const lintDatToolSchema = LintDatBody.extend(detailOnlyFormattingSchema.shape);
 type LintDatToolParams = z.input<typeof lintDatToolSchema>;
+
+const formatDatToolSchema = FormatDatBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type FormatDatToolParams = z.input<typeof formatDatToolSchema>;
 
 const discoverDatCandidatesToolSchema = DiscoverDatCandidatesQueryParams.extend(
 	detailOnlyFormattingSchema.shape,
@@ -691,6 +698,28 @@ export function registerTdTools(
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
 				return handleToolError(error, logger, TOOL_NAMES.LINT_DAT);
+			}
+		},
+	);
+
+	server.tool(
+		TOOL_NAMES.FORMAT_DAT,
+		"Format DAT code with ruff format, with optional dry-run preview",
+		formatDatToolSchema.strict().shape,
+		async (params: FormatDatToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...bodyParams } = params;
+				const result = await tdClient.formatDat(bodyParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatFormatDat(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(error, logger, TOOL_NAMES.FORMAT_DAT);
 			}
 		},
 	);

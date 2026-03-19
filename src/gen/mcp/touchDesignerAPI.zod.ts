@@ -235,6 +235,30 @@ export const LintDatResponse = zod.object({
 
 
 /**
+ * @summary Format DAT code with ruff
+ */
+export const formatDatBodyDryRunDefault = false;
+
+export const FormatDatBody = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/script1\"'),
+  "dryRun": zod.boolean().default(formatDatBodyDryRunDefault).describe('Preview formatting without applying (returns diff).')
+})
+
+export const FormatDatResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "path": zod.string().optional(),
+  "name": zod.string().optional(),
+  "originalText": zod.string().optional(),
+  "formattedText": zod.string().optional(),
+  "changed": zod.boolean().optional(),
+  "diff": zod.string().optional(),
+  "applied": zod.boolean().optional()
+}).optional()
+})
+
+
+/**
  * Discover DAT candidates under a parent, classified by kind (python, glsl, text, data). Agent-friendly endpoint that eliminates N+1 round-trips.
  * @summary Discover DAT candidates for agent workflows
  */

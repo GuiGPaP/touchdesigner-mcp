@@ -10,6 +10,7 @@ export { formatClassDetails, formatClassList } from "./classListFormatter.js";
 export {
 	formatDatText,
 	formatDiscoverDatCandidates,
+	formatFormatDat,
 	formatLintDat,
 	formatSetDatText,
 } from "./datFormatter.js";

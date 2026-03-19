@@ -1,5 +1,6 @@
 import type {
 	DiscoverDatCandidates200Data,
+	FormatDat200Data,
 	GetDatText200Data,
 	LintDat200Data,
 	SetDatText200Data,
@@ -128,6 +129,47 @@ export function formatLintDat(
 
 	return finalizeFormattedText(lines.join("\n"), opts, {
 		context: { path, title: "DAT Lint" },
+		structured: data,
+		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
+	});
+}
+
+export function formatFormatDat(
+	data: FormatDat200Data | undefined,
+	options?: FormatterOpts,
+): string {
+	const opts = mergeFormatterOptions(options);
+	if (!data) {
+		return finalizeFormattedText("Format returned no data.", opts, {
+			context: { title: "DAT Format" },
+		});
+	}
+
+	const path = data.path ?? "(unknown)";
+
+	if (!data.changed) {
+		const text = `\u2713 ${path}: no formatting changes needed`;
+		return finalizeFormattedText(text, opts, {
+			context: { path, title: "DAT Format" },
+			structured: data,
+		});
+	}
+
+	const lines: string[] = [];
+
+	if (data.applied) {
+		lines.push(`\u2713 Formatted ${path}`);
+	} else {
+		lines.push(`${path}: formatting changes available`);
+	}
+
+	if (!data.applied && data.diff) {
+		lines.push("[DRY RUN] Format preview:");
+		lines.push(data.diff);
+	}
+
+	return finalizeFormattedText(lines.join("\n"), opts, {
+		context: { path, title: "DAT Format" },
 		structured: data,
 		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
 	});

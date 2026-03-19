@@ -666,6 +666,50 @@ console.log(preview.data?.remainingDiagnostics);`,
 	{
 		category: "dat",
 		description:
+			"Format DAT code with ruff format. Supports dry-run mode to preview changes without applying.",
+		example: `// Dry-run: preview formatting without applying
+const preview = await formatDat({
+  nodePath: '/project1/script1',
+  dryRun: true,
+});
+console.log(preview.data?.diff);`,
+		functionName: "formatDat",
+		modulePath: `${MODULE_ROOT}/formatDat.ts`,
+		parameters: [
+			{
+				description:
+					"Absolute path to the DAT node (e.g., /project1/script1).",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description:
+					"Preview formatting without applying (returns diff).",
+				name: "dryRun",
+				required: false,
+				type: "boolean",
+			},
+			{
+				description: "Formatter verbosity.",
+				name: "detailLevel",
+				required: false,
+				type: "'minimal' | 'summary' | 'detailed'",
+			},
+			{
+				description: "Output format for automation.",
+				name: "responseFormat",
+				required: false,
+				type: "'json' | 'yaml' | 'markdown'",
+			},
+		],
+		returns:
+			"Original and formatted text, changed flag, unified diff, and applied status.",
+		tool: TOOL_NAMES.FORMAT_DAT,
+	},
+	{
+		category: "dat",
+		description:
 			"Discover DAT candidates under a parent, classified by kind",
 		example: `const candidates = await discoverDatCandidates({
   parentPath: '/project1',

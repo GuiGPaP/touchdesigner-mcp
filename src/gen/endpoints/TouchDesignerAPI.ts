@@ -666,6 +666,28 @@ export type LintDat200 = {
   data?: LintDat200Data;
 };
 
+export type FormatDatBody = {
+  /** Absolute path to the DAT node. e.g., "/project1/script1" */
+  nodePath: string;
+  /** Preview formatting without applying (returns diff). */
+  dryRun?: boolean;
+};
+
+export type FormatDat200Data = {
+  path?: string;
+  name?: string;
+  originalText?: string;
+  formattedText?: string;
+  changed?: boolean;
+  diff?: string;
+  applied?: boolean;
+};
+
+export type FormatDat200 = {
+  success?: boolean;
+  data?: FormatDat200Data;
+};
+
 export type DiscoverDatCandidatesParams = {
 /**
  * Absolute path to the parent. e.g., "/project1"
@@ -1049,6 +1071,20 @@ export const lintDat = (
     }
   
 /**
+ * @summary Format DAT code with ruff
+ */
+export const formatDat = (
+    formatDatBody: BodyType<FormatDatBody>,
+ options?: SecondParameter<typeof customInstance<FormatDat200>>,) => {
+      return customInstance<FormatDat200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-format`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: formatDatBody
+    },
+      options);
+    }
+
+/**
  * Discover DAT candidates under a parent, classified by kind (python, glsl, text, data). Agent-friendly endpoint that eliminates N+1 round-trips.
  * @summary Discover DAT candidates for agent workflows
  */
@@ -1295,6 +1331,7 @@ export type GetNodeErrorsResult = NonNullable<Awaited<ReturnType<typeof getNodeE
 export type GetDatTextResult = NonNullable<Awaited<ReturnType<typeof getDatText>>>
 export type SetDatTextResult = NonNullable<Awaited<ReturnType<typeof setDatText>>>
 export type LintDatResult = NonNullable<Awaited<ReturnType<typeof lintDat>>>
+export type FormatDatResult = NonNullable<Awaited<ReturnType<typeof formatDat>>>
 export type DiscoverDatCandidatesResult = NonNullable<Awaited<ReturnType<typeof discoverDatCandidates>>>
 export type GetNodeParameterSchemaResult = NonNullable<Awaited<ReturnType<typeof getNodeParameterSchema>>>
 export type CompleteOpPathsResult = NonNullable<Awaited<ReturnType<typeof completeOpPaths>>>

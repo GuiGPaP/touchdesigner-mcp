@@ -157,3 +157,7 @@ CLAUDE.md
 .mcpregistry_github_token
 .mcpregistry_registry_token
 .serena
+
+# Python build artifacts
+src/touchdesigner_mcp.egg-info/
+uv.lock
