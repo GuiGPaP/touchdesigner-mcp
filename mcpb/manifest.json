@@ -78,6 +78,18 @@
     {
       "name": "update_td_node_parameters",
       "description": "Update parameter values for TouchDesigner nodes"
+    },
+    {
+      "name": "search_td_assets",
+      "description": "Search the catalogue of reusable TouchDesigner assets (offline, no TD connection needed)"
+    },
+    {
+      "name": "get_td_asset",
+      "description": "Get detailed information about a specific TouchDesigner asset by ID (offline)"
+    },
+    {
+      "name": "deploy_td_asset",
+      "description": "Deploy a reusable .tox asset into the running TouchDesigner project"
     }
   ],
   "prompts": [

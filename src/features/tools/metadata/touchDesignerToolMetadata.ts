@@ -81,8 +81,7 @@ console.log(caps.lint_dat, caps.tools.ruff.version);`,
 				type: "'json' | 'yaml' | 'markdown'",
 			},
 		],
-		returns:
-			"Capabilities report with feature flags and tool versions.",
+		returns: "Capabilities report with feature flags and tool versions.",
 		tool: TOOL_NAMES.GET_CAPABILITIES,
 	},
 	{
@@ -550,8 +549,7 @@ console.log(text.data?.text);`,
 		modulePath: `${MODULE_ROOT}/getDatText.ts`,
 		parameters: [
 			{
-				description:
-					"Absolute path to the DAT (e.g., /project1/text1).",
+				description: "Absolute path to the DAT (e.g., /project1/text1).",
 				name: "nodePath",
 				required: true,
 				type: "string",
@@ -626,15 +624,13 @@ console.log(preview.data?.remainingDiagnostics);`,
 		modulePath: `${MODULE_ROOT}/lintDat.ts`,
 		parameters: [
 			{
-				description:
-					"Absolute path to the DAT node (e.g., /project1/script1).",
+				description: "Absolute path to the DAT node (e.g., /project1/script1).",
 				name: "nodePath",
 				required: true,
 				type: "string",
 			},
 			{
-				description:
-					"If true, apply auto-fixable corrections to the DAT.",
+				description: "If true, apply auto-fixable corrections to the DAT.",
 				name: "fix",
 				required: false,
 				type: "boolean",
@@ -665,8 +661,7 @@ console.log(preview.data?.remainingDiagnostics);`,
 	},
 	{
 		category: "dat",
-		description:
-			"Typecheck DAT code with pyright using td.pyi stubs",
+		description: "Typecheck DAT code with pyright using td.pyi stubs",
 		example: `const result = await typecheckDat({ nodePath: '/project1/script1' });\nconsole.log(result.data?.diagnostics);`,
 		functionName: "typecheckDat",
 		modulePath: `${MODULE_ROOT}/typecheckDat.ts`,
@@ -708,15 +703,13 @@ console.log(preview.data?.diff);`,
 		modulePath: `${MODULE_ROOT}/formatDat.ts`,
 		parameters: [
 			{
-				description:
-					"Absolute path to the DAT node (e.g., /project1/script1).",
+				description: "Absolute path to the DAT node (e.g., /project1/script1).",
 				name: "nodePath",
 				required: true,
 				type: "string",
 			},
 			{
-				description:
-					"Preview formatting without applying (returns diff).",
+				description: "Preview formatting without applying (returns diff).",
 				name: "dryRun",
 				required: false,
 				type: "boolean",
@@ -750,8 +743,7 @@ console.log(result.data?.valid, result.data?.format);`,
 		modulePath: `${MODULE_ROOT}/validateJsonDat.ts`,
 		parameters: [
 			{
-				description:
-					"Absolute path to the DAT node (e.g., /project1/data1).",
+				description: "Absolute path to the DAT node (e.g., /project1/data1).",
 				name: "nodePath",
 				required: true,
 				type: "string",
@@ -824,8 +816,7 @@ console.log(report.data?.summary);`,
 			"Combines discover_dat_candidates + lint_dat in a single call. Read-only (no fix/dry-run).",
 		parameters: [
 			{
-				description:
-					"Absolute path to the parent (e.g., /project1).",
+				description: "Absolute path to the parent (e.g., /project1).",
 				name: "parentPath",
 				required: true,
 				type: "string",
@@ -837,8 +828,7 @@ console.log(report.data?.summary);`,
 				type: "string",
 			},
 			{
-				description:
-					"Filter by DAT kind: python, glsl, text, data, or any.",
+				description: "Filter by DAT kind: python, glsl, text, data, or any.",
 				name: "purpose",
 				required: false,
 				type: "'python' | 'glsl' | 'text' | 'data' | 'any'",
@@ -868,8 +858,7 @@ console.log(report.data?.summary);`,
 	},
 	{
 		category: "dat",
-		description:
-			"Discover DAT candidates under a parent, classified by kind",
+		description: "Discover DAT candidates under a parent, classified by kind",
 		example: `const candidates = await discoverDatCandidates({
   parentPath: '/project1',
   purpose: 'python',
@@ -881,8 +870,7 @@ console.log(candidates.data?.candidates);`,
 			"Agent-friendly endpoint that eliminates N+1 round-trips when searching for DATs.",
 		parameters: [
 			{
-				description:
-					"Absolute path to the parent (e.g., /project1).",
+				description: "Absolute path to the parent (e.g., /project1).",
 				name: "parentPath",
 				required: true,
 				type: "string",
@@ -894,8 +882,7 @@ console.log(candidates.data?.candidates);`,
 				type: "boolean",
 			},
 			{
-				description:
-					"Filter by DAT kind: python, glsl, text, data, or any.",
+				description: "Filter by DAT kind: python, glsl, text, data, or any.",
 				name: "purpose",
 				required: false,
 				type: "'python' | 'glsl' | 'text' | 'data' | 'any'",
@@ -919,8 +906,7 @@ console.log(candidates.data?.candidates);`,
 	},
 	{
 		category: "helpers",
-		description:
-			"Create a Geometry COMP with In/Out operators inside it",
+		description: "Create a Geometry COMP with In/Out operators inside it",
 		example: `await createGeometryComp({
   parentPath: '/project1',
   name: 'geo1',
@@ -954,8 +940,7 @@ console.log(candidates.data?.candidates);`,
 				type: "number",
 			},
 			{
-				description:
-					"Whether to use POP (point) topology instead of SOP.",
+				description: "Whether to use POP (point) topology instead of SOP.",
 				name: "pop",
 				required: false,
 				type: "boolean",
@@ -973,7 +958,8 @@ console.log(candidates.data?.candidates);`,
 				type: "'json' | 'yaml' | 'markdown'",
 			},
 		],
-		returns: "Created geometry COMP details including path and child operators.",
+		returns:
+			"Created geometry COMP details including path and child operators.",
 		tool: TOOL_NAMES.CREATE_GEOMETRY_COMP,
 	},
 	{
@@ -1048,15 +1034,13 @@ console.log(candidates.data?.candidates);`,
 		modulePath: `${MODULE_ROOT}/configureInstancing.ts`,
 		parameters: [
 			{
-				description:
-					"Path to the Geometry COMP (e.g., /project1/geo1).",
+				description: "Path to the Geometry COMP (e.g., /project1/geo1).",
 				name: "geoPath",
 				required: true,
 				type: "string",
 			},
 			{
-				description:
-					"Name of the operator providing instance data.",
+				description: "Name of the operator providing instance data.",
 				name: "instanceOpName",
 				required: true,
 				type: "string",
@@ -1103,8 +1087,18 @@ console.log(candidates.data?.candidates);`,
 		functionName: "getNodeParameterSchema",
 		modulePath: `${MODULE_ROOT}/getNodeParameterSchema.ts`,
 		parameters: [
-			{ description: "Absolute path to the node.", name: "nodePath", required: true, type: "string" },
-			{ description: "Glob pattern to filter parameter names.", name: "pattern", required: false, type: "string" },
+			{
+				description: "Absolute path to the node.",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Glob pattern to filter parameter names.",
+				name: "pattern",
+				required: false,
+				type: "string",
+			},
 		],
 		returns: "Parameter schema list with types, ranges, menus, and defaults.",
 		tool: TOOL_NAMES.GET_NODE_PARAMETER_SCHEMA,
@@ -1117,9 +1111,24 @@ console.log(candidates.data?.candidates);`,
 		functionName: "completeOpPaths",
 		modulePath: `${MODULE_ROOT}/completeOpPaths.ts`,
 		parameters: [
-			{ description: "Absolute path to the context node.", name: "contextNodePath", required: true, type: "string" },
-			{ description: "Prefix to complete.", name: "prefix", required: false, type: "string" },
-			{ description: "Maximum results.", name: "limit", required: false, type: "number" },
+			{
+				description: "Absolute path to the context node.",
+				name: "contextNodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Prefix to complete.",
+				name: "prefix",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Maximum results.",
+				name: "limit",
+				required: false,
+				type: "number",
+			},
 		],
 		returns: "Matching operator paths with relative references.",
 		tool: TOOL_NAMES.COMPLETE_OP_PATHS,
@@ -1132,10 +1141,30 @@ console.log(candidates.data?.candidates);`,
 		functionName: "getChopChannels",
 		modulePath: `${MODULE_ROOT}/getChopChannels.ts`,
 		parameters: [
-			{ description: "Absolute path to the CHOP.", name: "nodePath", required: true, type: "string" },
-			{ description: "Glob pattern to filter channel names.", name: "pattern", required: false, type: "string" },
-			{ description: "Include min/max/avg statistics.", name: "includeStats", required: false, type: "boolean" },
-			{ description: "Maximum channels to return.", name: "limit", required: false, type: "number" },
+			{
+				description: "Absolute path to the CHOP.",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Glob pattern to filter channel names.",
+				name: "pattern",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Include min/max/avg statistics.",
+				name: "includeStats",
+				required: false,
+				type: "boolean",
+			},
+			{
+				description: "Maximum channels to return.",
+				name: "limit",
+				required: false,
+				type: "number",
+			},
 		],
 		returns: "Channel names and optional statistics.",
 		tool: TOOL_NAMES.GET_CHOP_CHANNELS,
@@ -1148,24 +1177,53 @@ console.log(candidates.data?.candidates);`,
 		functionName: "getDatTableInfo",
 		modulePath: `${MODULE_ROOT}/getDatTableInfo.ts`,
 		parameters: [
-			{ description: "Absolute path to the table DAT.", name: "nodePath", required: true, type: "string" },
-			{ description: "Maximum preview rows.", name: "maxPreviewRows", required: false, type: "number" },
-			{ description: "Truncate cells longer than this.", name: "maxCellChars", required: false, type: "number" },
+			{
+				description: "Absolute path to the table DAT.",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Maximum preview rows.",
+				name: "maxPreviewRows",
+				required: false,
+				type: "number",
+			},
+			{
+				description: "Truncate cells longer than this.",
+				name: "maxCellChars",
+				required: false,
+				type: "number",
+			},
 		],
 		returns: "Table dimensions and sample data.",
 		tool: TOOL_NAMES.GET_DAT_TABLE_INFO,
 	},
 	{
 		category: "state",
-		description:
-			"Get extension classes, methods, and properties for a COMP.",
+		description: "Get extension classes, methods, and properties for a COMP.",
 		example: `await getCompExtensions({ compPath: "/project1/base1", includeDocs: true });`,
 		functionName: "getCompExtensions",
 		modulePath: `${MODULE_ROOT}/getCompExtensions.ts`,
 		parameters: [
-			{ description: "Absolute path to the COMP.", name: "compPath", required: true, type: "string" },
-			{ description: "Include method docstrings.", name: "includeDocs", required: false, type: "boolean" },
-			{ description: "Maximum methods per extension.", name: "maxMethods", required: false, type: "number" },
+			{
+				description: "Absolute path to the COMP.",
+				name: "compPath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Include method docstrings.",
+				name: "includeDocs",
+				required: false,
+				type: "boolean",
+			},
+			{
+				description: "Maximum methods per extension.",
+				name: "maxMethods",
+				required: false,
+				type: "number",
+			},
 		],
 		returns: "Extension method and property listings.",
 		tool: TOOL_NAMES.GET_COMP_EXTENSIONS,
@@ -1178,10 +1236,30 @@ console.log(candidates.data?.candidates);`,
 		functionName: "indexTdProject",
 		modulePath: `${MODULE_ROOT}/indexTdProject.ts`,
 		parameters: [
-			{ description: "Root operator path.", name: "rootPath", required: false, type: "string" },
-			{ description: "Maximum depth for findChildren.", name: "maxDepth", required: false, type: "number" },
-			{ description: "Hard cap on operators scanned.", name: "opLimit", required: false, type: "number" },
-			{ description: "Index detail level: compact or full.", name: "mode", required: false, type: "string" },
+			{
+				description: "Root operator path.",
+				name: "rootPath",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Maximum depth for findChildren.",
+				name: "maxDepth",
+				required: false,
+				type: "number",
+			},
+			{
+				description: "Hard cap on operators scanned.",
+				name: "opLimit",
+				required: false,
+				type: "number",
+			},
+			{
+				description: "Index detail level: compact or full.",
+				name: "mode",
+				required: false,
+				type: "string",
+			},
 		],
 		returns: "Markdown index with stats, warnings, and truncation status.",
 		tool: TOOL_NAMES.INDEX_TD_PROJECT,
@@ -1194,11 +1272,130 @@ console.log(candidates.data?.candidates);`,
 		functionName: "getTdContext",
 		modulePath: `${MODULE_ROOT}/getTdContext.ts`,
 		parameters: [
-			{ description: "Absolute path to the target node.", name: "nodePath", required: true, type: "string" },
-			{ description: "Facets to include (omit for all).", name: "include", required: false, type: "string[]" },
+			{
+				description: "Absolute path to the target node.",
+				name: "nodePath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Facets to include (omit for all).",
+				name: "include",
+				required: false,
+				type: "string[]",
+			},
 		],
 		returns: "Aggregated facets with per-facet warnings.",
 		tool: TOOL_NAMES.GET_TD_CONTEXT,
+	},
+	{
+		category: "helpers",
+		description:
+			"Search the catalogue of reusable TouchDesigner assets. Works offline — no TD connection needed.",
+		example: `const results = await searchTdAssets({ query: "debug", tags: ["top"] });
+console.log(results);`,
+		functionName: "searchTdAssets",
+		modulePath: `${MODULE_ROOT}/searchTdAssets.ts`,
+		parameters: [
+			{
+				description:
+					"Search query — matches title, description, tags, aliases.",
+				name: "query",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Filter by tags (OR logic).",
+				name: "tags",
+				required: false,
+				type: "string[]",
+			},
+			{
+				description: "Max results to return.",
+				name: "maxResults",
+				required: false,
+				type: "number",
+			},
+			{
+				description: "Filter assets compatible with this TD version.",
+				name: "minTdVersion",
+				required: false,
+				type: "string",
+			},
+		],
+		returns:
+			"List of matching assets with ID, title, description, tags, kind, and source.",
+		tool: TOOL_NAMES.SEARCH_TD_ASSETS,
+	},
+	{
+		category: "helpers",
+		description:
+			"Get detailed info about a specific TouchDesigner asset by ID. Works offline.",
+		example: `const asset = await getTdAsset({ id: "null-debug", includeReadme: true });
+console.log(asset);`,
+		functionName: "getTdAsset",
+		modulePath: `${MODULE_ROOT}/getTdAsset.ts`,
+		parameters: [
+			{
+				description: "Asset ID to retrieve.",
+				name: "id",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Include README in response.",
+				name: "includeReadme",
+				required: false,
+				type: "boolean",
+			},
+		],
+		returns:
+			"Full asset manifest with deploy config, provenance, version, and optional README.",
+		tool: TOOL_NAMES.GET_TD_ASSET,
+	},
+	{
+		category: "helpers",
+		description:
+			"Deploy a reusable .tox asset into the running TouchDesigner project.",
+		example: `const result = await deployTdAsset({ id: "null-debug", parentPath: "/project1" });
+console.log(result.path, result.status);`,
+		functionName: "deployTdAsset",
+		modulePath: `${MODULE_ROOT}/deployTdAsset.ts`,
+		parameters: [
+			{
+				description: "Asset ID to deploy.",
+				name: "id",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Parent path where the asset will be created.",
+				name: "parentPath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Custom name for the container (overrides default).",
+				name: "containerName",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Dry run — show plan without deploying.",
+				name: "dryRun",
+				required: false,
+				type: "boolean",
+			},
+			{
+				description: "Force redeploy even if same version exists.",
+				name: "force",
+				required: false,
+				type: "boolean",
+			},
+		],
+		returns:
+			"Deploy result with status (deployed, already_exists, update_available, conflict, dry_run) and target path.",
+		tool: TOOL_NAMES.DEPLOY_TD_ASSET,
 	},
 ];
 

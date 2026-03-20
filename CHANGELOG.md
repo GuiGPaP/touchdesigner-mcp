@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Epic 9 — Reusable TD Asset Catalogue**: Added a full asset management system for deploying `.tox` components into TouchDesigner projects.
+  - Three new MCP tools: `search_td_assets`, `get_td_asset`, `deploy_td_asset`
+  - Asset manifest schema (`data/td-assets/schema.json`) with two kinds: `tox-asset` (deployable) and `external-ref` (documentation-only)
+  - Three built-in assets: `null-debug`, `resolution-monitor`, `simple-feedback`
+  - Asset registry with multi-path discovery (built-in, user, project) and fail-soft loading
+  - Deploy system: Python script generation with idempotence (version+sha256), collision detection, dry-run, force redeploy, and rollback
+  - Trust enforcement: only built-in assets are deployable in Phase 1
+  - Cross-platform user asset paths (Windows `%APPDATA%`, macOS `~/Library/Application Support`, Linux `$XDG_CONFIG_HOME`)
+  - `scripts/syncTdAssets.ts` for SHA-256 integrity verification (`--check` for CI, `--fix` to update manifests)
+  - Build pipeline copies `data/` into `dist/data/` for npm packaging
+  - Path resolution via `import.meta.url` (ESM-compatible): env override > dist/data > data/
+
 ## [1.4.5] - 2026-03-06
 
 ### Added

@@ -57,6 +57,18 @@ Tools allow AI agents to perform actions in TouchDesigner.
 | `get_chop_channels`     | Gets CHOP channel names and optional statistics.                   |
 | `get_dat_table_info`    | Gets table DAT dimensions and content sample.                      |
 | `get_comp_extensions`   | Gets COMP extension methods and properties.                        |
+| `describe_td_tools`     | Generates a filesystem-style manifest of available tools.          |
+| `get_capabilities`      | Gets available capabilities and tool versions from the server.     |
+| `typecheck_dat`         | Typechecks DAT code with pyright using td.pyi stubs.               |
+| `format_dat`            | Auto-formats DAT code with ruff, optional dry-run.                 |
+| `validate_glsl_dat`     | Validates GLSL shader code in a DAT operator.                      |
+| `validate_json_dat`     | Validates JSON/YAML content in a DAT operator.                     |
+| `lint_dats`             | Batch lints all Python DATs under a parent path.                   |
+| `index_td_project`      | Builds a Markdown project index for code completion.               |
+| `get_td_context`        | Aggregates contextual info for a single node.                      |
+| `search_td_assets`      | Searches the catalogue of reusable TD assets (offline).            |
+| `get_td_asset`          | Gets detailed info about a specific TD asset by ID (offline).      |
+| `deploy_td_asset`       | Deploys a reusable .tox asset into the running TD project.         |
 
 ### Prompts
 

@@ -70,7 +70,7 @@
 	"scripts": {
 		"build": "run-s build:*",
 		"build:gen": "npm run gen",
-		"build:dist": "tsc && shx chmod +x dist/*.js && shx cp -r src/features/tools/presenter/templates dist/features/tools/presenter/",
+		"build:dist": "tsc && shx chmod +x dist/*.js && shx cp -r src/features/tools/presenter/templates dist/features/tools/presenter/ && shx cp -r data dist/data",
 		"build:mcpb": "npx @anthropic-ai/mcpb pack mcpb/ touchdesigner-mcp.mcpb",
 		"lint": "run-p lint:*",
 		"lint:biome": "biome check",
@@ -90,6 +90,7 @@
 		"version": "run-p version:*",
 		"version:api": "node ./scripts/syncApiServerVersions.ts",
 		"version:mcp": "node ./scripts/syncMcpServerVersions.ts",
+		"sync:assets": "node scripts/syncTdAssets.ts",
 		"gen": "run-s gen:*",
 		"gen:webserver": "openapi-generator-cli generate -i ./src/api/index.yml -g python-flask -o ./td/modules/td_server -t ./src/templates/python-flask",
 		"gen:handlers": "node td/genHandlers.js",

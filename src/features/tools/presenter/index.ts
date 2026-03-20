@@ -5,9 +5,9 @@
  */
 
 export { formatCapabilities } from "./capabilitiesFormatter.js";
-export { formatProjectIndex, formatTdContext } from "./completionFormatter.js";
 export type { ClassDetailsData, ClassListData } from "./classListFormatter.js";
 export { formatClassDetails, formatClassList } from "./classListFormatter.js";
+export { formatProjectIndex, formatTdContext } from "./completionFormatter.js";
 export {
 	formatDatText,
 	formatDiscoverDatCandidates,
@@ -24,6 +24,13 @@ export {
 	formatCreateFeedbackLoop,
 	formatCreateGeometryComp,
 } from "./helperFormatter.js";
+export {
+	formatChopChannels,
+	formatCompExtensions,
+	formatCompleteOpPaths,
+	formatDatTableInfo,
+	formatParameterSchema,
+} from "./introspectionFormatter.js";
 export { formatModuleHelp } from "./moduleHelpFormatter.js";
 export type { NodeDetailsData } from "./nodeDetailsFormatter.js";
 export { formatNodeDetails } from "./nodeDetailsFormatter.js";
@@ -40,11 +47,9 @@ export {
 } from "./operationFormatter.js";
 export type { ScriptResultData } from "./scriptResultFormatter.js";
 export { formatScriptResult } from "./scriptResultFormatter.js";
-export { formatToolMetadata } from "./toolMetadataFormatter.js";
 export {
-	formatChopChannels,
-	formatCompExtensions,
-	formatCompleteOpPaths,
-	formatDatTableInfo,
-	formatParameterSchema,
-} from "./introspectionFormatter.js";
+	formatAssetDetail,
+	formatAssetSearchResults,
+	formatDeployResult,
+} from "./templateFormatter.js";
+export { formatToolMetadata } from "./toolMetadataFormatter.js";
