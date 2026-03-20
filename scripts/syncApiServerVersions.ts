@@ -42,7 +42,7 @@ writeTextFile("td/modules/utils/version.py", (contents) => {
 });
 
 writeTextFile("src/api/index.yml", (contents) => {
-	return contents.replace(/version:\s*[\d.]+/, `version: ${packageVersion}`);
+	return contents.replace(/version:\s*\S+/, `version: ${packageVersion}`);
 });
 
 console.log(

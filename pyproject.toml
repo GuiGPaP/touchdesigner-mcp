@@ -33,6 +33,7 @@ Issues = "https://github.com/8beeeaaat/touchdesigner-mcp/issues"
 line-length = 88
 target-version = "py39"
 indent-width = 4
+src = ["td/modules"]
 
 # Exclude auto-generated and third-party code
 extend-exclude = [
@@ -76,16 +77,14 @@ unfixable = []
 
 # Sort imports alphabetically
 [tool.ruff.lint.isort]
-combine-as-imports = true
-force-sort-within-sections = true
-known-first-party = ["mcp", "utils"]
+known-first-party = ["mcp", "td", "utils"]
 
 [tool.ruff.format]
 # Use double quotes for strings (to match Biome's JavaScript formatting)
 quote-style = "double"
 
 # Indent with tabs to match Biome
-indent-style = "tab"
+indent-style = "space"
 
 # Like Black, use double quotes for docstrings
 docstring-code-format = true
