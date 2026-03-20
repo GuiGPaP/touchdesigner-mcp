@@ -5,6 +5,7 @@ import { McpLogger } from "../core/logger.js";
 import type { Result } from "../core/result.js";
 import { MCP_SERVER_VERSION } from "../core/version.js";
 import { registerPrompts } from "../features/prompts/index.js";
+import { registerResources } from "../features/resources/index.js";
 import { registerTools } from "../features/tools/index.js";
 import { createTouchDesignerClient } from "../tdClient/index.js";
 import type { TouchDesignerClient } from "../tdClient/touchDesignerClient.js";
@@ -16,6 +17,7 @@ import { ConnectionManager } from "./connectionManager.js";
 export interface TouchDesignerCapabilities {
 	logging: Record<string, never>;
 	prompts: Record<string, never>;
+	resources: Record<string, never>;
 	tools: Record<string, never>;
 }
 
@@ -101,6 +103,7 @@ export class TouchDesignerServer {
 	 */
 	private registerAllFeatures(): void {
 		registerPrompts(this.server, this.logger);
+		registerResources(this.server, this.logger);
 		registerTools(this.server, this.logger, this.tdClient);
 	}
 }

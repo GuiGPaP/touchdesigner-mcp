@@ -48,6 +48,11 @@ export const TOOL_NAMES = {
 
 export const REFERENCE_COMMENT = `Check reference resources: ${TD_PYTHON_CLASS_REFERENCE_INDEX_URL}`;
 
+export const RESOURCE_URIS = {
+	MODULES_INDEX: "td://modules",
+	MODULE_DETAIL: "td://modules/{id}",
+} as const;
+
 export const PROMPT_NAMES = {
 	CHECK_NODE_ERRORS: "Check node errors",
 	NODE_CONNECTION: "Node connection",

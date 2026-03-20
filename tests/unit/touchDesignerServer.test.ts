@@ -43,6 +43,9 @@ describe("TouchDesignerServer", () => {
 	it("should initialize dependencies in the correct order", async () => {
 		// テスト前にモジュールをインポート
 		const promptsModule = await import("../../src/features/prompts/index.js");
+		const resourcesModule = await import(
+			"../../src/features/resources/index.js"
+		);
 		const toolsModule = await import("../../src/features/tools/index.js");
 
 		new TouchDesignerServer();
@@ -51,6 +54,7 @@ describe("TouchDesignerServer", () => {
 
 		// モック関数が呼ばれたか確認
 		expect(promptsModule.registerPrompts).toHaveBeenCalled();
+		expect(resourcesModule.registerResources).toHaveBeenCalled();
 		expect(toolsModule.registerTools).toHaveBeenCalled();
 	});
 });
