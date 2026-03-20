@@ -53,7 +53,7 @@ export function handleToolError(
 
 	if (serverMode?.mode === "docs-only") {
 		errorMessage +=
-			"\n\n💡 Mode: docs-only — static resources (td://modules) are available offline.";
+			"\n\n💡 Mode: docs-only — static resources (td://modules, td://operators) are available offline.";
 	}
 
 	return {

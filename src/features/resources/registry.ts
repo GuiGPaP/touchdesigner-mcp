@@ -52,8 +52,7 @@ export class KnowledgeRegistry {
 
 	/**
 	 * Search entries by query string.
-	 * Matches against: id, aliases, searchKeywords, content.summary,
-	 * payload.canonicalName, payload.members[].name
+	 * Kind-aware: searches relevant payload fields per entry type.
 	 */
 	search(query: string, maxResults = 20): TDKnowledgeEntry[] {
 		const q = query.trim().toLowerCase();
@@ -70,9 +69,27 @@ export class KnowledgeRegistry {
 	getIndex(): Array<{ id: string; title: string; kind: string }> {
 		return [...this.entries.values()].map((e) => ({
 			id: e.id,
-			title: e.title,
 			kind: e.kind,
+			title: e.title,
 		}));
+	}
+
+	/**
+	 * Return a lightweight index filtered to python-module entries.
+	 */
+	getModuleIndex(): Array<{ id: string; title: string; kind: string }> {
+		return [...this.entries.values()]
+			.filter((e) => e.kind === "python-module")
+			.map((e) => ({ id: e.id, kind: e.kind, title: e.title }));
+	}
+
+	/**
+	 * Return a lightweight index filtered to operator entries.
+	 */
+	getOperatorIndex(): Array<{ id: string; title: string; kind: string }> {
+		return [...this.entries.values()]
+			.filter((e) => e.kind === "operator")
+			.map((e) => ({ id: e.id, kind: e.kind, title: e.title }));
 	}
 }
 
@@ -81,10 +98,22 @@ function matchesQuery(entry: TDKnowledgeEntry, query: string): boolean {
 		entry.id,
 		entry.title,
 		entry.content.summary,
-		entry.payload.canonicalName,
 		...(entry.aliases ?? []),
 		...entry.searchKeywords,
-		...entry.payload.members.map((m) => m.name),
 	];
+
+	if (entry.kind === "python-module") {
+		haystacks.push(entry.payload.canonicalName);
+		for (const m of entry.payload.members) {
+			haystacks.push(m.name);
+		}
+	} else if (entry.kind === "operator") {
+		haystacks.push(entry.payload.opType);
+		haystacks.push(entry.payload.opFamily);
+		for (const p of entry.payload.parameters) {
+			haystacks.push(p.name);
+		}
+	}
+
 	return haystacks.some((h) => h.toLowerCase().includes(query));
 }

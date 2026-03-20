@@ -1,11 +1,8 @@
-import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import {
-	ErrorCode,
-	McpError,
-} from "@modelcontextprotocol/sdk/types.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { ILogger } from "../../../core/logger.js";
+import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import { RESOURCE_URIS } from "../../../core/constants.js";
+import type { ILogger } from "../../../core/logger.js";
 import type { KnowledgeRegistry } from "../registry.js";
 
 /**
@@ -19,19 +16,19 @@ export function registerKnowledgeResources(
 	logger: ILogger,
 	registry: KnowledgeRegistry,
 ): void {
-	// Static resource: module index
+	// Static resource: module index (python-module entries only)
 	server.registerResource(
 		"TD Module Index",
 		RESOURCE_URIS.MODULES_INDEX,
 		{ mimeType: "application/json" },
 		() => {
-			const index = registry.getIndex();
+			const index = registry.getModuleIndex();
 			return {
 				contents: [
 					{
-						uri: RESOURCE_URIS.MODULES_INDEX,
 						mimeType: "application/json",
-						text: JSON.stringify({ version: "1", entries: index }),
+						text: JSON.stringify({ entries: index, version: "1" }),
+						uri: RESOURCE_URIS.MODULES_INDEX,
 					},
 				],
 			};
@@ -39,18 +36,15 @@ export function registerKnowledgeResources(
 	);
 
 	// Template resource: module detail
-	const moduleTemplate = new ResourceTemplate(
-		RESOURCE_URIS.MODULE_DETAIL,
-		{
-			list: async () => ({
-				resources: registry.getIndex().map((e) => ({
-					uri: `td://modules/${e.id}`,
-					name: e.title,
-					mimeType: "application/json",
-				})),
-			}),
-		},
-	);
+	const moduleTemplate = new ResourceTemplate(RESOURCE_URIS.MODULE_DETAIL, {
+		list: async () => ({
+			resources: registry.getModuleIndex().map((e) => ({
+				mimeType: "application/json",
+				name: e.title,
+				uri: `td://modules/${e.id}`,
+			})),
+		}),
+	});
 
 	server.registerResource(
 		"TD Module Detail",
@@ -62,18 +56,15 @@ export function registerKnowledgeResources(
 		(uri, variables) => {
 			const id = variables.id as string;
 			const entry = registry.getById(id);
-			if (!entry) {
-				throw new McpError(
-					ErrorCode.InvalidParams,
-					`Module "${id}" not found`,
-				);
+			if (!entry || entry.kind !== "python-module") {
+				throw new McpError(ErrorCode.InvalidParams, `Module "${id}" not found`);
 			}
 			return {
 				contents: [
 					{
-						uri: uri.href,
 						mimeType: "application/json",
-						text: JSON.stringify({ version: "1", entry }),
+						text: JSON.stringify({ entry, version: "1" }),
+						uri: uri.href,
 					},
 				],
 			};
