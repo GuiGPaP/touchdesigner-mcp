@@ -3,6 +3,7 @@ import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import type { ILogger } from "../core/logger.js";
 import { McpLogger } from "../core/logger.js";
 import type { Result } from "../core/result.js";
+import { ServerMode } from "../core/serverMode.js";
 import { MCP_SERVER_VERSION } from "../core/version.js";
 import { registerPrompts } from "../features/prompts/index.js";
 import { registerResources } from "../features/resources/index.js";
@@ -28,6 +29,7 @@ export class TouchDesignerServer {
 	readonly server: McpServer;
 	readonly logger: ILogger;
 	readonly tdClient: TouchDesignerClient;
+	readonly serverMode: ServerMode;
 	private readonly connectionManager: ConnectionManager;
 
 	/**
@@ -48,8 +50,12 @@ export class TouchDesignerServer {
 			},
 		);
 		this.logger = new McpLogger(this.server);
+		this.serverMode = new ServerMode();
 
-		this.tdClient = createTouchDesignerClient({ logger: this.logger });
+		this.tdClient = createTouchDesignerClient({
+			logger: this.logger,
+			serverMode: this.serverMode,
+		});
 
 		this.connectionManager = new ConnectionManager(this.server, this.logger);
 
@@ -104,6 +110,6 @@ export class TouchDesignerServer {
 	private registerAllFeatures(): void {
 		registerPrompts(this.server, this.logger);
 		registerResources(this.server, this.logger);
-		registerTools(this.server, this.logger, this.tdClient);
+		registerTools(this.server, this.logger, this.tdClient, this.serverMode);
 	}
 }

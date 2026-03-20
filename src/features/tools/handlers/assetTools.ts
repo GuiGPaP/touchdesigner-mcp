@@ -3,6 +3,7 @@ import { z } from "zod";
 import { TOOL_NAMES } from "../../../core/constants.js";
 import { handleToolError } from "../../../core/errorHandling.js";
 import type { ILogger } from "../../../core/logger.js";
+import type { ServerMode } from "../../../core/serverMode.js";
 import type { TouchDesignerClient } from "../../../tdClient/touchDesignerClient.js";
 import {
 	generateDeployScript,
@@ -79,6 +80,7 @@ export function registerAssetTools(
 	logger: ILogger,
 	tdClient: TouchDesignerClient,
 	registry: AssetRegistry,
+	serverMode: ServerMode,
 ): void {
 	server.tool(
 		TOOL_NAMES.SEARCH_TD_ASSETS,
@@ -107,7 +109,13 @@ export function registerAssetTools(
 				});
 				return { content: [{ text, type: "text" as const }] };
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.SEARCH_TD_ASSETS);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.SEARCH_TD_ASSETS,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -138,7 +146,13 @@ export function registerAssetTools(
 				});
 				return { content: [{ text, type: "text" as const }] };
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.GET_TD_ASSET);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.GET_TD_ASSET,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -298,7 +312,13 @@ export function registerAssetTools(
 				});
 				return { content: [{ text, type: "text" as const }] };
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.DEPLOY_TD_ASSET);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.DEPLOY_TD_ASSET,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);

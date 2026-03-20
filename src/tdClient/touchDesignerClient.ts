@@ -7,6 +7,7 @@ import {
 } from "../core/compatibility.js";
 import type { ILogger } from "../core/logger.js";
 import { createErrorResult, createSuccessResult } from "../core/result.js";
+import type { ServerMode } from "../core/serverMode.js";
 import {
 	MCP_SERVER_VERSION,
 	MIN_COMPATIBLE_API_VERSION,
@@ -14,7 +15,6 @@ import {
 import {
 	completeOpPaths as apiCompleteOpPaths,
 	configureInstancing as apiConfigureInstancing,
-	getCapabilities as apiGetCapabilities,
 	createFeedbackLoop as apiCreateFeedbackLoop,
 	createGeometryComp as apiCreateGeometryComp,
 	createNode as apiCreateNode,
@@ -22,6 +22,8 @@ import {
 	discoverDatCandidates as apiDiscoverDatCandidates,
 	execNodeMethod as apiExecNodeMethod,
 	execPythonScript as apiExecPythonScript,
+	formatDat as apiFormatDat,
+	getCapabilities as apiGetCapabilities,
 	getChopChannels as apiGetChopChannels,
 	getCompExtensions as apiGetCompExtensions,
 	getDatTableInfo as apiGetDatTableInfo,
@@ -31,22 +33,20 @@ import {
 	getNodeErrors as apiGetNodeErrors,
 	getNodeParameterSchema as apiGetNodeParameterSchema,
 	getNodes as apiGetNodes,
+	getTdContext as apiGetTdContext,
 	getTdInfo as apiGetTdInfo,
 	getTdPythonClassDetails as apiGetTdPythonClassDetails,
 	getTdPythonClasses as apiGetTdPythonClasses,
-	formatDat as apiFormatDat,
+	indexTdProject as apiIndexTdProject,
 	lintDat as apiLintDat,
 	lintDats as apiLintDats,
-	validateGlslDat as apiValidateGlslDat,
-	validateJsonDat as apiValidateJsonDat,
 	setDatText as apiSetDatText,
 	typecheckDat as apiTypecheckDat,
 	updateNode as apiUpdateNode,
-	indexTdProject as apiIndexTdProject,
-	getTdContext as apiGetTdContext,
+	validateGlslDat as apiValidateGlslDat,
+	validateJsonDat as apiValidateJsonDat,
 	type CompleteOpPaths200Data,
 	type CompleteOpPathsParams,
-	type GetCapabilities200ResponseData,
 	type ConfigureInstancingRequest,
 	type CreateFeedbackLoopRequest,
 	type CreateGeometryCompRequest,
@@ -56,6 +56,9 @@ import {
 	type DiscoverDatCandidatesParams,
 	type ExecNodeMethodRequest,
 	type ExecPythonScriptRequest,
+	type FormatDat200Data,
+	type FormatDatBody,
+	type GetCapabilities200ResponseData,
 	type GetChopChannels200Data,
 	type GetChopChannelsParams,
 	type GetCompExtensions200Data,
@@ -70,25 +73,23 @@ import {
 	type GetNodeParameterSchema200Data,
 	type GetNodeParameterSchemaParams,
 	type GetNodesParams,
-	type FormatDat200Data,
-	type FormatDatBody,
+	type GetTdContext200Data,
+	type GetTdContextParams,
+	type IndexTdProject200Data,
+	type IndexTdProjectParams,
 	type LintDat200Data,
 	type LintDatBody,
 	type LintDats200Data,
 	type LintDatsBody,
-	type ValidateGlslDat200Data,
-	type ValidateGlslDatBody,
-	type ValidateJsonDat200Data,
-	type ValidateJsonDatBody,
 	type SetDatText200Data,
 	type SetDatTextBody,
 	type TypecheckDat200Data,
 	type TypecheckDatBody,
 	type UpdateNodeRequest,
-	type IndexTdProject200Data,
-	type IndexTdProjectParams,
-	type GetTdContext200Data,
-	type GetTdContextParams,
+	type ValidateGlslDat200Data,
+	type ValidateGlslDatBody,
+	type ValidateJsonDat200Data,
+	type ValidateJsonDatBody,
 } from "../gen/endpoints/TouchDesignerAPI.js";
 
 /**
@@ -135,7 +136,6 @@ export interface ITouchDesignerApi {
 const defaultApiClient: ITouchDesignerApi = {
 	completeOpPaths: apiCompleteOpPaths,
 	configureInstancing: apiConfigureInstancing,
-	getCapabilities: apiGetCapabilities,
 	createFeedbackLoop: apiCreateFeedbackLoop,
 	createGeometryComp: apiCreateGeometryComp,
 	createNode: apiCreateNode,
@@ -143,6 +143,8 @@ const defaultApiClient: ITouchDesignerApi = {
 	discoverDatCandidates: apiDiscoverDatCandidates,
 	execNodeMethod: apiExecNodeMethod,
 	execPythonScript: apiExecPythonScript,
+	formatDat: apiFormatDat,
+	getCapabilities: apiGetCapabilities,
 	getChopChannels: apiGetChopChannels,
 	getCompExtensions: apiGetCompExtensions,
 	getDatTableInfo: apiGetDatTableInfo,
@@ -152,19 +154,18 @@ const defaultApiClient: ITouchDesignerApi = {
 	getNodeErrors: apiGetNodeErrors,
 	getNodeParameterSchema: apiGetNodeParameterSchema,
 	getNodes: apiGetNodes,
+	getTdContext: apiGetTdContext,
 	getTdInfo: apiGetTdInfo,
 	getTdPythonClassDetails: apiGetTdPythonClassDetails,
 	getTdPythonClasses: apiGetTdPythonClasses,
-	formatDat: apiFormatDat,
+	indexTdProject: apiIndexTdProject,
 	lintDat: apiLintDat,
 	lintDats: apiLintDats,
-	validateGlslDat: apiValidateGlslDat,
-	validateJsonDat: apiValidateJsonDat,
 	setDatText: apiSetDatText,
 	typecheckDat: apiTypecheckDat,
 	updateNode: apiUpdateNode,
-	indexTdProject: apiIndexTdProject,
-	getTdContext: apiGetTdContext,
+	validateGlslDat: apiValidateGlslDat,
+	validateJsonDat: apiValidateJsonDat,
 };
 
 export type TdResponse<T> = {
@@ -231,6 +232,7 @@ type CompatibilityNotice = {
 export class TouchDesignerClient {
 	private readonly logger: ILogger;
 	private readonly api: ITouchDesignerApi;
+	private readonly serverMode?: ServerMode;
 	private verifiedCompatibilityError: Error | null;
 	private cachedCompatibilityCheck: boolean;
 	private errorCacheTimestamp: number | null;
@@ -244,10 +246,12 @@ export class TouchDesignerClient {
 		params: {
 			logger?: ILogger;
 			httpClient?: ITouchDesignerApi;
+			serverMode?: ServerMode;
 		} = {},
 	) {
 		this.logger = params.logger || nullLogger;
 		this.api = params.httpClient || defaultApiClient;
+		this.serverMode = params.serverMode;
 		this.verifiedCompatibilityError = null;
 		this.cachedCompatibilityCheck = false;
 		this.errorCacheTimestamp = null;
@@ -462,10 +466,12 @@ export class TouchDesignerClient {
 	 * Get server capabilities and tool versions
 	 */
 	async getCapabilities() {
-		return this.apiCall("Getting capabilities", () =>
-			this.api.getCapabilities() as Promise<
-				TdResponse<GetCapabilities200ResponseData | undefined>
-			>,
+		return this.apiCall(
+			"Getting capabilities",
+			() =>
+				this.api.getCapabilities() as Promise<
+					TdResponse<GetCapabilities200ResponseData | undefined>
+				>,
 		);
 	}
 
@@ -819,10 +825,21 @@ export class TouchDesignerClient {
 		);
 	}
 
+	/**
+	 * Force a fresh compatibility probe, bypassing the error cache.
+	 * Used by get_capabilities for immediate recovery detection.
+	 */
+	async invalidateAndProbe(): Promise<void> {
+		this.invalidateCompatibilityCache("manual probe");
+		this.verifiedCompatibilityError = null;
+		this.errorCacheTimestamp = null;
+		await this.verifyCompatibility();
+	}
+
 	async verifyVersionCompatibility() {
 		let tdInfoResult: Awaited<ReturnType<ITouchDesignerApi["getTdInfo"]>>;
 		try {
-			tdInfoResult = await this.api.getTdInfo();
+			tdInfoResult = await this.api.getTdInfo({ timeout: 5000 });
 		} catch (error) {
 			// Use axios.isAxiosError() for robust network/HTTP error detection
 			// AxiosError includes connection refused, timeout, network errors, etc.
@@ -844,6 +861,9 @@ export class TouchDesignerClient {
 				throw error;
 			}
 
+			// Network error → OFFLINE
+			this.serverMode?.transitionOffline();
+
 			// Handle AxiosError (network/HTTP errors)
 			const rawMessage = error.message || "Unknown network error";
 			const errorMessage = this.formatConnectionError(rawMessage);
@@ -854,6 +874,10 @@ export class TouchDesignerClient {
 			});
 			return createErrorResult(new Error(errorMessage));
 		}
+
+		// HTTP responded (even if success:false) → TD is REACHABLE → ONLINE
+		const tdBuild = tdInfoResult.data?.version ?? null;
+		this.serverMode?.transitionOnline(tdBuild ?? undefined);
 
 		if (!tdInfoResult.success) {
 			const errorMessage = this.formatConnectionError(tdInfoResult.error);

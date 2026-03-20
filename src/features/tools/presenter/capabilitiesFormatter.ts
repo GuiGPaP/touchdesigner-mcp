@@ -5,16 +5,37 @@ import {
 	mergeFormatterOptions,
 } from "./responseFormatter.js";
 
-type FormatterOpts = Pick<FormatterOptions, "detailLevel" | "responseFormat">;
+type ModeInfo = { mode: string; tdBuild: string | null };
+type FormatterOpts = Pick<
+	FormatterOptions,
+	"detailLevel" | "responseFormat"
+> & {
+	modeInfo?: ModeInfo;
+};
 
 export function formatCapabilities(
 	data: GetCapabilities200ResponseData | undefined,
 	options?: FormatterOpts,
 ): string {
 	const opts = mergeFormatterOptions(options);
+	const modeInfo = options?.modeInfo;
+
+	// Mode header lines
+	const modeLines: string[] = [];
+	if (modeInfo) {
+		modeLines.push(`Mode: ${modeInfo.mode}`);
+		modeLines.push(`Online: ${modeInfo.mode !== "docs-only"}`);
+		if (modeInfo.tdBuild) modeLines.push(`TD Build: ${modeInfo.tdBuild}`);
+	}
+	const modeHeader = modeLines.length ? `${modeLines.join("\n")}\n` : "";
+
 	if (!data) {
-		return finalizeFormattedText("Capabilities not available.", opts, {
+		const text = `${modeHeader}TD capabilities not available.`;
+		return finalizeFormattedText(text, opts, {
 			context: { title: "Capabilities" },
+			structured: modeInfo
+				? { ...modeInfo, online: modeInfo.mode !== "docs-only" }
+				: undefined,
 		});
 	}
 
@@ -26,6 +47,7 @@ export function formatCapabilities(
 
 	if (opts.detailLevel === "minimal") {
 		const parts: string[] = [];
+		if (modeInfo) parts.push(`mode=${modeInfo.mode}`);
 		parts.push(`lint_dat=${lintDat}`);
 		if (ruff?.installed && ruff.version) {
 			parts.push(`ruff=${ruff.version}`);
@@ -38,7 +60,9 @@ export function formatCapabilities(
 		});
 	}
 
-	const lines: string[] = ["Features:"];
+	const lines: string[] = [];
+	if (modeHeader) lines.push(modeHeader);
+	lines.push("Features:");
 	lines.push(`  lint_dat: ${lintDat}`);
 	lines.push(`  format_dat: ${formatDat}`);
 	lines.push(`  typecheck_dat: ${typecheckDat}`);
@@ -52,7 +76,7 @@ export function formatCapabilities(
 
 	return finalizeFormattedText(lines.join("\n"), opts, {
 		context: { title: "Capabilities" },
-		structured: data,
+		structured: { ...(modeInfo ?? {}), ...data },
 		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
 	});
 }

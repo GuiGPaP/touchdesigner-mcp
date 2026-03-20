@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ILogger } from "../../core/logger.js";
+import type { ServerMode } from "../../core/serverMode.js";
 import type { TouchDesignerClient } from "../../tdClient/index.js";
 import {
 	resolveBuiltinAssetsPath,
@@ -18,8 +19,9 @@ export function registerTools(
 	server: McpServer,
 	logger: ILogger,
 	tdClient: TouchDesignerClient,
+	serverMode: ServerMode,
 ): void {
-	registerTdTools(server, logger, tdClient);
+	registerTdTools(server, logger, tdClient, serverMode);
 
 	// Initialize asset registry with discovered paths
 	const registry = new AssetRegistry(logger);
@@ -42,5 +44,5 @@ export function registerTools(
 
 	registry.loadAll(assetPaths);
 
-	registerAssetTools(server, logger, tdClient, registry);
+	registerAssetTools(server, logger, tdClient, registry, serverMode);
 }

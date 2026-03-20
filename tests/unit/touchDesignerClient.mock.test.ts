@@ -1,6 +1,7 @@
 import { AxiosError } from "axios";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { ILogger } from "../../src/core/logger";
+import { ServerMode } from "../../src/core/serverMode";
 import * as version from "../../src/core/version";
 import * as touchDesignerAPI from "../../src/gen/endpoints/TouchDesignerAPI";
 
@@ -1271,6 +1272,190 @@ describe("TouchDesignerClient with mocks", () => {
 			if (result.success) {
 				expect(result.data.warnings).toContain("channels failed: not a CHOP");
 			}
+		});
+	});
+
+	describe("ServerMode transitions", () => {
+		test("AxiosError → docs-only", async () => {
+			const serverMode = new ServerMode();
+			const axiosError = new AxiosError("connect ECONNREFUSED 127.0.0.1:9981", "ECONNREFUSED");
+
+			const mockHttpClient = {
+				getTdInfo: vi.fn().mockRejectedValue(axiosError),
+			} as Partial<ITouchDesignerApi>;
+
+			const client = new TouchDesignerClient({
+				httpClient: mockHttpClient as ITouchDesignerApi,
+				logger: nullLogger,
+				serverMode,
+			});
+
+			await expect(client.getTdInfo()).rejects.toThrow(/TouchDesigner Connection Failed/);
+			expect(serverMode.mode).toBe("docs-only");
+			expect(serverMode.tdBuild).toBeNull();
+		});
+
+		test("HTTP success compatible → live with tdBuild", async () => {
+			const serverMode = new ServerMode();
+
+			const mockHttpClient = {
+				getTdInfo: vi.fn().mockResolvedValue({
+					data: {
+						mcpApiVersion: "1.3.1",
+						osName: "macOS",
+						osVersion: "12.6.1",
+						server: "TouchDesigner",
+						version: "2023.12345",
+					},
+					error: null,
+					success: true,
+				}),
+			} as Partial<ITouchDesignerApi>;
+
+			const client = new TouchDesignerClient({
+				httpClient: mockHttpClient as ITouchDesignerApi,
+				logger: nullLogger,
+				serverMode,
+			});
+
+			const result = await client.getTdInfo();
+			expect(result.success).toBe(true);
+			expect(serverMode.mode).toBe("live");
+			expect(serverMode.tdBuild).toBe("2023.12345");
+		});
+
+		test("HTTP success:false → live (not docs-only)", async () => {
+			const serverMode = new ServerMode();
+
+			const mockHttpClient = {
+				getTdInfo: vi.fn().mockResolvedValue({
+					data: null,
+					error: "connect ECONNREFUSED 127.0.0.1:9981",
+					success: false,
+				}),
+			} as Partial<ITouchDesignerApi>;
+
+			const client = new TouchDesignerClient({
+				httpClient: mockHttpClient as ITouchDesignerApi,
+				logger: nullLogger,
+				serverMode,
+			});
+
+			// success:false but HTTP responded → live
+			await expect(client.getTdInfo()).rejects.toThrow();
+			expect(serverMode.mode).toBe("live");
+		});
+
+		test("incompatible version → live (TD reachable)", async () => {
+			const serverMode = new ServerMode();
+
+			const mockHttpClient = {
+				getTdInfo: vi.fn().mockResolvedValue({
+					data: {
+						mcpApiVersion: "2.0.0",
+						osName: "macOS",
+						osVersion: "12.6.1",
+						server: "TouchDesigner",
+						version: "2024.99999",
+					},
+					error: null,
+					success: true,
+				}),
+			} as Partial<ITouchDesignerApi>;
+
+			const client = new TouchDesignerClient({
+				httpClient: mockHttpClient as ITouchDesignerApi,
+				logger: nullLogger,
+				serverMode,
+			});
+
+			await expect(client.getTdInfo()).rejects.toThrow("MAJOR version");
+			expect(serverMode.mode).toBe("live");
+			expect(serverMode.tdBuild).toBe("2024.99999");
+		});
+
+		test("invalidateAndProbe bypasses cache", async () => {
+			vi.useFakeTimers();
+			try {
+				const serverMode = new ServerMode();
+				const axiosError = new AxiosError("ECONNREFUSED", "ECONNREFUSED");
+
+				const mockGetTdInfo = vi.fn()
+					.mockRejectedValueOnce(axiosError) // Initial probe fails
+					.mockResolvedValueOnce({            // invalidateAndProbe succeeds
+						data: {
+							mcpApiVersion: "1.3.1",
+							osName: "macOS",
+							osVersion: "12.6.1",
+							server: "TouchDesigner",
+							version: "2023.12345",
+						},
+						error: null,
+						success: true,
+					});
+
+				const mockCreateNode = vi.fn().mockResolvedValue({
+					data: { result: { name: "test" } },
+					error: null,
+					success: true,
+				});
+
+				const client = new TouchDesignerClient({
+					httpClient: {
+						createNode: mockCreateNode,
+						getTdInfo: mockGetTdInfo,
+					} as unknown as ITouchDesignerApi,
+					logger: nullLogger,
+					serverMode,
+				});
+
+				// First call fails → cached error
+				await expect(
+					client.createNode({ nodeName: "t", nodeType: "null", parentPath: "/" }),
+				).rejects.toThrow();
+				expect(serverMode.mode).toBe("docs-only");
+
+				// Before TTL expires, invalidateAndProbe should bypass cache
+				await client.invalidateAndProbe();
+				expect(serverMode.mode).toBe("live");
+				expect(mockGetTdInfo).toHaveBeenCalledTimes(2);
+			} finally {
+				vi.useRealTimers();
+			}
+		});
+
+		test("recovery via invalidateAndProbe after AxiosError", async () => {
+			const serverMode = new ServerMode();
+			const axiosError = new AxiosError("ECONNREFUSED", "ECONNREFUSED");
+
+			const mockGetTdInfo = vi.fn()
+				.mockRejectedValueOnce(axiosError)
+				.mockResolvedValueOnce({
+					data: {
+						mcpApiVersion: "1.3.1",
+						osName: "macOS",
+						osVersion: "12.6.1",
+						server: "TouchDesigner",
+						version: "2023.12345",
+					},
+					error: null,
+					success: true,
+				});
+
+			const client = new TouchDesignerClient({
+				httpClient: { getTdInfo: mockGetTdInfo } as unknown as ITouchDesignerApi,
+				logger: nullLogger,
+				serverMode,
+			});
+
+			// Fail first
+			await expect(client.getTdInfo()).rejects.toThrow();
+			expect(serverMode.mode).toBe("docs-only");
+
+			// Recover
+			await client.invalidateAndProbe();
+			expect(serverMode.mode).toBe("live");
+			expect(serverMode.tdBuild).toBe("2023.12345");
 		});
 	});
 });

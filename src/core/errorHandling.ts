@@ -1,5 +1,6 @@
 import type { ToolNames } from "../features/tools/index.js";
 import type { ILogger } from "./logger.js";
+import type { ServerMode } from "./serverMode.js";
 
 /**
  * Standard API error response structure compatible with MCP SDK
@@ -21,6 +22,7 @@ export function handleToolError(
 	logger: ILogger,
 	toolName: ToolNames,
 	referenceComment?: string,
+	serverMode?: ServerMode,
 ): ErrorResponse {
 	const formattedError =
 		error instanceof Error
@@ -47,7 +49,12 @@ export function handleToolError(
 		logger: "ErrorHandling",
 	});
 
-	const errorMessage = `${toolName}: ${formattedError}${referenceComment ? `. ${referenceComment}` : ""}`;
+	let errorMessage = `${toolName}: ${formattedError}${referenceComment ? `. ${referenceComment}` : ""}`;
+
+	if (serverMode?.mode === "docs-only") {
+		errorMessage +=
+			"\n\n💡 Mode: docs-only — static resources (td://modules) are available offline.";
+	}
 
 	return {
 		content: [

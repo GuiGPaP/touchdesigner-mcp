@@ -4,6 +4,7 @@ import { z } from "zod";
 import { REFERENCE_COMMENT, TOOL_NAMES } from "../../../core/constants.js";
 import { handleToolError } from "../../../core/errorHandling.js";
 import type { ILogger } from "../../../core/logger.js";
+import type { ServerMode } from "../../../core/serverMode.js";
 import {
 	CompleteOpPathsQueryParams,
 	ConfigureInstancingBody,
@@ -14,6 +15,7 @@ import {
 	DiscoverDatCandidatesQueryParams,
 	ExecNodeMethodBody,
 	ExecPythonScriptBody,
+	FormatDatBody,
 	GetChopChannelsQueryParams,
 	GetCompExtensionsQueryParams,
 	GetDatTableInfoQueryParams,
@@ -23,17 +25,16 @@ import {
 	GetNodeErrorsQueryParams,
 	GetNodeParameterSchemaQueryParams,
 	GetNodesQueryParams,
+	GetTdContextQueryParams,
 	GetTdPythonClassDetailsParams,
-	FormatDatBody,
+	IndexTdProjectQueryParams,
 	LintDatBody,
 	LintDatsBody,
-	ValidateGlslDatBody,
-	TypecheckDatBody,
-	ValidateJsonDatBody,
 	SetDatTextBody,
+	TypecheckDatBody,
 	UpdateNodeBody,
-	IndexTdProjectQueryParams,
-	GetTdContextQueryParams,
+	ValidateGlslDatBody,
+	ValidateJsonDatBody,
 } from "../../../gen/mcp/touchDesignerAPI.zod.js";
 import type { TouchDesignerClient } from "../../../tdClient/touchDesignerClient.js";
 import type { ToolMetadata } from "../metadata/touchDesignerToolMetadata.js";
@@ -53,25 +54,25 @@ import {
 	formatDatText,
 	formatDeleteNodeResult,
 	formatDiscoverDatCandidates,
-	formatFormatDat,
-	formatValidateGlslDat,
-	formatValidateJsonDat,
 	formatExecNodeMethodResult,
+	formatFormatDat,
 	formatLintDat,
 	formatLintDats,
-	formatTypecheckDat,
 	formatModuleHelp,
 	formatNodeDetails,
 	formatNodeErrors,
 	formatNodeList,
 	formatParameterSchema,
+	formatProjectIndex,
 	formatScriptResult,
 	formatSetDatText,
+	formatTdContext,
 	formatTdInfo,
 	formatToolMetadata,
+	formatTypecheckDat,
 	formatUpdateNodeResult,
-	formatProjectIndex,
-	formatTdContext,
+	formatValidateGlslDat,
+	formatValidateJsonDat,
 } from "../presenter/index.js";
 import {
 	detailOnlyFormattingSchema,
@@ -151,7 +152,9 @@ type SetDatTextToolParams = z.input<typeof setDatTextToolSchema>;
 const lintDatToolSchema = LintDatBody.extend(detailOnlyFormattingSchema.shape);
 type LintDatToolParams = z.input<typeof lintDatToolSchema>;
 
-const typecheckDatToolSchema = TypecheckDatBody.extend(detailOnlyFormattingSchema.shape);
+const typecheckDatToolSchema = TypecheckDatBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
 type TypecheckDatToolParams = z.input<typeof typecheckDatToolSchema>;
 
 const lintDatsToolSchema = LintDatsBody.extend(
@@ -243,6 +246,7 @@ export function registerTdTools(
 	server: McpServer,
 	logger: ILogger,
 	tdClient: TouchDesignerClient,
+	serverMode: ServerMode,
 ): void {
 	const toolMetadataEntries = getTouchDesignerToolMetadata();
 
@@ -311,7 +315,13 @@ export function registerTdTools(
 				});
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.GET_TD_INFO);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.GET_TD_INFO,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -321,14 +331,43 @@ export function registerTdTools(
 		"Get available capabilities and tool versions from the TouchDesigner server",
 		capabilitiesToolSchema.strict().shape,
 		async (params: CapabilitiesToolParams = {}) => {
+			const { detailLevel, responseFormat } = params;
+
+			// Phase 1: probe frais (bypasse le cache d'erreur)
 			try {
-				const { detailLevel, responseFormat } = params;
+				await tdClient.invalidateAndProbe();
+			} catch (probeError) {
+				const modeInfo = serverMode.toJSON();
+				if (modeInfo.mode === "docs-only") {
+					// Network failed → return offline status via formatter
+					const formattedText = formatCapabilities(undefined, {
+						detailLevel: detailLevel ?? "summary",
+						modeInfo,
+						responseFormat,
+					});
+					return {
+						content: [{ text: formattedText, type: "text" as const }],
+					};
+				}
+				// TD reachable but error (incompatibility, etc.) → show real diagnostic
+				return handleToolError(
+					probeError,
+					logger,
+					TOOL_NAMES.GET_CAPABILITIES,
+					undefined,
+					serverMode,
+				);
+			}
+
+			// Phase 2: TD reachable → fetch full capabilities
+			try {
 				const result = await tdClient.getCapabilities();
 				if (!result.success) {
 					throw result.error;
 				}
 				const formattedText = formatCapabilities(result.data, {
 					detailLevel: detailLevel ?? "summary",
+					modeInfo: serverMode.toJSON(),
 					responseFormat,
 				});
 				return createToolResult(tdClient, formattedText);
@@ -337,6 +376,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.GET_CAPABILITIES,
+					undefined,
+					serverMode,
 				);
 			}
 		},
@@ -367,7 +408,13 @@ export function registerTdTools(
 
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.EXECUTE_PYTHON_SCRIPT);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.EXECUTE_PYTHON_SCRIPT,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -394,6 +441,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.CREATE_TD_NODE,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -421,6 +469,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.DELETE_TD_NODE,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -455,6 +504,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.GET_TD_NODES,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -484,9 +534,9 @@ export function registerTdTools(
 				return handleToolError(
 					error,
 					logger,
-
 					TOOL_NAMES.GET_TD_NODE_PARAMETERS,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -517,6 +567,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.GET_TD_NODE_ERRORS,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -544,6 +595,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.UPDATE_TD_NODE_PARAMETERS,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -578,6 +630,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.EXECUTE_NODE_METHOD,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -608,6 +661,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.GET_TD_CLASSES,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -639,6 +693,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.GET_TD_CLASS_DETAILS,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -661,7 +716,13 @@ export function registerTdTools(
 				});
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.GET_TD_MODULE_HELP);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.GET_TD_MODULE_HELP,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -683,7 +744,13 @@ export function registerTdTools(
 				});
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.GET_DAT_TEXT);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.GET_DAT_TEXT,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -705,7 +772,13 @@ export function registerTdTools(
 				});
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.SET_DAT_TEXT);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.SET_DAT_TEXT,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -727,7 +800,13 @@ export function registerTdTools(
 				});
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.LINT_DAT);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.LINT_DAT,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -749,7 +828,13 @@ export function registerTdTools(
 				});
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.TYPECHECK_DAT);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.TYPECHECK_DAT,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -771,7 +856,13 @@ export function registerTdTools(
 				});
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.LINT_DATS);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.LINT_DATS,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -793,7 +884,13 @@ export function registerTdTools(
 				});
 				return createToolResult(tdClient, formattedText);
 			} catch (error) {
-				return handleToolError(error, logger, TOOL_NAMES.FORMAT_DAT);
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.FORMAT_DAT,
+					undefined,
+					serverMode,
+				);
 			}
 		},
 	);
@@ -819,6 +916,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.VALIDATE_JSON_DAT,
+					undefined,
+					serverMode,
 				);
 			}
 		},
@@ -845,6 +944,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.VALIDATE_GLSL_DAT,
+					undefined,
+					serverMode,
 				);
 			}
 		},
@@ -871,6 +972,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.DISCOVER_DAT_CANDIDATES,
+					undefined,
+					serverMode,
 				);
 			}
 		},
@@ -898,6 +1001,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.CREATE_GEOMETRY_COMP,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -925,6 +1029,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.CREATE_FEEDBACK_LOOP,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -952,6 +1057,7 @@ export function registerTdTools(
 					logger,
 					TOOL_NAMES.CONFIGURE_INSTANCING,
 					REFERENCE_COMMENT,
+					serverMode,
 				);
 			}
 		},
@@ -978,6 +1084,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.GET_NODE_PARAMETER_SCHEMA,
+					undefined,
+					serverMode,
 				);
 			}
 		},
@@ -1004,6 +1112,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.COMPLETE_OP_PATHS,
+					undefined,
+					serverMode,
 				);
 			}
 		},
@@ -1030,6 +1140,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.GET_CHOP_CHANNELS,
+					undefined,
+					serverMode,
 				);
 			}
 		},
@@ -1056,6 +1168,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.GET_DAT_TABLE_INFO,
+					undefined,
+					serverMode,
 				);
 			}
 		},
@@ -1082,6 +1196,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.GET_COMP_EXTENSIONS,
+					undefined,
+					serverMode,
 				);
 			}
 		},
@@ -1115,6 +1231,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.INDEX_TD_PROJECT,
+					undefined,
+					serverMode,
 				);
 			}
 		},
@@ -1148,6 +1266,8 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.GET_TD_CONTEXT,
+					undefined,
+					serverMode,
 				);
 			}
 		},
