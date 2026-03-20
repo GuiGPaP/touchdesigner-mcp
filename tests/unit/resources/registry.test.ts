@@ -1,24 +1,24 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { KnowledgeRegistry } from "../../../src/features/resources/registry.js";
 import type { TDKnowledgeEntry } from "../../../src/features/resources/types.js";
 
-function makeEntry(overrides: Partial<TDKnowledgeEntry> = {}): TDKnowledgeEntry {
+function makeEntry(
+	overrides: Partial<TDKnowledgeEntry> = {},
+): TDKnowledgeEntry {
 	return {
-		id: "test-module",
-		title: "TestModule",
-		kind: "python-module",
 		content: { summary: "A test module" },
-		provenance: { source: "manual", confidence: "high", license: "MIT" },
-		searchKeywords: ["test"],
+		id: "test-module",
+		kind: "python-module",
 		payload: {
 			canonicalName: "TestModule",
-			members: [
-				{ name: "doStuff", description: "Does stuff" },
-			],
+			members: [{ description: "Does stuff", name: "doStuff" }],
 		},
+		provenance: { confidence: "high", license: "MIT", source: "manual" },
+		searchKeywords: ["test"],
+		title: "TestModule",
 		...overrides,
 	} as TDKnowledgeEntry;
 }
@@ -28,10 +28,7 @@ function writeTempModule(basePath: string, entry: TDKnowledgeEntry): void {
 	if (!existsSync(modulesDir)) {
 		mkdirSync(modulesDir, { recursive: true });
 	}
-	writeFileSync(
-		join(modulesDir, `${entry.id}.json`),
-		JSON.stringify(entry),
-	);
+	writeFileSync(join(modulesDir, `${entry.id}.json`), JSON.stringify(entry));
 }
 
 describe("KnowledgeRegistry", () => {
@@ -47,7 +44,7 @@ describe("KnowledgeRegistry", () => {
 	});
 
 	afterEach(() => {
-		rmSync(tempDir, { recursive: true, force: true });
+		rmSync(tempDir, { force: true, recursive: true });
 	});
 
 	describe("loadAll", () => {
@@ -95,10 +92,7 @@ describe("KnowledgeRegistry", () => {
 			writeTempModule(tempDir, entry);
 			// Write a second file with same ID in the same dir
 			const modulesDir = join(tempDir, "modules");
-			writeFileSync(
-				join(modulesDir, "dup-copy.json"),
-				JSON.stringify(entry),
-			);
+			writeFileSync(join(modulesDir, "dup-copy.json"), JSON.stringify(entry));
 
 			const registry = new KnowledgeRegistry(mockLogger);
 			registry.loadAll(tempDir);
@@ -158,7 +152,9 @@ describe("KnowledgeRegistry", () => {
 				id: "tdfunctions",
 				payload: {
 					canonicalName: "TDFunctions",
-					members: [{ name: "createProperty", description: "Creates a property" }],
+					members: [
+						{ description: "Creates a property", name: "createProperty" },
+					],
 				},
 			});
 			writeTempModule(tempDir, entry);
@@ -176,7 +172,7 @@ describe("KnowledgeRegistry", () => {
 				id: "tdfunctions",
 				payload: {
 					canonicalName: "TDFunctions",
-					members: [{ name: "doStuff", description: "Does stuff" }],
+					members: [{ description: "Does stuff", name: "doStuff" }],
 				},
 			});
 			writeTempModule(tempDir, entry);
@@ -237,8 +233,8 @@ describe("KnowledgeRegistry", () => {
 			expect(index).toHaveLength(1);
 			expect(index[0]).toEqual({
 				id: "tdfunctions",
-				title: "TDFunctions",
 				kind: "python-module",
+				title: "TDFunctions",
 			});
 			// Ensure no payload or content leaks
 			expect(index[0]).not.toHaveProperty("payload");

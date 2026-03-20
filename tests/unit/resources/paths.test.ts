@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
-import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveKnowledgePath } from "../../../src/features/resources/paths.js";
@@ -15,7 +15,7 @@ describe("resolveKnowledgePath", () => {
 	});
 
 	afterEach(() => {
-		rmSync(tempDir, { recursive: true, force: true });
+		rmSync(tempDir, { force: true, recursive: true });
 		delete process.env.TD_MCP_KNOWLEDGE_PATH;
 	});
 

@@ -1,23 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { KnowledgeRegistry } from "../../../src/features/resources/registry.js";
 import { registerKnowledgeResources } from "../../../src/features/resources/handlers/knowledgeResources.js";
+import { KnowledgeRegistry } from "../../../src/features/resources/registry.js";
 import type { TDKnowledgeEntry } from "../../../src/features/resources/types.js";
 
-function makeEntry(overrides: Partial<TDKnowledgeEntry> = {}): TDKnowledgeEntry {
+function makeEntry(
+	overrides: Partial<TDKnowledgeEntry> = {},
+): TDKnowledgeEntry {
 	return {
-		id: "tdfunctions",
-		title: "TDFunctions",
-		kind: "python-module",
 		content: { summary: "Utility module" },
-		provenance: { source: "skills-reference", confidence: "high", license: "MIT" },
-		searchKeywords: ["createProperty"],
+		id: "tdfunctions",
+		kind: "python-module",
 		payload: {
-			canonicalName: "TDFunctions",
 			accessPattern: "import TDFunctions",
-			members: [
-				{ name: "createProperty", description: "Creates a property" },
-			],
+			canonicalName: "TDFunctions",
+			members: [{ description: "Creates a property", name: "createProperty" }],
 		},
+		provenance: {
+			confidence: "high",
+			license: "MIT",
+			source: "skills-reference",
+		},
+		searchKeywords: ["createProperty"],
+		title: "TDFunctions",
 		...overrides,
 	} as TDKnowledgeEntry;
 }
@@ -33,14 +37,19 @@ type RegisterCall = {
 function createMockServer() {
 	const registeredResources: RegisterCall[] = [];
 	return {
+		registeredResources,
 		server: {
 			registerResource: vi.fn(
-				(name: string, uriOrTemplate: unknown, config: unknown, callback: (...args: unknown[]) => unknown) => {
-					registeredResources.push({ name, uriOrTemplate, config, callback });
+				(
+					name: string,
+					uriOrTemplate: unknown,
+					config: unknown,
+					callback: (...args: unknown[]) => unknown,
+				) => {
+					registeredResources.push({ callback, config, name, uriOrTemplate });
 				},
 			),
 		},
-		registeredResources,
 	};
 }
 
@@ -63,7 +72,9 @@ describe("registerKnowledgeResources", () => {
 	function setupWithEntries(entries: TDKnowledgeEntry[]) {
 		// Create a fresh registry and populate via reflection
 		registry = new KnowledgeRegistry();
-		const entriesMap = (registry as unknown as { entries: Map<string, TDKnowledgeEntry> }).entries;
+		const entriesMap = (
+			registry as unknown as { entries: Map<string, TDKnowledgeEntry> }
+		).entries;
 		for (const entry of entries) {
 			entriesMap.set(entry.id, entry);
 		}
@@ -104,7 +115,7 @@ describe("registerKnowledgeResources", () => {
 		const parsed = JSON.parse(result.contents[0].text);
 		expect(parsed.version).toBe("1");
 		expect(parsed.entries).toEqual([
-			{ id: "tdfunctions", title: "TDFunctions", kind: "python-module" },
+			{ id: "tdfunctions", kind: "python-module", title: "TDFunctions" },
 		]);
 	});
 
@@ -140,6 +151,77 @@ describe("registerKnowledgeResources", () => {
 		);
 	});
 
+	it("td://modules index should NOT include operator entries", () => {
+		const moduleEntry = makeEntry({ id: "tdfunctions", title: "TDFunctions" });
+		// Add an operator entry directly to the registry
+		registry = new KnowledgeRegistry();
+		const entriesMap = (
+			registry as unknown as { entries: Map<string, TDKnowledgeEntry> }
+		).entries;
+		entriesMap.set(moduleEntry.id, moduleEntry);
+		entriesMap.set("glsl-top", {
+			content: { summary: "Shader" },
+			id: "glsl-top",
+			kind: "operator",
+			payload: { opFamily: "TOP", opType: "glslTOP", parameters: [] },
+			provenance: {
+				confidence: "high",
+				license: "Derivative",
+				source: "td-docs",
+			},
+			searchKeywords: ["glsl"],
+			title: "GLSL TOP",
+		} as TDKnowledgeEntry);
+
+		registerKnowledgeResources(
+			mockServer.server as never,
+			mockLogger as never,
+			registry,
+		);
+
+		const staticCall = mockServer.registeredResources[0];
+		const result = staticCall.callback() as {
+			contents: Array<{ text: string }>;
+		};
+		const parsed = JSON.parse(result.contents[0].text);
+		expect(parsed.entries).toHaveLength(1);
+		expect(parsed.entries[0].id).toBe("tdfunctions");
+	});
+
+	it("td://modules/{id} should throw for operator entry accessed via modules", () => {
+		registry = new KnowledgeRegistry();
+		const entriesMap = (
+			registry as unknown as { entries: Map<string, TDKnowledgeEntry> }
+		).entries;
+		entriesMap.set("glsl-top", {
+			content: { summary: "Shader" },
+			id: "glsl-top",
+			kind: "operator",
+			payload: { opFamily: "TOP", opType: "glslTOP", parameters: [] },
+			provenance: {
+				confidence: "high",
+				license: "Derivative",
+				source: "td-docs",
+			},
+			searchKeywords: ["glsl"],
+			title: "GLSL TOP",
+		} as TDKnowledgeEntry);
+
+		registerKnowledgeResources(
+			mockServer.server as never,
+			mockLogger as never,
+			registry,
+		);
+
+		const templateCall = mockServer.registeredResources[1];
+		const uri = new URL("td://modules/glsl-top");
+		const variables = { id: "glsl-top" };
+
+		expect(() => templateCall.callback(uri, variables)).toThrow(
+			/Module "glsl-top" not found/,
+		);
+	});
+
 	it("template list callback should enumerate all modules", async () => {
 		const entries = [
 			makeEntry({ id: "tdfunctions", title: "TDFunctions" }),
@@ -149,7 +231,9 @@ describe("registerKnowledgeResources", () => {
 
 		const templateCall = mockServer.registeredResources[1];
 		// Access the ResourceTemplate's list callback
-		const template = templateCall.uriOrTemplate as { listCallback?: () => Promise<unknown> };
+		const template = templateCall.uriOrTemplate as {
+			listCallback?: () => Promise<unknown>;
+		};
 		if (template.listCallback) {
 			const listResult = (await template.listCallback()) as {
 				resources: Array<{ uri: string; name: string; mimeType: string }>;

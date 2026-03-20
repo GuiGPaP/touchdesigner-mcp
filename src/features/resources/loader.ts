@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ILogger } from "../../core/logger.js";
-import { type TDKnowledgeEntry, knowledgeEntrySchema } from "./types.js";
+import { knowledgeEntrySchema, type TDKnowledgeEntry } from "./types.js";
 
 /**
  * Load a single knowledge entry from a JSON file.
@@ -68,8 +68,7 @@ export function loadKnowledgeEntries(
 		const dirPath = join(basePath, subdir);
 		let files: string[];
 		try {
-			files = readdirSync(dirPath)
-				.filter((f) => f.endsWith(".json"));
+			files = readdirSync(dirPath).filter((f) => f.endsWith(".json"));
 		} catch {
 			continue;
 		}
