@@ -43,6 +43,8 @@ vi.mock("../../src/gen/endpoints/TouchDesignerAPI", async () => {
 		setDatText: vi.fn(),
 		typecheckDat: vi.fn(),
 		updateNode: vi.fn(),
+		indexTdProject: vi.fn(),
+		getTdContext: vi.fn(),
 	};
 });
 
@@ -1198,6 +1200,77 @@ describe("TouchDesignerClient with mocks", () => {
 			const client = new TouchDesignerClient({ logger: nullLogger });
 			const result = await client.getCompExtensions({ compPath: "/p1/base1" });
 			expect(result.success).toBe(true);
+		});
+
+		test("indexTdProject should handle successful response", async () => {
+			vi.mocked(touchDesignerAPI.indexTdProject).mockResolvedValue({
+				success: true,
+				data: {
+					markdown: "# Project\nops here",
+					stats: { opCount: 10, compCount: 2, extensionCount: 1, warningCount: 0 },
+					truncated: false,
+					warnings: [],
+				},
+				error: null,
+			});
+			const client = new TouchDesignerClient({ logger: nullLogger });
+			const result = await client.indexTdProject({ rootPath: "/project1" });
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.data.markdown).toContain("Project");
+				expect(result.data.stats?.opCount).toBe(10);
+			}
+		});
+
+		test("indexTdProject should handle error response", async () => {
+			vi.mocked(touchDesignerAPI.indexTdProject).mockResolvedValue({
+				success: false,
+				data: undefined,
+				error: "Scan failed",
+			});
+			const client = new TouchDesignerClient({ logger: nullLogger });
+			const result = await client.indexTdProject();
+			expect(result.success).toBe(false);
+		});
+
+		test("getTdContext should handle successful response", async () => {
+			vi.mocked(touchDesignerAPI.getTdContext).mockResolvedValue({
+				success: true,
+				data: {
+					nodePath: "/project1/geo1",
+					facets: { parameters: { count: 3 }, errors: { errors: [] } },
+					warnings: [],
+				},
+				error: null,
+			});
+			const client = new TouchDesignerClient({ logger: nullLogger });
+			const result = await client.getTdContext({ nodePath: "/project1/geo1" });
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.data.nodePath).toBe("/project1/geo1");
+				expect(result.data.facets).toBeDefined();
+			}
+		});
+
+		test("getTdContext should handle partial failure with warnings", async () => {
+			vi.mocked(touchDesignerAPI.getTdContext).mockResolvedValue({
+				success: true,
+				data: {
+					nodePath: "/project1/geo1",
+					facets: { parameters: { count: 3 } },
+					warnings: ["channels failed: not a CHOP"],
+				},
+				error: null,
+			});
+			const client = new TouchDesignerClient({ logger: nullLogger });
+			const result = await client.getTdContext({
+				nodePath: "/project1/geo1",
+				include: ["parameters", "channels"],
+			});
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.data.warnings).toContain("channels failed: not a CHOP");
+			}
 		});
 	});
 });

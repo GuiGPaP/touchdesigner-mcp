@@ -100,6 +100,91 @@ export interface LintDiagnostic {
   fixable?: boolean;
 }
 
+export type TypecheckDiagnosticSeverity = typeof TypecheckDiagnosticSeverity[keyof typeof TypecheckDiagnosticSeverity];
+
+
+export const TypecheckDiagnosticSeverity = {
+  error: 'error',
+  warning: 'warning',
+  information: 'information',
+} as const;
+
+/**
+ * A single pyright typecheck diagnostic
+ */
+export interface TypecheckDiagnostic {
+  severity?: TypecheckDiagnosticSeverity;
+  message?: string;
+  line?: number;
+  column?: number;
+  rule?: string;
+}
+
+/**
+ * A single JSON/YAML validation diagnostic
+ */
+export interface JsonValidationDiagnostic {
+  line?: number;
+  column?: number;
+  message?: string;
+}
+
+export type GlslValidationDiagnosticSeverity = typeof GlslValidationDiagnosticSeverity[keyof typeof GlslValidationDiagnosticSeverity];
+
+
+export const GlslValidationDiagnosticSeverity = {
+  error: 'error',
+  warning: 'warning',
+  info: 'info',
+} as const;
+
+/**
+ * A single GLSL validation diagnostic
+ */
+export interface GlslValidationDiagnostic {
+  line?: number;
+  column?: number;
+  message?: string;
+  severity?: GlslValidationDiagnosticSeverity;
+}
+
+export type BatchLintSummaryBySeverity = {
+  error?: number;
+  warning?: number;
+  info?: number;
+};
+
+export type BatchLintSummaryWorstOffendersItem = {
+  path?: string;
+  name?: string;
+  diagnosticCount?: number;
+};
+
+/**
+ * Aggregated summary for a batch lint operation
+ */
+export interface BatchLintSummary {
+  totalDatsScanned?: number;
+  datsWithErrors?: number;
+  datsClean?: number;
+  totalIssues?: number;
+  fixableCount?: number;
+  manualCount?: number;
+  bySeverity?: BatchLintSummaryBySeverity;
+  worstOffenders?: BatchLintSummaryWorstOffendersItem[];
+}
+
+/**
+ * Per-DAT lint result in a batch operation
+ */
+export interface BatchLintDatResult {
+  path?: string;
+  name?: string;
+  diagnosticCount?: number;
+  diagnostics?: LintDiagnostic[];
+  error?: string;
+}
+
 /**
  * Type of the Python entity
  */
@@ -567,6 +652,79 @@ export interface ConfigureInstancing200Response {
   error: string | null;
 }
 
+/**
+ * @nullable
+ */
+export type GetHealth200ResponseData = {
+  /** Server status */
+  status: string;
+  /** Python interpreter version */
+  pythonVersion: string;
+  /** TouchDesigner version (e.g., 2023.30000) */
+  tdVersion: string;
+  /** TouchDesigner build number */
+  tdBuild: string;
+} | null;
+
+export interface GetHealth200Response {
+  /** Whether the operation was successful */
+  success: boolean;
+  data: GetHealth200ResponseData | null;
+  /**
+   * Error message if the operation was not successful
+   * @nullable
+   */
+  error: string | null;
+}
+
+/**
+ * @nullable
+ */
+export type GetCapabilities200ResponseDataTool = {
+  /** Whether the tool is installed */
+  installed?: boolean;
+  /**
+   * Tool version string
+   * @nullable
+   */
+  version?: string | null;
+} | null;
+
+/**
+ * @nullable
+ */
+export type GetCapabilities200ResponseDataTools = {
+  ruff?: GetCapabilities200ResponseDataTool | null;
+  pyright?: GetCapabilities200ResponseDataTool | null;
+  glslangValidator?: GetCapabilities200ResponseDataTool | null;
+} | null;
+
+/**
+ * @nullable
+ */
+export type GetCapabilities200ResponseData = {
+  /** Whether lint_dat is available */
+  lint_dat?: boolean;
+  /** Whether format_dat is available */
+  format_dat?: boolean;
+  /** Whether validate_glsl_dat is available (always true, may use fallback) */
+  validate_glsl_dat?: boolean;
+  /** Whether typecheck_dat is available */
+  typecheck_dat?: boolean;
+  tools?: GetCapabilities200ResponseDataTools | null;
+} | null;
+
+export interface GetCapabilities200Response {
+  /** Whether the operation was successful */
+  success: boolean;
+  data: GetCapabilities200ResponseData | null;
+  /**
+   * Error message if the operation was not successful
+   * @nullable
+   */
+  error: string | null;
+}
+
 export type DeleteNodeParams = {
 /**
  * e.g., "/project1/geo1"
@@ -666,31 +824,6 @@ export type LintDat200 = {
   data?: LintDat200Data;
 };
 
-export type TypecheckDatBody = {
-  /** Absolute path to the DAT node. e.g., "/project1/script1" */
-  nodePath: string;
-};
-
-export type TypecheckDiagnostic = {
-  severity?: string;
-  message?: string;
-  line?: number;
-  column?: number;
-  rule?: string;
-};
-
-export type TypecheckDat200Data = {
-  path?: string;
-  name?: string;
-  diagnosticCount?: number;
-  diagnostics?: TypecheckDiagnostic[];
-};
-
-export type TypecheckDat200 = {
-  success?: boolean;
-  data?: TypecheckDat200Data;
-};
-
 export type FormatDatBody = {
   /** Absolute path to the DAT node. e.g., "/project1/script1" */
   nodePath: string;
@@ -718,15 +851,9 @@ export type ValidateJsonDatBody = {
   nodePath: string;
 };
 
-export type ValidateJsonDat200DataDiagnosticsItem = {
-  line?: number;
-  column?: number;
-  message?: string;
-};
-
 export type ValidateJsonDat200DataFormat = typeof ValidateJsonDat200DataFormat[keyof typeof ValidateJsonDat200DataFormat];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+
 export const ValidateJsonDat200DataFormat = {
   json: 'json',
   yaml: 'yaml',
@@ -738,7 +865,7 @@ export type ValidateJsonDat200Data = {
   name?: string;
   format?: ValidateJsonDat200DataFormat;
   valid?: boolean;
-  diagnostics?: ValidateJsonDat200DataDiagnosticsItem[];
+  diagnostics?: JsonValidationDiagnostic[];
 };
 
 export type ValidateJsonDat200 = {
@@ -751,16 +878,9 @@ export type ValidateGlslDatBody = {
   nodePath: string;
 };
 
-export type ValidateGlslDat200DataDiagnosticsItem = {
-  line?: number;
-  column?: number;
-  message?: string;
-  severity?: string;
-};
-
 export type ValidateGlslDat200DataShaderType = typeof ValidateGlslDat200DataShaderType[keyof typeof ValidateGlslDat200DataShaderType];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+
 export const ValidateGlslDat200DataShaderType = {
   pixel: 'pixel',
   vertex: 'vertex',
@@ -770,7 +890,7 @@ export const ValidateGlslDat200DataShaderType = {
 
 export type ValidateGlslDat200DataValidationMethod = typeof ValidateGlslDat200DataValidationMethod[keyof typeof ValidateGlslDat200DataValidationMethod];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+
 export const ValidateGlslDat200DataValidationMethod = {
   td_errors: 'td_errors',
   glslangValidator: 'glslangValidator',
@@ -781,9 +901,12 @@ export type ValidateGlslDat200Data = {
   path?: string;
   name?: string;
   shaderType?: ValidateGlslDat200DataShaderType;
-  valid?: boolean;
-  diagnostics?: ValidateGlslDat200DataDiagnosticsItem[];
+  /** @nullable */
+  valid?: boolean | null;
+  diagnostics?: GlslValidationDiagnostic[];
   validationMethod?: ValidateGlslDat200DataValidationMethod;
+  /** Whether any validation method was available */
+  validationAvailable?: boolean;
 };
 
 export type ValidateGlslDat200 = {
@@ -791,46 +914,29 @@ export type ValidateGlslDat200 = {
   data?: ValidateGlslDat200Data;
 };
 
+/**
+ * Filter by DAT kind
+ */
+export type LintDatsBodyPurpose = typeof LintDatsBodyPurpose[keyof typeof LintDatsBodyPurpose];
+
+
+export const LintDatsBodyPurpose = {
+  python: 'python',
+  glsl: 'glsl',
+  text: 'text',
+  data: 'data',
+  any: 'any',
+} as const;
+
 export type LintDatsBody = {
   /** Absolute path to the parent. e.g., "/project1" */
   parentPath: string;
   /** Glob pattern to filter DAT names */
   pattern?: string;
   /** Filter by DAT kind */
-  purpose?: string;
+  purpose?: LintDatsBodyPurpose;
   /** Search recursively into descendants */
   recursive?: boolean;
-};
-
-export type BatchLintSummaryWorstOffendersItem = {
-  path?: string;
-  name?: string;
-  diagnosticCount?: number;
-};
-
-export type BatchLintSummaryBySeverity = {
-  error?: number;
-  warning?: number;
-  info?: number;
-};
-
-export type BatchLintSummary = {
-  totalDatsScanned?: number;
-  datsWithErrors?: number;
-  datsClean?: number;
-  totalIssues?: number;
-  fixableCount?: number;
-  manualCount?: number;
-  bySeverity?: BatchLintSummaryBySeverity;
-  worstOffenders?: BatchLintSummaryWorstOffendersItem[];
-};
-
-export type BatchLintDatResult = {
-  path?: string;
-  name?: string;
-  diagnosticCount?: number;
-  diagnostics?: LintDiagnostic[];
-  error?: string;
 };
 
 export type LintDats200Data = {
@@ -842,6 +948,23 @@ export type LintDats200Data = {
 export type LintDats200 = {
   success?: boolean;
   data?: LintDats200Data;
+};
+
+export type TypecheckDatBody = {
+  /** Absolute path to the DAT node. e.g., "/project1/script1" */
+  nodePath: string;
+};
+
+export type TypecheckDat200Data = {
+  path?: string;
+  name?: string;
+  diagnosticCount?: number;
+  diagnostics?: TypecheckDiagnostic[];
+};
+
+export type TypecheckDat200 = {
+  success?: boolean;
+  data?: TypecheckDat200Data;
 };
 
 export type DiscoverDatCandidatesParams = {
@@ -1068,34 +1191,98 @@ export type GetCompExtensions200 = {
   data?: GetCompExtensions200Data;
 };
 
-export type GetCapabilities200DataTool = {
-  installed?: boolean;
-  /** @nullable */
-  version?: string | null;
-};
-
-export type GetCapabilities200DataTools = {
-  ruff?: GetCapabilities200DataTool;
-  pyright?: GetCapabilities200DataTool;
-};
-
-export type GetCapabilities200Data = {
-  lint_dat?: boolean;
-  format_dat?: boolean;
-  typecheck_dat?: boolean;
-  tools?: GetCapabilities200DataTools;
-};
-
-export type GetCapabilities200 = {
-  success?: boolean;
-  data?: GetCapabilities200Data;
-};
-
 export type GetModuleHelpParams = {
 /**
  * Module or class name (e.g., "noiseCHOP", "td.noiseCHOP", "tdu").
  */
 moduleName: string;
+};
+
+export type IndexTdProjectParams = {
+/**
+ * Root operator path to start scanning from
+ */
+rootPath?: string;
+/**
+ * Maximum depth for findChildren
+ */
+maxDepth?: number;
+/**
+ * Hard cap on operators scanned
+ */
+opLimit?: number;
+/**
+ * Index detail level: compact (~2k tokens) or full
+ */
+mode?: IndexTdProjectMode;
+};
+
+export type IndexTdProjectMode = typeof IndexTdProjectMode[keyof typeof IndexTdProjectMode];
+
+
+export const IndexTdProjectMode = {
+  compact: 'compact',
+  full: 'full',
+} as const;
+
+export type IndexTdProject200DataStats = {
+  opCount?: number;
+  compCount?: number;
+  extensionCount?: number;
+  warningCount?: number;
+};
+
+export type IndexTdProject200Data = {
+  markdown?: string;
+  stats?: IndexTdProject200DataStats;
+  truncated?: boolean;
+  warnings?: string[];
+};
+
+export type IndexTdProject200 = {
+  success?: boolean;
+  data?: IndexTdProject200Data;
+  /** @nullable */
+  error?: string | null;
+};
+
+export type GetTdContextParams = {
+/**
+ * Absolute path to the target node, e.g. "/project1/geo1"
+ */
+nodePath: string;
+/**
+ * Facets to include (omit for all)
+ */
+include?: GetTdContextIncludeItem[];
+};
+
+export type GetTdContextIncludeItem = typeof GetTdContextIncludeItem[keyof typeof GetTdContextIncludeItem];
+
+
+export const GetTdContextIncludeItem = {
+  parameters: 'parameters',
+  channels: 'channels',
+  tableInfo: 'tableInfo',
+  extensions: 'extensions',
+  children: 'children',
+  errors: 'errors',
+  datText: 'datText',
+} as const;
+
+export type GetTdContext200DataFacets = { [key: string]: unknown };
+
+export type GetTdContext200Data = {
+  nodePath?: string;
+  facets?: GetTdContext200DataFacets;
+  warnings?: string[];
+};
+
+export type GetTdContext200 = {
+  success?: boolean;
+  data?: GetTdContext200Data;
+  /** @nullable */
+  error?: string | null;
 };
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -1227,6 +1414,48 @@ export const lintDat = (
     }
   
 /**
+ * @summary Format DAT code with ruff
+ */
+export const formatDat = (
+    formatDatBody: BodyType<FormatDatBody>,
+ options?: SecondParameter<typeof customInstance<FormatDat200>>,) => {
+      return customInstance<FormatDat200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-format`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: formatDatBody
+    },
+      options);
+    }
+  
+/**
+ * @summary Validate JSON/YAML content in a DAT
+ */
+export const validateJsonDat = (
+    validateJsonDatBody: BodyType<ValidateJsonDatBody>,
+ options?: SecondParameter<typeof customInstance<ValidateJsonDat200>>,) => {
+      return customInstance<ValidateJsonDat200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-validate-json`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: validateJsonDatBody
+    },
+      options);
+    }
+  
+/**
+ * @summary Validate GLSL shader code in a DAT
+ */
+export const validateGlslDat = (
+    validateGlslDatBody: BodyType<ValidateGlslDatBody>,
+ options?: SecondParameter<typeof customInstance<ValidateGlslDat200>>,) => {
+      return customInstance<ValidateGlslDat200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-validate-glsl`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: validateGlslDatBody
+    },
+      options);
+    }
+  
+/**
  * @summary Batch lint DATs under a parent path
  */
 export const lintDats = (
@@ -1239,7 +1468,7 @@ export const lintDats = (
     },
       options);
     }
-
+  
 /**
  * @summary Typecheck DAT code with pyright
  */
@@ -1253,51 +1482,7 @@ export const typecheckDat = (
     },
       options);
     }
-
-/**
- * @summary Format DAT code with ruff
- */
-export const formatDat = (
-    formatDatBody: BodyType<FormatDatBody>,
- options?: SecondParameter<typeof customInstance<FormatDat200>>,) => {
-      return customInstance<FormatDat200>(
-      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-format`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: formatDatBody
-    },
-      options);
-    }
-
-/**
- * Validate JSON or YAML content in a DAT operator
- * @summary Validate JSON/YAML content in a DAT
- */
-export const validateJsonDat = (
-    validateJsonDatBody: BodyType<ValidateJsonDatBody>,
- options?: SecondParameter<typeof customInstance<ValidateJsonDat200>>,) => {
-      return customInstance<ValidateJsonDat200>(
-      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-validate-json`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: validateJsonDatBody
-    },
-      options);
-    }
-
-/**
- * Validate GLSL shader code in a DAT
- * @summary Validate GLSL shader code in a DAT
- */
-export const validateGlslDat = (
-    validateGlslDatBody: BodyType<ValidateGlslDatBody>,
- options?: SecondParameter<typeof customInstance<ValidateGlslDat200>>,) => {
-      return customInstance<ValidateGlslDat200>(
-      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/dat-validate-glsl`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: validateGlslDatBody
-    },
-      options);
-    }
-
+  
 /**
  * Discover DAT candidates under a parent, classified by kind (python, glsl, text, data). Agent-friendly endpoint that eliminates N+1 round-trips.
  * @summary Discover DAT candidates for agent workflows
@@ -1382,19 +1567,6 @@ export const getCompExtensions = (
       options);
     }
   
-/**
- * Returns available features and tool versions
- * @summary Get server capabilities
- */
-export const getCapabilities = (
-
- options?: SecondParameter<typeof customInstance<GetCapabilities200>>,) => {
-      return customInstance<GetCapabilities200>(
-      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/capabilities`, method: 'GET'
-    },
-      options);
-    }
-
 /**
  * Returns a list of Python classes, modules, and functions available in TouchDesigner
  * @summary Get a list of Python classes and modules
@@ -1486,6 +1658,32 @@ export const getTdInfo = (
     }
   
 /**
+ * Returns health status of the TouchDesigner server
+ * @summary Get server health status
+ */
+export const getHealth = (
+    
+ options?: SecondParameter<typeof customInstance<GetHealth200Response>>,) => {
+      return customInstance<GetHealth200Response>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/health`, method: 'GET'
+    },
+      options);
+    }
+  
+/**
+ * Returns available features and tool versions
+ * @summary Get server capabilities
+ */
+export const getCapabilities = (
+    
+ options?: SecondParameter<typeof customInstance<GetCapabilities200Response>>,) => {
+      return customInstance<GetCapabilities200Response>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/capabilities`, method: 'GET'
+    },
+      options);
+    }
+  
+/**
  * Create a Geometry COMP with In and Out operators inside it.
 Wraps the td_helpers.network.setup_geometry_comp() helper.
 
@@ -1536,6 +1734,40 @@ export const configureInstancing = (
       options);
     }
   
+/**
+ * Scan the operator tree starting at rootPath and build a Markdown index
+for code-completion context. Cheap global scan — use get_td_context for
+per-node deep inspection.
+
+ * @summary Build project index for code completion
+ */
+export const indexTdProject = (
+    params?: IndexTdProjectParams,
+ options?: SecondParameter<typeof customInstance<IndexTdProject200>>,) => {
+      return customInstance<IndexTdProject200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/project-index`, method: 'GET',
+        params
+    },
+      options);
+    }
+  
+/**
+ * Aggregate contextual information for a single node. Fetches multiple
+facets (parameters, channels, extensions, errors, etc.) in one call.
+Use include to select specific facets; omit for all.
+
+ * @summary Get contextual info for a node (aggregated)
+ */
+export const getTdContext = (
+    params: GetTdContextParams,
+ options?: SecondParameter<typeof customInstance<GetTdContext200>>,) => {
+      return customInstance<GetTdContext200>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/context`, method: 'GET',
+        params
+    },
+      options);
+    }
+  
 export type DeleteNodeResult = NonNullable<Awaited<ReturnType<typeof deleteNode>>>
 export type GetNodesResult = NonNullable<Awaited<ReturnType<typeof getNodes>>>
 export type CreateNodeResult = NonNullable<Awaited<ReturnType<typeof createNode>>>
@@ -1545,10 +1777,11 @@ export type GetNodeErrorsResult = NonNullable<Awaited<ReturnType<typeof getNodeE
 export type GetDatTextResult = NonNullable<Awaited<ReturnType<typeof getDatText>>>
 export type SetDatTextResult = NonNullable<Awaited<ReturnType<typeof setDatText>>>
 export type LintDatResult = NonNullable<Awaited<ReturnType<typeof lintDat>>>
-export type LintDatsResult = NonNullable<Awaited<ReturnType<typeof lintDats>>>
 export type FormatDatResult = NonNullable<Awaited<ReturnType<typeof formatDat>>>
 export type ValidateJsonDatResult = NonNullable<Awaited<ReturnType<typeof validateJsonDat>>>
 export type ValidateGlslDatResult = NonNullable<Awaited<ReturnType<typeof validateGlslDat>>>
+export type LintDatsResult = NonNullable<Awaited<ReturnType<typeof lintDats>>>
+export type TypecheckDatResult = NonNullable<Awaited<ReturnType<typeof typecheckDat>>>
 export type DiscoverDatCandidatesResult = NonNullable<Awaited<ReturnType<typeof discoverDatCandidates>>>
 export type GetNodeParameterSchemaResult = NonNullable<Awaited<ReturnType<typeof getNodeParameterSchema>>>
 export type CompleteOpPathsResult = NonNullable<Awaited<ReturnType<typeof completeOpPaths>>>
@@ -1561,8 +1794,10 @@ export type GetModuleHelpResult = NonNullable<Awaited<ReturnType<typeof getModul
 export type ExecNodeMethodResult = NonNullable<Awaited<ReturnType<typeof execNodeMethod>>>
 export type ExecPythonScriptResult = NonNullable<Awaited<ReturnType<typeof execPythonScript>>>
 export type GetTdInfoResult = NonNullable<Awaited<ReturnType<typeof getTdInfo>>>
+export type GetHealthResult = NonNullable<Awaited<ReturnType<typeof getHealth>>>
+export type GetCapabilitiesResult = NonNullable<Awaited<ReturnType<typeof getCapabilities>>>
 export type CreateGeometryCompResult = NonNullable<Awaited<ReturnType<typeof createGeometryComp>>>
 export type CreateFeedbackLoopResult = NonNullable<Awaited<ReturnType<typeof createFeedbackLoop>>>
-export type GetCapabilitiesResult = NonNullable<Awaited<ReturnType<typeof getCapabilities>>>
-export type TypecheckDatResult = NonNullable<Awaited<ReturnType<typeof typecheckDat>>>
 export type ConfigureInstancingResult = NonNullable<Awaited<ReturnType<typeof configureInstancing>>>
+export type IndexTdProjectResult = NonNullable<Awaited<ReturnType<typeof indexTdProject>>>
+export type GetTdContextResult = NonNullable<Awaited<ReturnType<typeof getTdContext>>>

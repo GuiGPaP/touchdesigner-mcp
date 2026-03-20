@@ -235,6 +235,79 @@ export const LintDatResponse = zod.object({
 
 
 /**
+ * @summary Format DAT code with ruff
+ */
+export const formatDatBodyDryRunDefault = false;
+
+export const FormatDatBody = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/script1\"'),
+  "dryRun": zod.boolean().default(formatDatBodyDryRunDefault).describe('Preview formatting without applying (returns diff).')
+})
+
+export const FormatDatResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "path": zod.string().optional(),
+  "name": zod.string().optional(),
+  "originalText": zod.string().optional(),
+  "formattedText": zod.string().optional(),
+  "changed": zod.boolean().optional(),
+  "diff": zod.string().optional(),
+  "applied": zod.boolean().optional()
+}).optional()
+})
+
+
+/**
+ * @summary Validate JSON/YAML content in a DAT
+ */
+export const ValidateJsonDatBody = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/data1\"')
+})
+
+export const ValidateJsonDatResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "path": zod.string().optional(),
+  "name": zod.string().optional(),
+  "format": zod.enum(['json', 'yaml', 'unknown']).optional(),
+  "valid": zod.boolean().optional(),
+  "diagnostics": zod.array(zod.object({
+  "line": zod.number().optional(),
+  "column": zod.number().optional(),
+  "message": zod.string().optional()
+}).describe('A single JSON\/YAML validation diagnostic')).optional()
+}).optional()
+})
+
+
+/**
+ * @summary Validate GLSL shader code in a DAT
+ */
+export const ValidateGlslDatBody = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/glsl_pixel\"')
+})
+
+export const ValidateGlslDatResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "path": zod.string().optional(),
+  "name": zod.string().optional(),
+  "shaderType": zod.enum(['pixel', 'vertex', 'compute', 'unknown']).optional(),
+  "valid": zod.boolean().nullish(),
+  "diagnostics": zod.array(zod.object({
+  "line": zod.number().optional(),
+  "column": zod.number().optional(),
+  "message": zod.string().optional(),
+  "severity": zod.enum(['error', 'warning', 'info']).optional()
+}).describe('A single GLSL validation diagnostic')).optional(),
+  "validationMethod": zod.enum(['td_errors', 'glslangValidator', 'none']).optional(),
+  "validationAvailable": zod.boolean().optional().describe('Whether any validation method was available')
+}).optional()
+})
+
+
+/**
  * @summary Batch lint DATs under a parent path
  */
 export const lintDatsBodyPatternDefault = `*`;
@@ -269,7 +342,7 @@ export const LintDatsResponse = zod.object({
   "name": zod.string().optional(),
   "diagnosticCount": zod.number().optional()
 })).optional()
-}).optional(),
+}).optional().describe('Aggregated summary for a batch lint operation'),
   "results": zod.array(zod.object({
   "path": zod.string().optional(),
   "name": zod.string().optional(),
@@ -303,86 +376,12 @@ export const TypecheckDatResponse = zod.object({
   "name": zod.string().optional(),
   "diagnosticCount": zod.number().optional(),
   "diagnostics": zod.array(zod.object({
-  "severity": zod.string().optional(),
+  "severity": zod.enum(['error', 'warning', 'information']).optional(),
   "message": zod.string().optional(),
   "line": zod.number().optional(),
   "column": zod.number().optional(),
   "rule": zod.string().optional()
 }).describe('A single pyright typecheck diagnostic')).optional()
-}).optional()
-})
-
-
-/**
- * @summary Format DAT code with ruff
- */
-export const formatDatBodyDryRunDefault = false;
-
-export const FormatDatBody = zod.object({
-  "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/script1\"'),
-  "dryRun": zod.boolean().default(formatDatBodyDryRunDefault).describe('Preview formatting without applying (returns diff).')
-})
-
-export const FormatDatResponse = zod.object({
-  "success": zod.boolean().optional(),
-  "data": zod.object({
-  "path": zod.string().optional(),
-  "name": zod.string().optional(),
-  "originalText": zod.string().optional(),
-  "formattedText": zod.string().optional(),
-  "changed": zod.boolean().optional(),
-  "diff": zod.string().optional(),
-  "applied": zod.boolean().optional()
-}).optional()
-})
-
-
-/**
- * Validate JSON or YAML content in a DAT operator
- * @summary Validate JSON/YAML content in a DAT
- */
-export const ValidateJsonDatBody = zod.object({
-  "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/data1\"')
-})
-
-export const ValidateJsonDatResponse = zod.object({
-  "success": zod.boolean().optional(),
-  "data": zod.object({
-  "path": zod.string().optional(),
-  "name": zod.string().optional(),
-  "format": zod.enum(['json', 'yaml', 'unknown']).optional(),
-  "valid": zod.boolean().optional(),
-  "diagnostics": zod.array(zod.object({
-  "line": zod.number().optional(),
-  "column": zod.number().optional(),
-  "message": zod.string().optional()
-})).optional()
-}).optional()
-})
-
-
-/**
- * Validate GLSL shader code in a DAT
- * @summary Validate GLSL shader code in a DAT
- */
-export const ValidateGlslDatBody = zod.object({
-  "nodePath": zod.string().describe('Absolute path to the DAT node. e.g., \"\/project1\/glsl_pixel\"')
-})
-
-export const ValidateGlslDatResponse = zod.object({
-  "success": zod.boolean().optional(),
-  "data": zod.object({
-  "path": zod.string().optional(),
-  "name": zod.string().optional(),
-  "shaderType": zod.enum(['pixel', 'vertex', 'compute', 'unknown']).optional(),
-  "valid": zod.boolean().optional(),
-  "diagnostics": zod.array(zod.object({
-  "line": zod.number().optional(),
-  "column": zod.number().optional(),
-  "message": zod.string().optional(),
-  "severity": zod.string().optional()
-})).optional(),
-  "validationMethod": zod.enum(['td_errors', 'glslangValidator', 'none']).optional()
 }).optional()
 })
 
@@ -586,30 +585,6 @@ export const GetCompExtensionsResponse = zod.object({
 
 
 /**
- * Returns available features and tool versions
- * @summary Get server capabilities
- */
-export const GetCapabilitiesResponse = zod.object({
-  "success": zod.boolean().optional(),
-  "data": zod.object({
-  "lint_dat": zod.boolean().optional(),
-  "format_dat": zod.boolean().optional(),
-  "typecheck_dat": zod.boolean().optional(),
-  "tools": zod.object({
-  "ruff": zod.object({
-  "installed": zod.boolean().optional(),
-  "version": zod.string().nullish()
-}).optional(),
-  "pyright": zod.object({
-  "installed": zod.boolean().optional(),
-  "version": zod.string().nullish()
-}).optional()
-}).optional()
-}).optional()
-})
-
-
-/**
  * Returns a list of Python classes, modules, and functions available in TouchDesigner
  * @summary Get a list of Python classes and modules
  */
@@ -743,6 +718,52 @@ export const GetTdInfoResponse = zod.object({
 
 
 /**
+ * Returns health status of the TouchDesigner server
+ * @summary Get server health status
+ */
+export const GetHealthResponse = zod.object({
+  "success": zod.boolean().describe('Whether the operation was successful'),
+  "data": zod.object({
+  "status": zod.string().describe('Server status'),
+  "pythonVersion": zod.string().describe('Python interpreter version'),
+  "tdVersion": zod.string().describe('TouchDesigner version (e.g., 2023.30000)'),
+  "tdBuild": zod.string().describe('TouchDesigner build number')
+}).nullable(),
+  "error": zod.string().nullable().describe('Error message if the operation was not successful')
+})
+
+
+/**
+ * Returns available features and tool versions
+ * @summary Get server capabilities
+ */
+export const GetCapabilitiesResponse = zod.object({
+  "success": zod.boolean().describe('Whether the operation was successful'),
+  "data": zod.object({
+  "lint_dat": zod.boolean().optional().describe('Whether lint_dat is available'),
+  "format_dat": zod.boolean().optional().describe('Whether format_dat is available'),
+  "validate_glsl_dat": zod.boolean().optional().describe('Whether validate_glsl_dat is available (always true, may use fallback)'),
+  "typecheck_dat": zod.boolean().optional().describe('Whether typecheck_dat is available'),
+  "tools": zod.object({
+  "ruff": zod.object({
+  "installed": zod.boolean().optional().describe('Whether the tool is installed'),
+  "version": zod.string().nullish().describe('Tool version string')
+}).nullish(),
+  "pyright": zod.object({
+  "installed": zod.boolean().optional().describe('Whether the tool is installed'),
+  "version": zod.string().nullish().describe('Tool version string')
+}).nullish(),
+  "glslangValidator": zod.object({
+  "installed": zod.boolean().optional().describe('Whether the tool is installed'),
+  "version": zod.string().nullish().describe('Tool version string')
+}).nullish()
+}).nullish()
+}).nullable(),
+  "error": zod.string().nullable().describe('Error message if the operation was not successful')
+})
+
+
+/**
  * Create a Geometry COMP with In and Out operators inside it.
 Wraps the td_helpers.network.setup_geometry_comp() helper.
 
@@ -822,4 +843,65 @@ export const ConfigureInstancingResponse = zod.object({
 
 }).nullable().describe('Instancing configuration details'),
   "error": zod.string().nullable().describe('Error message if the operation was not successful')
+})
+
+
+/**
+ * Scan the operator tree starting at rootPath and build a Markdown index
+for code-completion context. Cheap global scan — use get_td_context for
+per-node deep inspection.
+
+ * @summary Build project index for code completion
+ */
+export const indexTdProjectQueryRootPathDefault = `/project1`;
+export const indexTdProjectQueryMaxDepthDefault = 10;
+export const indexTdProjectQueryOpLimitDefault = 500;
+export const indexTdProjectQueryModeDefault = `compact`;
+
+export const IndexTdProjectQueryParams = zod.object({
+  "rootPath": zod.string().default(indexTdProjectQueryRootPathDefault).describe('Root operator path to start scanning from'),
+  "maxDepth": zod.number().default(indexTdProjectQueryMaxDepthDefault).describe('Maximum depth for findChildren'),
+  "opLimit": zod.number().default(indexTdProjectQueryOpLimitDefault).describe('Hard cap on operators scanned'),
+  "mode": zod.enum(['compact', 'full']).default(indexTdProjectQueryModeDefault).describe('Index detail level: compact (~2k tokens) or full')
+})
+
+export const IndexTdProjectResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "markdown": zod.string().optional(),
+  "stats": zod.object({
+  "opCount": zod.number().optional(),
+  "compCount": zod.number().optional(),
+  "extensionCount": zod.number().optional(),
+  "warningCount": zod.number().optional()
+}).optional(),
+  "truncated": zod.boolean().optional(),
+  "warnings": zod.array(zod.string()).optional()
+}).optional(),
+  "error": zod.string().nullish()
+})
+
+
+/**
+ * Aggregate contextual information for a single node. Fetches multiple
+facets (parameters, channels, extensions, errors, etc.) in one call.
+Use include to select specific facets; omit for all.
+
+ * @summary Get contextual info for a node (aggregated)
+ */
+export const GetTdContextQueryParams = zod.object({
+  "nodePath": zod.string().describe('Absolute path to the target node, e.g. \"\/project1\/geo1\"'),
+  "include": zod.array(zod.enum(['parameters', 'channels', 'tableInfo', 'extensions', 'children', 'errors', 'datText'])).optional().describe('Facets to include (omit for all)')
+})
+
+export const GetTdContextResponse = zod.object({
+  "success": zod.boolean().optional(),
+  "data": zod.object({
+  "nodePath": zod.string().optional(),
+  "facets": zod.looseObject({
+
+}).optional(),
+  "warnings": zod.array(zod.string()).optional()
+}).optional(),
+  "error": zod.string().nullish()
 })

@@ -1,4 +1,4 @@
-import type { GetCapabilities200Data } from "../../../gen/endpoints/TouchDesignerAPI.js";
+import type { GetCapabilities200ResponseData } from "../../../gen/endpoints/TouchDesignerAPI.js";
 import type { FormatterOptions } from "./responseFormatter.js";
 import {
 	finalizeFormattedText,
@@ -8,7 +8,7 @@ import {
 type FormatterOpts = Pick<FormatterOptions, "detailLevel" | "responseFormat">;
 
 export function formatCapabilities(
-	data: GetCapabilities200Data | undefined,
+	data: GetCapabilities200ResponseData | undefined,
 	options?: FormatterOpts,
 ): string {
 	const opts = mergeFormatterOptions(options);

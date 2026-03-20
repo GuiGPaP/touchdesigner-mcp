@@ -1170,6 +1170,36 @@ console.log(candidates.data?.candidates);`,
 		returns: "Extension method and property listings.",
 		tool: TOOL_NAMES.GET_COMP_EXTENSIONS,
 	},
+	{
+		category: "state",
+		description:
+			"Build a Markdown project index for code completion. Cheap global scan of the operator tree.",
+		example: `await indexTdProject({ rootPath: "/project1", mode: "compact" });`,
+		functionName: "indexTdProject",
+		modulePath: `${MODULE_ROOT}/indexTdProject.ts`,
+		parameters: [
+			{ description: "Root operator path.", name: "rootPath", required: false, type: "string" },
+			{ description: "Maximum depth for findChildren.", name: "maxDepth", required: false, type: "number" },
+			{ description: "Hard cap on operators scanned.", name: "opLimit", required: false, type: "number" },
+			{ description: "Index detail level: compact or full.", name: "mode", required: false, type: "string" },
+		],
+		returns: "Markdown index with stats, warnings, and truncation status.",
+		tool: TOOL_NAMES.INDEX_TD_PROJECT,
+	},
+	{
+		category: "state",
+		description:
+			"Aggregate contextual info for a single node: parameters, channels, extensions, errors, and more.",
+		example: `await getTdContext({ nodePath: "/project1/geo1", include: ["parameters", "errors"] });`,
+		functionName: "getTdContext",
+		modulePath: `${MODULE_ROOT}/getTdContext.ts`,
+		parameters: [
+			{ description: "Absolute path to the target node.", name: "nodePath", required: true, type: "string" },
+			{ description: "Facets to include (omit for all).", name: "include", required: false, type: "string[]" },
+		],
+		returns: "Aggregated facets with per-facet warnings.",
+		tool: TOOL_NAMES.GET_TD_CONTEXT,
+	},
 ];
 
 export function getTouchDesignerToolMetadata(): ToolMetadata[] {

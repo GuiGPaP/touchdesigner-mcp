@@ -16,6 +16,10 @@ paths:
     $ref: ./paths/api/nodes/detail.yml
   /api/nodes/errors:
     $ref: ./paths/api/nodes/errors.yml
+  /api/nodes/project-index:
+    $ref: ./paths/api/nodes/project-index.yml
+  /api/nodes/context:
+    $ref: ./paths/api/nodes/context.yml
   /api/td/classes:
     $ref: ./paths/api/td/classes/list.yml
   /api/td/classes/{className}:

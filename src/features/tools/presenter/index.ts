@@ -5,6 +5,7 @@
  */
 
 export { formatCapabilities } from "./capabilitiesFormatter.js";
+export { formatProjectIndex, formatTdContext } from "./completionFormatter.js";
 export type { ClassDetailsData, ClassListData } from "./classListFormatter.js";
 export { formatClassDetails, formatClassList } from "./classListFormatter.js";
 export {

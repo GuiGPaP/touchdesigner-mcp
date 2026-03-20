@@ -32,6 +32,8 @@ import {
 	ValidateJsonDatBody,
 	SetDatTextBody,
 	UpdateNodeBody,
+	IndexTdProjectQueryParams,
+	GetTdContextQueryParams,
 } from "../../../gen/mcp/touchDesignerAPI.zod.js";
 import type { TouchDesignerClient } from "../../../tdClient/touchDesignerClient.js";
 import type { ToolMetadata } from "../metadata/touchDesignerToolMetadata.js";
@@ -68,6 +70,8 @@ import {
 	formatTdInfo,
 	formatToolMetadata,
 	formatUpdateNodeResult,
+	formatProjectIndex,
+	formatTdContext,
 } from "../presenter/index.js";
 import {
 	detailOnlyFormattingSchema,
@@ -1078,6 +1082,72 @@ export function registerTdTools(
 					error,
 					logger,
 					TOOL_NAMES.GET_COMP_EXTENSIONS,
+				);
+			}
+		},
+	);
+
+	// ── index_td_project ────────────────────────────────────────
+
+	const indexTdProjectToolSchema = IndexTdProjectQueryParams.extend(
+		detailOnlyFormattingSchema.shape,
+	);
+	type IndexTdProjectToolParams = z.input<typeof indexTdProjectToolSchema>;
+
+	server.tool(
+		TOOL_NAMES.INDEX_TD_PROJECT,
+		"Build project index for code completion (cheap global scan)",
+		indexTdProjectToolSchema.strict().shape,
+		async (params: IndexTdProjectToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...queryParams } = params;
+				const result = await tdClient.indexTdProject(queryParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatProjectIndex(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.INDEX_TD_PROJECT,
+				);
+			}
+		},
+	);
+
+	// ── get_td_context ──────────────────────────────────────────
+
+	const getTdContextToolSchema = GetTdContextQueryParams.extend(
+		detailOnlyFormattingSchema.shape,
+	);
+	type GetTdContextToolParams = z.input<typeof getTdContextToolSchema>;
+
+	server.tool(
+		TOOL_NAMES.GET_TD_CONTEXT,
+		"Get contextual info for a node (aggregated facets: parameters, channels, extensions, errors, etc.)",
+		getTdContextToolSchema.strict().shape,
+		async (params: GetTdContextToolParams) => {
+			try {
+				const { detailLevel, responseFormat, ...queryParams } = params;
+				const result = await tdClient.getTdContext(queryParams);
+				if (!result.success) {
+					throw result.error;
+				}
+				const formattedText = formatTdContext(result.data, {
+					detailLevel: detailLevel ?? "summary",
+					responseFormat,
+				});
+				return createToolResult(tdClient, formattedText);
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.GET_TD_CONTEXT,
 				);
 			}
 		},

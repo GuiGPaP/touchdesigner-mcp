@@ -42,9 +42,11 @@ import {
 	setDatText as apiSetDatText,
 	typecheckDat as apiTypecheckDat,
 	updateNode as apiUpdateNode,
+	indexTdProject as apiIndexTdProject,
+	getTdContext as apiGetTdContext,
 	type CompleteOpPaths200Data,
 	type CompleteOpPathsParams,
-	type GetCapabilities200Data,
+	type GetCapabilities200ResponseData,
 	type ConfigureInstancingRequest,
 	type CreateFeedbackLoopRequest,
 	type CreateGeometryCompRequest,
@@ -83,6 +85,10 @@ import {
 	type TypecheckDat200Data,
 	type TypecheckDatBody,
 	type UpdateNodeRequest,
+	type IndexTdProject200Data,
+	type IndexTdProjectParams,
+	type GetTdContext200Data,
+	type GetTdContextParams,
 } from "../gen/endpoints/TouchDesignerAPI.js";
 
 /**
@@ -119,6 +125,8 @@ export interface ITouchDesignerApi {
 	setDatText: typeof apiSetDatText;
 	typecheckDat: typeof apiTypecheckDat;
 	updateNode: typeof apiUpdateNode;
+	indexTdProject: typeof apiIndexTdProject;
+	getTdContext: typeof apiGetTdContext;
 }
 
 /**
@@ -155,6 +163,8 @@ const defaultApiClient: ITouchDesignerApi = {
 	setDatText: apiSetDatText,
 	typecheckDat: apiTypecheckDat,
 	updateNode: apiUpdateNode,
+	indexTdProject: apiIndexTdProject,
+	getTdContext: apiGetTdContext,
 };
 
 export type TdResponse<T> = {
@@ -454,7 +464,7 @@ export class TouchDesignerClient {
 	async getCapabilities() {
 		return this.apiCall("Getting capabilities", () =>
 			this.api.getCapabilities() as Promise<
-				TdResponse<GetCapabilities200Data | undefined>
+				TdResponse<GetCapabilities200ResponseData | undefined>
 			>,
 		);
 	}
@@ -778,6 +788,34 @@ export class TouchDesignerClient {
 					TdResponse<GetCompExtensions200Data | undefined>
 				>,
 			{ compPath: params.compPath },
+		);
+	}
+
+	/**
+	 * Build project index for code completion
+	 */
+	async indexTdProject(params?: IndexTdProjectParams) {
+		return this.apiCall(
+			"Building project index",
+			() =>
+				this.api.indexTdProject(params) as Promise<
+					TdResponse<IndexTdProject200Data | undefined>
+				>,
+			{ rootPath: params?.rootPath },
+		);
+	}
+
+	/**
+	 * Get contextual info for a node (aggregated facets)
+	 */
+	async getTdContext(params: GetTdContextParams) {
+		return this.apiCall(
+			"Getting node context",
+			() =>
+				this.api.getTdContext(params) as Promise<
+					TdResponse<GetTdContext200Data | undefined>
+				>,
+			{ nodePath: params.nodePath },
 		);
 	}
 
