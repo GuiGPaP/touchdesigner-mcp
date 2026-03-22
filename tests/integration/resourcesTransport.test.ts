@@ -82,8 +82,11 @@ describe("Resources Transport Integration (offline)", () => {
 
 	it("should declare resources in server capabilities", () => {
 		expect(initializeResult).toBeDefined();
-		const capabilities = (initializeResult as { result?: { capabilities?: Record<string, unknown> } })
-			.result?.capabilities;
+		const capabilities = (
+			initializeResult as {
+				result?: { capabilities?: Record<string, unknown> };
+			}
+		).result?.capabilities;
 		expect(capabilities).toBeDefined();
 		expect(capabilities).toHaveProperty("resources");
 	});
@@ -181,7 +184,7 @@ describe("Resources Transport Integration (offline)", () => {
 				Accept: ACCEPT_HEADER,
 				"Content-Type": "application/json",
 				"Mcp-Protocol-Version": PROTOCOL_VERSION,
-				"Mcp-Session-Id": activeSessionId!,
+				"Mcp-Session-Id": activeSessionId ?? "",
 			},
 			method: "POST",
 		});

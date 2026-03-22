@@ -5,7 +5,6 @@ vi.mock("../../../src/features/resources/paths.js", () => ({
 }));
 
 import { registerResources } from "../../../src/features/resources/index.js";
-import type { KnowledgeRegistry } from "../../../src/features/resources/registry.js";
 
 /**
  * Fail-soft test: when resolveKnowledgePath returns undefined,
@@ -26,11 +25,9 @@ describe("registerResources — fail-soft (no knowledge path)", () => {
 		registeredResources = [];
 		mockLogger = { sendLog: vi.fn() };
 		mockServer = {
-			registerResource: vi.fn(
-				(name: string, uriOrTemplate: unknown) => {
-					registeredResources.push({ name, uriOrTemplate });
-				},
-			),
+			registerResource: vi.fn((name: string, uriOrTemplate: unknown) => {
+				registeredResources.push({ name, uriOrTemplate });
+			}),
 		};
 	});
 
@@ -92,7 +89,7 @@ describe("registerResources — fail-soft (no knowledge path)", () => {
 			(c: unknown[]) => c[1] === "td://modules",
 		);
 		expect(callArgs).toBeDefined();
-		const callback = callArgs![3] as () => {
+		const callback = callArgs?.[3] as () => {
 			contents: Array<{ text: string }>;
 		};
 		const result = callback();

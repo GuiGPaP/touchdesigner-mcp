@@ -8,7 +8,14 @@ import type { TDKnowledgeEntry } from "../../../src/features/resources/types.js"
  * These ensure that the canonical JSON files remain valid and complete.
  */
 
-const CORPUS_PATH = join(import.meta.dirname, "..", "..", "..", "data", "td-knowledge");
+const CORPUS_PATH = join(
+	import.meta.dirname,
+	"..",
+	"..",
+	"..",
+	"data",
+	"td-knowledge",
+);
 const mockLogger = { sendLog: vi.fn() };
 
 describe("Corpus contract — data/td-knowledge/", () => {
@@ -47,13 +54,13 @@ describe("Corpus contract — data/td-knowledge/", () => {
 
 				it("has non-empty content.warnings", () => {
 					expect(mod).toBeDefined();
-					expect(mod!.content.warnings).toBeDefined();
-					expect(mod!.content.warnings!.length).toBeGreaterThan(0);
+					expect(mod?.content.warnings).toBeDefined();
+					expect(mod?.content.warnings?.length).toBeGreaterThan(0);
 				});
 
 				it("has non-empty payload.members", () => {
 					expect(mod).toBeDefined();
-					expect(mod!.payload.members.length).toBeGreaterThan(0);
+					expect(mod?.payload.members.length).toBeGreaterThan(0);
 				});
 			});
 		}
@@ -73,7 +80,7 @@ describe("Corpus contract — data/td-knowledge/", () => {
 		it("glsl-top has kind 'operator'", () => {
 			const glslTop = operators.find((o) => o.id === "glsl-top");
 			expect(glslTop).toBeDefined();
-			expect(glslTop!.kind).toBe("operator");
+			expect(glslTop?.kind).toBe("operator");
 		});
 	});
 });
