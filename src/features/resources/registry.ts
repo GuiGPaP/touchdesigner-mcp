@@ -91,6 +91,19 @@ export class KnowledgeRegistry {
 			.filter((e) => e.kind === "operator")
 			.map((e) => ({ id: e.id, kind: e.kind, title: e.title }));
 	}
+
+	/**
+	 * Return a lightweight index filtered to glsl-pattern entries.
+	 */
+	getGlslPatternIndex(): Array<{
+		id: string;
+		title: string;
+		kind: string;
+	}> {
+		return [...this.entries.values()]
+			.filter((e) => e.kind === "glsl-pattern")
+			.map((e) => ({ id: e.id, kind: e.kind, title: e.title }));
+	}
 }
 
 function matchesQuery(entry: TDKnowledgeEntry, query: string): boolean {
@@ -112,6 +125,12 @@ function matchesQuery(entry: TDKnowledgeEntry, query: string): boolean {
 		haystacks.push(entry.payload.opFamily);
 		for (const p of entry.payload.parameters) {
 			haystacks.push(p.name);
+		}
+	} else if (entry.kind === "glsl-pattern") {
+		haystacks.push(entry.payload.type);
+		haystacks.push(entry.payload.difficulty);
+		if (entry.payload.tags) {
+			haystacks.push(...entry.payload.tags);
 		}
 	}
 

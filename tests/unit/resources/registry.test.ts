@@ -23,12 +23,45 @@ function makeEntry(
 	} as TDKnowledgeEntry;
 }
 
-function writeTempModule(basePath: string, entry: TDKnowledgeEntry): void {
-	const modulesDir = join(basePath, "modules");
-	if (!existsSync(modulesDir)) {
-		mkdirSync(modulesDir, { recursive: true });
+function makeGlslPatternEntry(
+	overrides: Partial<TDKnowledgeEntry> = {},
+): TDKnowledgeEntry {
+	return {
+		content: { summary: "A test GLSL pattern" },
+		id: "test-pattern",
+		kind: "glsl-pattern",
+		payload: {
+			code: {
+				glsl: "out vec4 fragColor;\nvoid main() { fragColor = vec4(1.0); }",
+			},
+			difficulty: "beginner",
+			setup: {
+				operators: [{ family: "TOP", name: "test", type: "glslTOP" }],
+			},
+			tags: ["test"],
+			type: "pixel",
+		},
+		provenance: { confidence: "high", license: "MIT", source: "manual" },
+		searchKeywords: ["test", "pixel"],
+		title: "Test Pattern",
+		...overrides,
+	} as TDKnowledgeEntry;
+}
+
+function writeTempEntry(
+	basePath: string,
+	subdir: string,
+	entry: TDKnowledgeEntry,
+): void {
+	const dir = join(basePath, subdir);
+	if (!existsSync(dir)) {
+		mkdirSync(dir, { recursive: true });
 	}
-	writeFileSync(join(modulesDir, `${entry.id}.json`), JSON.stringify(entry));
+	writeFileSync(join(dir, `${entry.id}.json`), JSON.stringify(entry));
+}
+
+function writeTempModule(basePath: string, entry: TDKnowledgeEntry): void {
+	writeTempEntry(basePath, "modules", entry);
 }
 
 describe("KnowledgeRegistry", () => {
@@ -215,6 +248,68 @@ describe("KnowledgeRegistry", () => {
 
 			const results = registry.search("test", 1);
 			expect(results).toHaveLength(1);
+		});
+	});
+
+	describe("glsl-pattern support", () => {
+		it("getByKind should return glsl-pattern entries", () => {
+			const entry = makeGlslPatternEntry({ id: "noise" });
+			writeTempEntry(tempDir, "glsl-patterns", entry);
+
+			const registry = new KnowledgeRegistry(mockLogger);
+			registry.loadAll(tempDir);
+
+			const results = registry.getByKind("glsl-pattern");
+			expect(results).toHaveLength(1);
+			expect(results[0].id).toBe("noise");
+		});
+
+		it("getGlslPatternIndex should return pattern index", () => {
+			const entry1 = makeGlslPatternEntry({
+				id: "pattern1",
+				title: "Pattern 1",
+			});
+			const entry2 = makeGlslPatternEntry({
+				id: "pattern2",
+				title: "Pattern 2",
+			});
+			writeTempEntry(tempDir, "glsl-patterns", entry1);
+			writeTempEntry(tempDir, "glsl-patterns", entry2);
+
+			const registry = new KnowledgeRegistry(mockLogger);
+			registry.loadAll(tempDir);
+
+			const index = registry.getGlslPatternIndex();
+			expect(index).toHaveLength(2);
+			expect(index[0]).toEqual({
+				id: "pattern1",
+				kind: "glsl-pattern",
+				title: "Pattern 1",
+			});
+		});
+
+		it("search should match on tags and type", () => {
+			const entry = makeGlslPatternEntry({
+				id: "feedback",
+				payload: {
+					code: { glsl: "void main() {}" },
+					difficulty: "intermediate",
+					setup: {
+						operators: [{ family: "TOP", name: "fb", type: "glslTOP" }],
+					},
+					tags: ["feedback", "decay"],
+					type: "pixel",
+				},
+			});
+			writeTempEntry(tempDir, "glsl-patterns", entry);
+
+			const registry = new KnowledgeRegistry(mockLogger);
+			registry.loadAll(tempDir);
+
+			expect(registry.search("feedback")).toHaveLength(1);
+			expect(registry.search("pixel")).toHaveLength(1);
+			expect(registry.search("decay")).toHaveLength(1);
+			expect(registry.search("intermediate")).toHaveLength(1);
 		});
 	});
 

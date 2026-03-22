@@ -79,6 +79,58 @@ const operatorEntrySchema = knowledgeEntryBaseSchema.extend({
 	payload: operatorPayloadSchema,
 });
 
+// ── GLSL pattern schemas ───────────────────────────────────────────
+
+const glslUniformSchema = z.object({
+	default: z.string().optional(),
+	description: z.string().optional(),
+	expression: z.string().optional(),
+	name: z.string(),
+	page: z.string().optional(),
+	type: z.enum(["float", "vec2", "vec3", "vec4", "int", "sampler2D"]),
+});
+
+const glslOperatorSetupSchema = z.object({
+	family: z.string(),
+	name: z.string(),
+	params: z.record(z.string(), z.unknown()).optional(),
+	role: z.enum(["primary", "auxiliary", "input"]).optional(),
+	type: z.string(),
+});
+
+const glslConnectionSchema = z.object({
+	from: z.string(),
+	inputIndex: z.number().int().optional(),
+	to: z.string(),
+});
+
+const glslSetupSchema = z.object({
+	connections: z.array(glslConnectionSchema).optional(),
+	operators: z.array(glslOperatorSetupSchema),
+	resolution: z.object({ h: z.number(), w: z.number() }).optional(),
+	uniforms: z.array(glslUniformSchema).optional(),
+});
+
+const glslCodeSchema = z.object({
+	glsl: z.string(),
+	vertexGlsl: z.string().optional(),
+});
+
+const glslPatternPayloadSchema = z.object({
+	code: glslCodeSchema,
+	difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+	estimatedGpuCost: z.enum(["low", "medium", "high"]).optional(),
+	minVersion: z.string().optional(),
+	setup: glslSetupSchema,
+	tags: z.array(z.string()).optional(),
+	type: z.enum(["pixel", "vertex", "compute", "utility"]),
+});
+
+const glslPatternEntrySchema = knowledgeEntryBaseSchema.extend({
+	kind: z.literal("glsl-pattern"),
+	payload: glslPatternPayloadSchema,
+});
+
 // ── Enriched operator schemas (post-merge with live data) ───────────
 
 export const enrichedStaticOperatorParamSchema =
@@ -121,6 +173,7 @@ export const enrichmentMetaSchema = z.object({
 export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
 	pythonModuleEntrySchema,
 	operatorEntrySchema,
+	glslPatternEntrySchema,
 ]);
 
 // ── Exported types ──────────────────────────────────────────────────
@@ -128,6 +181,7 @@ export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
 export type TDKnowledgeEntry = z.infer<typeof knowledgeEntrySchema>;
 export type TDPythonModuleEntry = z.infer<typeof pythonModuleEntrySchema>;
 export type TDOperatorEntry = z.infer<typeof operatorEntrySchema>;
+export type TDGlslPatternEntry = z.infer<typeof glslPatternEntrySchema>;
 export type EnrichmentMeta = z.infer<typeof enrichmentMetaSchema>;
 export type EnrichedStaticOperatorParam = z.infer<
 	typeof enrichedStaticOperatorParamSchema
