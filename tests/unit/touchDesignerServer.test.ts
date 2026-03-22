@@ -7,8 +7,9 @@ vi.mock("../../src/features/prompts/index.js", () => ({
 	registerPrompts: vi.fn(),
 }));
 
+const sentinelRegistry = { _sentinel: true };
 vi.mock("../../src/features/resources/index.js", () => ({
-	registerResources: vi.fn(),
+	registerResources: vi.fn(() => sentinelRegistry),
 }));
 
 vi.mock("../../src/features/tools/index.js", () => ({
@@ -56,5 +57,28 @@ describe("TouchDesignerServer", () => {
 		expect(promptsModule.registerPrompts).toHaveBeenCalled();
 		expect(resourcesModule.registerResources).toHaveBeenCalled();
 		expect(toolsModule.registerTools).toHaveBeenCalled();
+	});
+
+	it("should pass KnowledgeRegistry from registerResources to registerTools", async () => {
+		const resourcesModule = await import(
+			"../../src/features/resources/index.js"
+		);
+		const toolsModule = await import("../../src/features/tools/index.js");
+
+		new TouchDesignerServer();
+
+		// registerResources returns the sentinel registry
+		expect(resourcesModule.registerResources).toHaveReturnedWith(
+			sentinelRegistry,
+		);
+
+		// registerTools receives it as the 5th argument
+		expect(toolsModule.registerTools).toHaveBeenCalledWith(
+			expect.anything(), // server
+			expect.anything(), // logger
+			expect.anything(), // tdClient
+			expect.anything(), // serverMode
+			sentinelRegistry, // knowledgeRegistry
+		);
 	});
 });

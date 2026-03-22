@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ILogger } from "../../core/logger.js";
 import type { ServerMode } from "../../core/serverMode.js";
 import type { TouchDesignerClient } from "../../tdClient/index.js";
+import type { KnowledgeRegistry } from "../resources/registry.js";
 import {
 	resolveBuiltinAssetsPath,
 	resolveProjectAssetsPath,
@@ -10,21 +11,23 @@ import {
 import { AssetRegistry } from "../templates/registry.js";
 import type { AssetSource } from "../templates/types.js";
 import { registerAssetTools } from "./handlers/assetTools.js";
+import { registerGlslPatternTools } from "./handlers/glslPatternTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
 
 /**
- * Register resource handlers with MCP server
+ * Register tool handlers with MCP server
  */
 export function registerTools(
 	server: McpServer,
 	logger: ILogger,
 	tdClient: TouchDesignerClient,
 	serverMode: ServerMode,
+	knowledgeRegistry: KnowledgeRegistry,
 ): void {
 	registerTdTools(server, logger, tdClient, serverMode);
 
 	// Initialize asset registry with discovered paths
-	const registry = new AssetRegistry(logger);
+	const assetRegistry = new AssetRegistry(logger);
 	const assetPaths: Array<{ path: string; source: AssetSource }> = [];
 
 	const builtinPath = resolveBuiltinAssetsPath(import.meta.url);
@@ -42,7 +45,8 @@ export function registerTools(
 		assetPaths.push({ path: projectPath, source: "project" });
 	}
 
-	registry.loadAll(assetPaths);
+	assetRegistry.loadAll(assetPaths);
 
-	registerAssetTools(server, logger, tdClient, registry, serverMode);
+	registerAssetTools(server, logger, tdClient, assetRegistry, serverMode);
+	registerGlslPatternTools(server, logger, knowledgeRegistry, serverMode);
 }

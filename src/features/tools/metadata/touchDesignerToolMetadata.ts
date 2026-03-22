@@ -1397,6 +1397,82 @@ console.log(result.path, result.status);`,
 			"Deploy result with status (deployed, already_exists, update_available, conflict, dry_run) and target path.",
 		tool: TOOL_NAMES.DEPLOY_TD_ASSET,
 	},
+	{
+		category: "helpers",
+		description:
+			"Search the catalogue of GLSL shader patterns by type, difficulty, tags, or text query. Works offline.",
+		example: `const results = await searchGlslPatterns({ type: "pixel", difficulty: "beginner" });`,
+		functionName: "searchGlslPatterns",
+		modulePath: `${MODULE_ROOT}/searchGlslPatterns.ts`,
+		parameters: [
+			{
+				description: "Text query matching title, summary, tags, etc.",
+				name: "query",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Filter by shader type: pixel, vertex, compute, utility.",
+				name: "type",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Filter by difficulty: beginner, intermediate, advanced.",
+				name: "difficulty",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Filter by tags (OR logic).",
+				name: "tags",
+				required: false,
+				type: "string[]",
+			},
+			{
+				description: "Maximum number of results (default: 10).",
+				name: "maxResults",
+				required: false,
+				type: "number",
+			},
+		],
+		returns:
+			"List of matching GLSL patterns with id, title, type, difficulty, and summary.",
+		tool: TOOL_NAMES.SEARCH_GLSL_PATTERNS,
+	},
+	{
+		category: "helpers",
+		description:
+			"Get detailed information about a specific GLSL shader pattern by ID, including source code and TD setup instructions. Works offline.",
+		example: `const pattern = await getGlslPattern({ id: "raymarching-basic" });
+console.log(pattern.code.glsl);`,
+		functionName: "getGlslPattern",
+		modulePath: `${MODULE_ROOT}/getGlslPattern.ts`,
+		parameters: [
+			{
+				description: "Pattern ID to retrieve.",
+				name: "id",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Include GLSL source code (default: true).",
+				name: "includeCode",
+				required: false,
+				type: "boolean",
+			},
+			{
+				description:
+					"Include TD setup instructions — operators, uniforms, connections (default: true).",
+				name: "includeSetup",
+				required: false,
+				type: "boolean",
+			},
+		],
+		returns:
+			"Full GLSL pattern with source code, TD setup instructions, warnings, and metadata.",
+		tool: TOOL_NAMES.GET_GLSL_PATTERN,
+	},
 ];
 
 export function getTouchDesignerToolMetadata(): ToolMetadata[] {

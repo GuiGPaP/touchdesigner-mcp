@@ -13,7 +13,7 @@ export function registerResources(
 	logger: ILogger,
 	tdClient: TouchDesignerClient,
 	serverMode: ServerMode,
-): void {
+): KnowledgeRegistry {
 	const registry = new KnowledgeRegistry(logger);
 	const path = resolveKnowledgePath(import.meta.url);
 	if (path) {
@@ -35,4 +35,6 @@ export function registerResources(
 
 	registerKnowledgeResources(server, logger, registry);
 	registerOperatorResources(server, logger, registry, fusionService);
+
+	return registry;
 }

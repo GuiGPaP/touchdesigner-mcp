@@ -109,7 +109,18 @@ export class TouchDesignerServer {
 	 */
 	private registerAllFeatures(): void {
 		registerPrompts(this.server, this.logger);
-		registerResources(this.server, this.logger, this.tdClient, this.serverMode);
-		registerTools(this.server, this.logger, this.tdClient, this.serverMode);
+		const knowledgeRegistry = registerResources(
+			this.server,
+			this.logger,
+			this.tdClient,
+			this.serverMode,
+		);
+		registerTools(
+			this.server,
+			this.logger,
+			this.tdClient,
+			this.serverMode,
+			knowledgeRegistry,
+		);
 	}
 }
