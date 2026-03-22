@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 
-export type ServerModeValue = "docs-only" | "hybrid" | "live";
+export type ServerModeValue = "docs-only" | "live";
 
 export class ServerMode extends EventEmitter {
 	private _mode: ServerModeValue = "docs-only";

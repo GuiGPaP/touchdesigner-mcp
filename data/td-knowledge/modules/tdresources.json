@@ -6,6 +6,7 @@
 	"content": {
 		"summary": "Singleton system COMP providing UI popups (PopMenu, PopDialog), HTTP client (WebClient), file download (FileDownloader), and mouse input (MouseCHOP). Accessed via op.TDResources.",
 		"warnings": [
+			"Access via op.TDResources — do NOT use 'import TDResources'. This is a singleton COMP, not a Python module.",
 			"PopMenu supports max 2 nesting levels for submenus.",
 			"PopDialog supports max 4 buttons — additional buttons are silently ignored.",
 			"WebClient callback receives statusCode=None on timeout/connection failure — always check before using.",
@@ -94,6 +95,11 @@
 					{ "name": "uploadFile", "type": "str", "default": "None", "description": "Path to file — sends PUT with file body (upload, not download)" }
 				],
 				"warnings": ["force=False skips download if localPath already exists", "uploadFile repurposes this as a PUT upload — url becomes the upload target"]
+			},
+			{
+				"name": "ButtonPopMenu",
+				"description": "Variant of PopMenu attached to a button widget. Does NOT support submenus.",
+				"warnings": ["Does NOT support submenus"]
 			},
 			{
 				"name": "MouseCHOP",
