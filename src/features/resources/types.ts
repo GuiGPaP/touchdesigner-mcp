@@ -100,8 +100,9 @@ const glslOperatorSetupSchema = z.object({
 
 const glslConnectionSchema = z.object({
 	from: z.string(),
-	inputIndex: z.number().int().optional(),
+	fromOutput: z.number().int().default(0),
 	to: z.string(),
+	toInput: z.number().int().default(0),
 });
 
 const glslSetupSchema = z.object({

@@ -48,5 +48,11 @@ export function registerTools(
 	assetRegistry.loadAll(assetPaths);
 
 	registerAssetTools(server, logger, tdClient, assetRegistry, serverMode);
-	registerGlslPatternTools(server, logger, knowledgeRegistry, serverMode);
+	registerGlslPatternTools(
+		server,
+		logger,
+		tdClient,
+		knowledgeRegistry,
+		serverMode,
+	);
 }

@@ -81,9 +81,7 @@ export function formatGlslPatternDetail(
 		if (p.setup.connections && p.setup.connections.length > 0) {
 			lines.push("", "### Connections");
 			for (const c of p.setup.connections) {
-				const idx =
-					c.inputIndex !== undefined ? ` (input ${c.inputIndex})` : "";
-				lines.push(`- ${c.from} → ${c.to}${idx}`);
+				lines.push(`- ${c.from}[${c.fromOutput}] → ${c.to}[${c.toInput}]`);
 			}
 		}
 	}
@@ -147,5 +145,69 @@ export function formatGlslPatternSearchResults(
 	return finalizeFormattedText(lines.join("\n"), opts, {
 		context: { query: options?.query, resultCount: entries.length },
 		structured,
+	});
+}
+
+/**
+ * Format deploy result for the deploy_glsl_pattern tool response.
+ */
+export function formatGlslDeployResult(
+	result: Record<string, unknown>,
+	options?: FormatterOpts,
+): string {
+	const opts = mergeFormatterOptions(options);
+
+	const status = String(result.status ?? "unknown");
+	const patternId = String(result.patternId ?? "");
+	const path = result.path ? String(result.path) : undefined;
+	const message = result.message ? String(result.message) : undefined;
+	const createdNodes = Array.isArray(result.createdNodes)
+		? result.createdNodes
+		: [];
+	const uniforms = Array.isArray(result.uniforms) ? result.uniforms : [];
+
+	const lines: string[] = [`# Deploy: ${patternId} — ${status}`, ""];
+
+	if (message) {
+		lines.push(message, "");
+	}
+	if (path) {
+		lines.push(`- **Path:** ${path}`);
+	}
+	lines.push(`- **Status:** ${status}`);
+
+	if (createdNodes.length > 0) {
+		lines.push("", "## Created Nodes");
+		for (const n of createdNodes) {
+			const node = n as Record<string, unknown>;
+			lines.push(`- **${node.name}**: ${node.type} → ${node.path ?? ""}`);
+		}
+	}
+
+	if (uniforms.length > 0 && status !== "dry_run") {
+		lines.push("", "## Uniforms (manual configuration needed)");
+		for (const u of uniforms) {
+			const uni = u as Record<string, unknown>;
+			const expr = uni.expression ? ` = \`${uni.expression}\`` : "";
+			const desc = uni.description ? ` — ${uni.description}` : "";
+			lines.push(`- **${uni.name}** (${uni.type})${expr}${desc}`);
+			if (uni.page) {
+				lines.push(`  Page: ${uni.page}`);
+			}
+		}
+	}
+
+	if (status === "dry_run" && uniforms.length > 0) {
+		lines.push("", "## Planned Uniforms");
+		for (const u of uniforms) {
+			const uni = u as Record<string, unknown>;
+			const expr = uni.expression ? ` = \`${uni.expression}\`` : "";
+			lines.push(`- **${uni.name}** (${uni.type})${expr}`);
+		}
+	}
+
+	return finalizeFormattedText(lines.join("\n"), opts, {
+		context: { title: `Deploy: ${patternId}` },
+		structured: result,
 	});
 }

@@ -95,18 +95,20 @@ describe("GLSL Pattern Tools", () => {
 	}
 
 	describe("registration", () => {
-		it("should register both tools", () => {
+		it("should register all three tools", () => {
 			const registry = createMockRegistry([]);
 			registerGlslPatternTools(
 				mockServer.server as never,
 				mockLogger as never,
+				{} as never, // tdClient
 				registry,
 				mockServerMode as never,
 			);
-			expect(mockServer.server.tool).toHaveBeenCalledTimes(2);
+			expect(mockServer.server.tool).toHaveBeenCalledTimes(3);
 			const names = mockServer.tools.map((t) => t.name);
 			expect(names).toContain(TOOL_NAMES.SEARCH_GLSL_PATTERNS);
 			expect(names).toContain(TOOL_NAMES.GET_GLSL_PATTERN);
+			expect(names).toContain(TOOL_NAMES.DEPLOY_GLSL_PATTERN);
 		});
 	});
 
@@ -117,6 +119,7 @@ describe("GLSL Pattern Tools", () => {
 			registerGlslPatternTools(
 				mockServer.server as never,
 				mockLogger as never,
+				{} as never, // tdClient
 				registry,
 				mockServerMode as never,
 			);
@@ -136,6 +139,7 @@ describe("GLSL Pattern Tools", () => {
 			registerGlslPatternTools(
 				mockServer.server as never,
 				mockLogger as never,
+				{} as never, // tdClient
 				registry,
 				mockServerMode as never,
 			);
@@ -171,6 +175,7 @@ describe("GLSL Pattern Tools", () => {
 			registerGlslPatternTools(
 				mockServer.server as never,
 				mockLogger as never,
+				{} as never, // tdClient
 				registry,
 				mockServerMode as never,
 			);
@@ -236,6 +241,7 @@ describe("GLSL Pattern Tools", () => {
 			registerGlslPatternTools(
 				mockServer.server as never,
 				mockLogger as never,
+				{} as never, // tdClient
 				registry,
 				mockServerMode as never,
 			);
@@ -326,15 +332,81 @@ describe("GLSL Pattern Tools", () => {
 		});
 	});
 
+	describe("deploy_glsl_pattern", () => {
+		function setupDeploy(entries: TDKnowledgeEntry[] = []) {
+			const registry = createMockRegistry(entries);
+			registerGlslPatternTools(
+				mockServer.server as never,
+				mockLogger as never,
+				{} as never, // tdClient
+				registry,
+				mockServerMode as never,
+			);
+			return getToolHandler(TOOL_NAMES.DEPLOY_GLSL_PATTERN);
+		}
+
+		it("should return error for root path", async () => {
+			const tool = setupDeploy([makePattern()]);
+			const result = (await tool.handler({
+				id: "test-pattern",
+				parentPath: "/",
+			})) as { isError?: boolean; content: Array<{ text: string }> };
+			expect(result.isError).toBe(true);
+			expect(result.content[0].text).toContain("root");
+		});
+
+		it("should return error for unknown pattern", async () => {
+			const tool = setupDeploy([]);
+			const result = (await tool.handler({
+				id: "nonexistent",
+				parentPath: "/project1",
+			})) as { isError?: boolean };
+			expect(result.isError).toBe(true);
+		});
+
+		it("should return error for utility pattern", async () => {
+			const utilEntry = makePattern({
+				id: "sdf-primitives",
+				payload: {
+					code: { glsl: "// utility functions" },
+					difficulty: "intermediate",
+					setup: { operators: [] },
+					type: "utility",
+				},
+			});
+			const tool = setupDeploy([utilEntry]);
+			const result = (await tool.handler({
+				id: "sdf-primitives",
+				parentPath: "/project1",
+			})) as { isError?: boolean; content: Array<{ text: string }> };
+			expect(result.isError).toBe(true);
+			expect(result.content[0].text).toContain("utility");
+		});
+
+		it("should return dry-run plan without executing", async () => {
+			const entry = makePattern({ id: "passthrough", title: "Passthrough" });
+			const tool = setupDeploy([entry]);
+			const result = (await tool.handler({
+				dryRun: true,
+				id: "passthrough",
+				parentPath: "/project1",
+			})) as { isError?: boolean; content: Array<{ text: string }> };
+			expect(result.isError).toBeUndefined();
+			expect(result.content[0].text).toContain("dry_run");
+			expect(result.content[0].text).toContain("passthrough");
+		});
+	});
+
 	describe("tool metadata", () => {
-		it("should have metadata entries for both tools", () => {
+		it("should have metadata entries for all three tools", () => {
 			const metadata = getTouchDesignerToolMetadata();
 			const glslTools = metadata.filter(
 				(m) =>
 					m.tool === TOOL_NAMES.GET_GLSL_PATTERN ||
-					m.tool === TOOL_NAMES.SEARCH_GLSL_PATTERNS,
+					m.tool === TOOL_NAMES.SEARCH_GLSL_PATTERNS ||
+					m.tool === TOOL_NAMES.DEPLOY_GLSL_PATTERN,
 			);
-			expect(glslTools).toHaveLength(2);
+			expect(glslTools).toHaveLength(3);
 		});
 	});
 });

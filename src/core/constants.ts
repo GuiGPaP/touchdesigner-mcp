@@ -14,6 +14,7 @@ export const TOOL_NAMES = {
 	CREATE_GEOMETRY_COMP: "create_geometry_comp",
 	CREATE_TD_NODE: "create_td_node",
 	DELETE_TD_NODE: "delete_td_node",
+	DEPLOY_GLSL_PATTERN: "deploy_glsl_pattern",
 	DEPLOY_TD_ASSET: "deploy_td_asset",
 	DESCRIBE_TD_TOOLS: "describe_td_tools",
 	DISCOVER_DAT_CANDIDATES: "discover_dat_candidates",

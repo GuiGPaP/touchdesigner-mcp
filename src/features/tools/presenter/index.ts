@@ -20,6 +20,7 @@ export {
 	formatValidateJsonDat,
 } from "./datFormatter.js";
 export {
+	formatGlslDeployResult,
 	formatGlslPatternDetail,
 	formatGlslPatternSearchResults,
 } from "./glslPatternFormatter.js";

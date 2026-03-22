@@ -1473,6 +1473,45 @@ console.log(pattern.code.glsl);`,
 			"Full GLSL pattern with source code, TD setup instructions, warnings, and metadata.",
 		tool: TOOL_NAMES.GET_GLSL_PATTERN,
 	},
+	{
+		category: "helpers",
+		description:
+			"Deploy a GLSL shader pattern into the running TouchDesigner project. Creates operators, injects code, wires connections. Supports dry-run.",
+		example: `const result = await deployGlslPattern({ id: "feedback-decay", parentPath: "/project1" });
+console.log(result.status, result.createdNodes);`,
+		functionName: "deployGlslPattern",
+		modulePath: `${MODULE_ROOT}/deployGlslPattern.ts`,
+		parameters: [
+			{
+				description: "Pattern ID to deploy.",
+				name: "id",
+				required: true,
+				type: "string",
+			},
+			{
+				description:
+					"Parent path in TD where the pattern container will be created.",
+				name: "parentPath",
+				required: true,
+				type: "string",
+			},
+			{
+				description: "Custom container name (defaults to pattern ID).",
+				name: "name",
+				required: false,
+				type: "string",
+			},
+			{
+				description: "Preview deploy plan without executing.",
+				name: "dryRun",
+				required: false,
+				type: "boolean",
+			},
+		],
+		returns:
+			"Deploy result with status (deployed, dry_run, rolled_back, error), created node paths, and any warnings.",
+		tool: TOOL_NAMES.DEPLOY_GLSL_PATTERN,
+	},
 ];
 
 export function getTouchDesignerToolMetadata(): ToolMetadata[] {

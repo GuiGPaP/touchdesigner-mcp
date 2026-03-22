@@ -4,9 +4,12 @@ import { TOOL_NAMES } from "../../../core/constants.js";
 import { handleToolError } from "../../../core/errorHandling.js";
 import type { ILogger } from "../../../core/logger.js";
 import type { ServerMode } from "../../../core/serverMode.js";
+import type { TouchDesignerClient } from "../../../tdClient/touchDesignerClient.js";
 import type { KnowledgeRegistry } from "../../resources/registry.js";
 import type { TDGlslPatternEntry } from "../../resources/types.js";
+import { generateGlslDeployScript } from "../glslDeployScript.js";
 import {
+	formatGlslDeployResult,
 	formatGlslPatternDetail,
 	formatGlslPatternSearchResults,
 } from "../presenter/index.js";
@@ -56,6 +59,24 @@ const getGlslPatternSchema = detailOnlyFormattingSchema.extend({
 });
 type GetGlslPatternParams = z.input<typeof getGlslPatternSchema>;
 
+const deployGlslPatternSchema = detailOnlyFormattingSchema.extend({
+	dryRun: z
+		.boolean()
+		.describe("Preview deploy plan without executing")
+		.optional(),
+	id: z.string().min(1).describe("Pattern ID to deploy"),
+	name: z
+		.string()
+		.min(1)
+		.describe("Custom container name (defaults to pattern ID)")
+		.optional(),
+	parentPath: z
+		.string()
+		.min(2)
+		.describe("Parent path in TD where the pattern container will be created"),
+});
+type DeployGlslPatternParams = z.input<typeof deployGlslPatternSchema>;
+
 // --- Local text matching ---
 
 function matchesQuery(entry: TDGlslPatternEntry, query: string): boolean {
@@ -78,6 +99,7 @@ function matchesQuery(entry: TDGlslPatternEntry, query: string): boolean {
 export function registerGlslPatternTools(
 	server: McpServer,
 	logger: ILogger,
+	tdClient: TouchDesignerClient,
 	registry: KnowledgeRegistry,
 	serverMode: ServerMode,
 ): void {
@@ -172,6 +194,145 @@ export function registerGlslPatternTools(
 					error,
 					logger,
 					TOOL_NAMES.GET_GLSL_PATTERN,
+					undefined,
+					serverMode,
+				);
+			}
+		},
+	);
+
+	// --- deploy_glsl_pattern ---
+
+	server.tool(
+		TOOL_NAMES.DEPLOY_GLSL_PATTERN,
+		"Deploy a GLSL shader pattern into the running TouchDesigner project — creates operators, injects code, wires connections",
+		deployGlslPatternSchema.strict().shape,
+		async (params: DeployGlslPatternParams) => {
+			try {
+				const { detailLevel, dryRun, id, name, parentPath, responseFormat } =
+					params;
+
+				// Block root path
+				if (parentPath === "/") {
+					return {
+						content: [
+							{
+								text: 'Cannot deploy to root "/". Specify a valid parent path (e.g., /project1).',
+								type: "text" as const,
+							},
+						],
+						isError: true,
+					};
+				}
+
+				// Resolve pattern
+				const entry = registry.getById(id);
+				if (!entry || entry.kind !== "glsl-pattern") {
+					return {
+						content: [
+							{
+								text: `GLSL pattern not found: "${id}". Use search_glsl_patterns to discover available patterns.`,
+								type: "text" as const,
+							},
+						],
+						isError: true,
+					};
+				}
+
+				const pattern = entry as TDGlslPatternEntry;
+
+				// Reject utility patterns
+				if (pattern.payload.type === "utility") {
+					return {
+						content: [
+							{
+								text: `Pattern "${id}" is a utility library (no main shader). Utility patterns provide reusable functions — they cannot be deployed as standalone operators.`,
+								type: "text" as const,
+							},
+						],
+						isError: true,
+					};
+				}
+
+				const containerName = name ?? id;
+
+				// Dry-run: return plan without executing
+				if (dryRun) {
+					const plan = {
+						connections: pattern.payload.setup.connections ?? [],
+						containerName,
+						createdNodes: pattern.payload.setup.operators.map((op) => ({
+							family: op.family,
+							name: op.name,
+							type: op.type,
+						})),
+						parentPath,
+						patternId: id,
+						status: "dry_run" as const,
+						uniforms: pattern.payload.setup.uniforms ?? [],
+					};
+					const text = formatGlslDeployResult(plan, {
+						detailLevel,
+						responseFormat,
+					});
+					return { content: [{ text, type: "text" as const }] };
+				}
+
+				// Generate and execute Python script
+				const script = generateGlslDeployScript({
+					containerName,
+					parentPath,
+					pattern,
+				});
+
+				const scriptResult = await tdClient.execPythonScript<{
+					result: string;
+				}>({ script });
+
+				if (!scriptResult.success) {
+					throw scriptResult.error;
+				}
+
+				let deployResult: Record<string, unknown>;
+				try {
+					deployResult = JSON.parse(scriptResult.data.result as string);
+				} catch {
+					throw new Error(
+						`Failed to parse deploy script result: ${String(scriptResult.data.result)}`,
+					);
+				}
+
+				// Post-check: get node errors on deployed container
+				if (
+					deployResult.status === "deployed" &&
+					typeof deployResult.path === "string"
+				) {
+					try {
+						const errResult = await tdClient.getNodeErrors({
+							nodePath: deployResult.path as string,
+						});
+						if (errResult.success && errResult.data) {
+							const errors =
+								(errResult.data as { errors?: unknown[] }).errors ?? [];
+							if (errors.length > 0) {
+								deployResult.message = `${String(deployResult.message ?? "Deployed")} — WARNING: ${errors.length} error(s) detected`;
+							}
+						}
+					} catch {
+						// Non-critical — skip error check
+					}
+				}
+
+				const text = formatGlslDeployResult(deployResult, {
+					detailLevel,
+					responseFormat,
+				});
+				return { content: [{ text, type: "text" as const }] };
+			} catch (error) {
+				return handleToolError(
+					error,
+					logger,
+					TOOL_NAMES.DEPLOY_GLSL_PATTERN,
 					undefined,
 					serverMode,
 				);
