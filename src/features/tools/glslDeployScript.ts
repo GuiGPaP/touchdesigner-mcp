@@ -84,6 +84,11 @@ container_name = '${pyStr(containerName)}'
 pattern_id = '${pyStr(pattern.id)}'
 pattern_type = '${pyStr(p.type)}'
 
+completed_steps = []
+failed_step = None
+created_paths = []
+shader_dat_paths = []
+
 try:
     parent_op = op(parent_path)
     if parent_op is None:
@@ -118,32 +123,40 @@ try:
         })
         raise SystemExit
 
-    # Create container
+    # Step 1: Create container
     container = parent_op.create(baseCOMP, container_name)
     container.tags.add('mcp-glsl-pattern')
     container.store('mcp_pattern_id', pattern_id)
     container.store('mcp_deployed_at', datetime.now().isoformat())
+    created_paths.append(container.path)
+    completed_steps.append('create_container')
 
+    # Step 2: Create operators
     nodes = {}
     created_nodes = []
 
-    # Create operators
 ${opLines.join("\n")}
 
     for name, node in nodes.items():
         created_nodes.append({"name": name, "type": node.OPType, "path": node.path})
+        created_paths.append(node.path)
+    completed_steps.append('create_operators')
 
-    # Inject GLSL code
+    # Step 3: Inject GLSL code
 ${codeLines.join("\n")}
+    completed_steps.append('inject_code')
 
-    # Wire connections
+    # Step 4: Wire connections
 ${connLines.length > 0 ? connLines.join("\n") : "    pass  # No connections to wire"}
+    completed_steps.append('wire_connections')
 
     result = json.dumps({
         "status": "deployed",
         "patternId": pattern_id,
         "path": container.path,
+        "completedSteps": completed_steps,
         "createdNodes": created_nodes,
+        "shaderDatPaths": shader_dat_paths,
         "uniforms": ${JSON.stringify(uniformInfo)},
         "message": f"Pattern '{pattern_id}' deployed to {container.path} with {len(created_nodes)} operator(s)"
     })
@@ -151,16 +164,36 @@ ${connLines.length > 0 ? connLines.join("\n") : "    pass  # No connections to w
 except SystemExit:
     pass
 except Exception as e:
+    failed_step_name = 'unknown'
+    if 'create_container' not in completed_steps:
+        failed_step_name = 'create_container'
+    elif 'create_operators' not in completed_steps:
+        failed_step_name = 'create_operators'
+    elif 'inject_code' not in completed_steps:
+        failed_step_name = 'inject_code'
+    elif 'wire_connections' not in completed_steps:
+        failed_step_name = 'wire_connections'
+
+    rollback_status = 'none'
+    cleaned_up_paths = []
     try:
         rollback_op = op(parent_path).op(container_name)
         if rollback_op is not None:
             rollback_op.destroy()
+            rollback_status = 'full'
+            cleaned_up_paths = created_paths[:]
     except:
-        pass
+        rollback_status = 'partial'
+
     result = json.dumps({
         "status": "rolled_back",
         "patternId": pattern_id,
-        "message": f"Deploy failed and rolled back: {str(e)}"
+        "completedSteps": completed_steps,
+        "failedStep": failed_step_name,
+        "rollbackStatus": rollback_status,
+        "createdPaths": created_paths,
+        "cleanedUpPaths": cleaned_up_paths,
+        "message": f"Deploy failed at step '{failed_step_name}' and rolled back: {str(e)}"
     })
 `.trim();
 }
@@ -189,7 +222,6 @@ function buildCodeInjectionLines(
 			return [
 				`    primary = nodes['${pyStr(primaryName)}']`,
 				"    # GLSL TOP auto-creates a docked DAT for shader code",
-				"    # Find it via the docked list or dat parameter",
 				"    glsl_dat = None",
 				"    if hasattr(primary.par, 'dat') and primary.par.dat.eval():",
 				"        glsl_dat = primary.par.dat.eval()",
@@ -202,6 +234,8 @@ function buildCodeInjectionLines(
 				"        glsl_dat = container.create(textDAT, f'{primary.name}_code')",
 				"        primary.par.dat = glsl_dat",
 				`    glsl_dat.text = '''${glslCode}'''`,
+				"    created_nodes.append({'name': glsl_dat.name, 'type': 'textDAT', 'path': glsl_dat.path})",
+				"    shader_dat_paths.append(glsl_dat.path)",
 			];
 		}
 		case "vertex": {
@@ -218,6 +252,8 @@ function buildCodeInjectionLines(
 				`    frag_dat.text = '''${glslCode}'''`,
 				"    created_nodes.append({'name': vert_dat.name, 'type': 'textDAT', 'path': vert_dat.path})",
 				"    created_nodes.append({'name': frag_dat.name, 'type': 'textDAT', 'path': frag_dat.path})",
+				"    shader_dat_paths.append(vert_dat.path)",
+				"    shader_dat_paths.append(frag_dat.path)",
 				"    # Point GLSL MAT load parameters to the DATs",
 				"    try:",
 				"        primary.par.vertexdat = vert_dat",

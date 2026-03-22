@@ -176,6 +176,51 @@ export function formatGlslDeployResult(
 	}
 	lines.push(`- **Status:** ${status}`);
 
+	const postCheckStatus = result.postCheckStatus
+		? String(result.postCheckStatus)
+		: undefined;
+	if (postCheckStatus) {
+		lines.push(`- **Post-check:** ${postCheckStatus}`);
+	}
+
+	// Failure details
+	const completedSteps = Array.isArray(result.completedSteps)
+		? result.completedSteps
+		: undefined;
+	const failedStep = result.failedStep ? String(result.failedStep) : undefined;
+	const rollbackStatus = result.rollbackStatus
+		? String(result.rollbackStatus)
+		: undefined;
+
+	if (failedStep) {
+		lines.push(`- **Failed step:** ${failedStep}`);
+	}
+	if (rollbackStatus) {
+		lines.push(`- **Rollback:** ${rollbackStatus}`);
+	}
+	if (completedSteps && completedSteps.length > 0) {
+		lines.push(
+			`- **Completed steps:** ${completedSteps.map(String).join(" → ")}`,
+		);
+	}
+
+	// GLSL validation results
+	const glslValidation = Array.isArray(result.glslValidation)
+		? result.glslValidation
+		: undefined;
+	if (glslValidation && glslValidation.length > 0) {
+		lines.push("", "## GLSL Validation");
+		for (const v of glslValidation) {
+			const val = v as Record<string, unknown>;
+			if (val.status === "skipped") {
+				lines.push(`- **${val.path}**: skipped (${val.reason})`);
+			} else {
+				const ok = val.valid ? "valid" : "ERRORS";
+				lines.push(`- **${val.path}**: ${ok}`);
+			}
+		}
+	}
+
 	if (createdNodes.length > 0) {
 		lines.push("", "## Created Nodes");
 		for (const n of createdNodes) {

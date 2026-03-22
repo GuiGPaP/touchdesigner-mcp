@@ -189,13 +189,72 @@ describe("generateGlslDeployScript", () => {
 		expect(script).toContain("par.glsl");
 	});
 
-	it("should include rollback on exception", () => {
+	it("should include step tracking", () => {
+		const script = generateGlslDeployScript({
+			containerName: "test",
+			parentPath: "/project1",
+			pattern: makePattern(),
+		});
+		expect(script).toContain("completed_steps");
+		expect(script).toContain("'create_container'");
+		expect(script).toContain("'create_operators'");
+		expect(script).toContain("'inject_code'");
+		expect(script).toContain("'wire_connections'");
+	});
+
+	it("should include shaderDatPaths in result", () => {
+		const script = generateGlslDeployScript({
+			containerName: "test",
+			parentPath: "/project1",
+			pattern: makePattern(),
+		});
+		expect(script).toContain("shader_dat_paths");
+		expect(script).toContain('"shaderDatPaths"');
+	});
+
+	it("should add pixel DAT to created_nodes and shader_dat_paths", () => {
+		const script = generateGlslDeployScript({
+			containerName: "test",
+			parentPath: "/project1",
+			pattern: makePattern(),
+		});
+		// Pixel patterns should append glsl_dat to created_nodes
+		expect(script).toContain("created_nodes.append({'name': glsl_dat.name");
+		expect(script).toContain("shader_dat_paths.append(glsl_dat.path)");
+	});
+
+	it("should add vertex DATs to shader_dat_paths", () => {
+		const pattern = makePattern({
+			payload: {
+				code: { glsl: "// frag", vertexGlsl: "// vert" },
+				difficulty: "beginner",
+				setup: {
+					operators: [
+						{ family: "MAT", name: "m1", role: "primary", type: "glslMAT" },
+					],
+				},
+				type: "vertex",
+			},
+		});
+		const script = generateGlslDeployScript({
+			containerName: "test",
+			parentPath: "/project1",
+			pattern,
+		});
+		expect(script).toContain("shader_dat_paths.append(vert_dat.path)");
+		expect(script).toContain("shader_dat_paths.append(frag_dat.path)");
+	});
+
+	it("should include structured error with failedStep and rollbackStatus", () => {
 		const script = generateGlslDeployScript({
 			containerName: "test",
 			parentPath: "/project1",
 			pattern: makePattern(),
 		});
 		expect(script).toContain("rolled_back");
+		expect(script).toContain("failedStep");
+		expect(script).toContain("rollbackStatus");
+		expect(script).toContain("completedSteps");
 		expect(script).toContain("destroy()");
 	});
 

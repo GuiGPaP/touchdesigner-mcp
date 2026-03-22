@@ -302,11 +302,14 @@ export function registerGlslPatternTools(
 					);
 				}
 
-				// Post-check: get node errors on deployed container
+				// Post-checks (fail-soft — never block a successful deploy)
 				if (
 					deployResult.status === "deployed" &&
 					typeof deployResult.path === "string"
 				) {
+					let postCheckStatus: string | undefined;
+
+					// Post-check 1: node errors on container
 					try {
 						const errResult = await tdClient.getNodeErrors({
 							nodePath: deployResult.path as string,
@@ -315,11 +318,56 @@ export function registerGlslPatternTools(
 							const errors =
 								(errResult.data as { errors?: unknown[] }).errors ?? [];
 							if (errors.length > 0) {
-								deployResult.message = `${String(deployResult.message ?? "Deployed")} — WARNING: ${errors.length} error(s) detected`;
+								deployResult.nodeErrorCount = errors.length;
+								postCheckStatus = "warnings";
 							}
 						}
 					} catch {
-						// Non-critical — skip error check
+						// Non-critical — skip
+					}
+
+					// Post-check 2: validate GLSL DATs (pixel + vertex only)
+					const shaderDatPaths = deployResult.shaderDatPaths as
+						| string[]
+						| undefined;
+					if (shaderDatPaths && shaderDatPaths.length > 0) {
+						const glslValidation: Array<Record<string, unknown>> = [];
+						for (const datPath of shaderDatPaths) {
+							try {
+								const valResult = await tdClient.validateGlslDat({
+									nodePath: datPath,
+								});
+								if (valResult.success && valResult.data) {
+									const data = valResult.data as Record<string, unknown>;
+									const valid = data.valid ?? data.status === "valid";
+									glslValidation.push({
+										errors: valid ? [] : (data.errors ?? []),
+										path: datPath,
+										valid,
+									});
+									if (!valid) {
+										postCheckStatus = "warnings";
+									}
+								} else {
+									glslValidation.push({
+										path: datPath,
+										reason: "validation call failed",
+										status: "skipped",
+									});
+								}
+							} catch {
+								glslValidation.push({
+									path: datPath,
+									reason: "validation unavailable",
+									status: "skipped",
+								});
+							}
+						}
+						deployResult.glslValidation = glslValidation;
+					}
+
+					if (postCheckStatus) {
+						deployResult.postCheckStatus = postCheckStatus;
 					}
 				}
 

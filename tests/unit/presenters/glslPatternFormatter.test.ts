@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { TDGlslPatternEntry } from "../../../src/features/resources/types.js";
 import {
+	formatGlslDeployResult,
 	formatGlslPatternDetail,
 	formatGlslPatternSearchResults,
 } from "../../../src/features/tools/presenter/glslPatternFormatter.js";
@@ -140,5 +141,72 @@ describe("formatGlslPatternSearchResults", () => {
 			query: "feedback",
 		});
 		expect(result).toContain("feedback");
+	});
+});
+
+describe("formatGlslDeployResult", () => {
+	it("should show status and patternId", () => {
+		const result = formatGlslDeployResult({
+			patternId: "feedback-decay",
+			status: "deployed",
+		});
+		expect(result).toContain("deployed");
+		expect(result).toContain("feedback-decay");
+	});
+
+	it("should show completedSteps and failedStep for failures", () => {
+		const result = formatGlslDeployResult({
+			completedSteps: ["create_container", "create_operators"],
+			failedStep: "inject_code",
+			patternId: "test",
+			rollbackStatus: "full",
+			status: "rolled_back",
+		});
+		expect(result).toContain("inject_code");
+		expect(result).toContain("create_container");
+		expect(result).toContain("full");
+	});
+
+	it("should show postCheckStatus when present", () => {
+		const result = formatGlslDeployResult({
+			patternId: "test",
+			postCheckStatus: "warnings",
+			status: "deployed",
+		});
+		expect(result).toContain("warnings");
+	});
+
+	it("should show glslValidation results", () => {
+		const result = formatGlslDeployResult({
+			glslValidation: [
+				{ errors: [], path: "/project1/test/glsl1_code", valid: true },
+				{
+					errors: ["syntax error"],
+					path: "/project1/test/glsl2_code",
+					valid: false,
+				},
+			],
+			patternId: "test",
+			status: "deployed",
+		});
+		expect(result).toContain("glsl1_code");
+		expect(result).toContain("valid");
+		expect(result).toContain("ERRORS");
+	});
+
+	it("should show skipped validation", () => {
+		const result = formatGlslDeployResult({
+			glslValidation: [
+				{
+					path: "/project1/test/dat1",
+					reason: "validation unavailable",
+					status: "skipped",
+				},
+			],
+			patternId: "test",
+			status: "deployed",
+		});
+		expect(result).toContain("skipped");
+		expect(result).toContain("unavailable");
 	});
 });
