@@ -12,6 +12,7 @@ import { AssetRegistry } from "../templates/registry.js";
 import type { AssetSource } from "../templates/types.js";
 import { registerAssetTools } from "./handlers/assetTools.js";
 import { registerGlslPatternTools } from "./handlers/glslPatternTools.js";
+import { registerHealthTools } from "./handlers/healthTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
 
 /**
@@ -23,8 +24,9 @@ export function registerTools(
 	tdClient: TouchDesignerClient,
 	serverMode: ServerMode,
 	knowledgeRegistry: KnowledgeRegistry,
-): void {
+): { assetRegistry: AssetRegistry } {
 	registerTdTools(server, logger, tdClient, serverMode);
+	registerHealthTools(server, logger, tdClient, serverMode);
 
 	// Initialize asset registry with discovered paths
 	const assetRegistry = new AssetRegistry(logger);
@@ -55,4 +57,6 @@ export function registerTools(
 		knowledgeRegistry,
 		serverMode,
 	);
+
+	return { assetRegistry };
 }

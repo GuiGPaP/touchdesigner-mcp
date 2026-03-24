@@ -10,6 +10,10 @@ export class ServerMode extends EventEmitter {
 		return this._mode;
 	}
 
+	get isLive(): boolean {
+		return this._mode === "live";
+	}
+
 	get tdBuild(): string | null {
 		return this._tdBuild;
 	}

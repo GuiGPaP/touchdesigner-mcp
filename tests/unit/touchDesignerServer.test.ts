@@ -13,7 +13,7 @@ vi.mock("../../src/features/resources/index.js", () => ({
 }));
 
 vi.mock("../../src/features/tools/index.js", () => ({
-	registerTools: vi.fn(),
+	registerTools: vi.fn(() => ({ assetRegistry: { size: 0 } })),
 }));
 
 vi.mock("@modelcontextprotocol/sdk/server/mcp.js", () => ({
@@ -33,6 +33,14 @@ vi.mock("../../src/tdClient/index.js", () => ({
 		getTdInfo: vi
 			.fn()
 			.mockResolvedValue({ data: { server: "info" }, success: true }),
+		healthProbe: vi.fn().mockResolvedValue({
+			build: null,
+			compatible: null,
+			error: null,
+			lastSeen: null,
+			latencyMs: 0,
+			online: false,
+		}),
 	}),
 }));
 

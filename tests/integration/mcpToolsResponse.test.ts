@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { TOOL_NAMES } from "../../src/core/constants.js";
 import type { ILogger } from "../../src/core/logger.js";
+import { ServerMode } from "../../src/core/serverMode.js";
 import { registerTools } from "../../src/features/tools/register.js";
 import type { ExecNodeMethodRequest } from "../../src/gen/endpoints/TouchDesignerAPI";
 import type { TouchDesignerClient } from "../../src/tdClient/index.js";
@@ -167,10 +168,13 @@ DATA DESCRIPTORS
 
 describe("MCP tool responses", () => {
 	const server = new MockMcpServer();
+	const serverMode = new ServerMode();
+	serverMode.transitionOnline("test-build");
 	registerTools(
 		server as unknown as import("@modelcontextprotocol/sdk/server/mcp.js").McpServer,
 		logger,
 		createMockTdClient(),
+		serverMode,
 	);
 
 	it("returns formatted node list for GET_TD_NODES", async () => {
@@ -284,10 +288,13 @@ describe("MCP tool responses", () => {
 			success: false,
 		})) as TouchDesignerClient["getModuleHelp"];
 
+		const failingServerMode = new ServerMode();
+		failingServerMode.transitionOnline("test-build");
 		registerTools(
 			failingServer as unknown as import("@modelcontextprotocol/sdk/server/mcp.js").McpServer,
 			logger,
 			failingClient,
+			failingServerMode,
 		);
 
 		const handler = failingServer.getTool(TOOL_NAMES.GET_TD_MODULE_HELP);

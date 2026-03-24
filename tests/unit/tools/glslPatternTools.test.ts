@@ -77,7 +77,8 @@ describe("GLSL Pattern Tools", () => {
 	let mockServer: ReturnType<typeof createMockServer>;
 	const mockLogger = { sendLog: vi.fn() };
 	const mockServerMode = {
-		mode: "docs-only",
+		isLive: true,
+		mode: "live",
 		on: vi.fn(),
 		tdBuild: null,
 		toJSON: vi.fn(),

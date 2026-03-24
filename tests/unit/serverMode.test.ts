@@ -70,6 +70,19 @@ describe("ServerMode", () => {
 		expect(listener).toHaveBeenCalledTimes(0);
 	});
 
+	test("isLive returns false initially", () => {
+		const sm = new ServerMode();
+		expect(sm.isLive).toBe(false);
+	});
+
+	test("isLive returns true after transitionOnline", () => {
+		const sm = new ServerMode();
+		sm.transitionOnline("2023.12345");
+		expect(sm.isLive).toBe(true);
+		sm.transitionOffline();
+		expect(sm.isLive).toBe(false);
+	});
+
 	test("toJSON returns correct shape", () => {
 		const sm = new ServerMode();
 		expect(sm.toJSON()).toEqual({ mode: "docs-only", tdBuild: null });
