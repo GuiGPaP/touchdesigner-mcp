@@ -16,6 +16,7 @@ import { registerAssetTools } from "./handlers/assetTools.js";
 import { registerExecLogTools } from "./handlers/execLogTools.js";
 import { registerGlslPatternTools } from "./handlers/glslPatternTools.js";
 import { registerHealthTools } from "./handlers/healthTools.js";
+import { registerProjectCatalogTools } from "./handlers/projectCatalogTools.js";
 import { registerSearchTools } from "./handlers/searchTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
 import { ExecAuditLog } from "./security/index.js";
@@ -82,6 +83,9 @@ export function registerTools(
 			serverMode,
 		);
 	}
+
+	// Register project catalog tools
+	registerProjectCatalogTools(server, logger, tdClient, serverMode, auditLog);
 
 	return { assetRegistry };
 }
