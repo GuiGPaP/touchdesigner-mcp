@@ -57,7 +57,7 @@ for _c in _children:
     # Detect anomalies: instancing config on Geometry COMPs
     if _fam == "COMP" and _op_type == "geometryCOMP":
         try:
-            _inst = _c.par.instancechop.eval()
+            _inst = _c.par.instancechop.val
             if _inst:
                 _anomalies.append({
                     "path": _path,
