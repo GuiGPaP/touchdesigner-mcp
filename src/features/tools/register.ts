@@ -11,9 +11,11 @@ import {
 import { AssetRegistry } from "../templates/registry.js";
 import type { AssetSource } from "../templates/types.js";
 import { registerAssetTools } from "./handlers/assetTools.js";
+import { registerExecLogTools } from "./handlers/execLogTools.js";
 import { registerGlslPatternTools } from "./handlers/glslPatternTools.js";
 import { registerHealthTools } from "./handlers/healthTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
+import { ExecAuditLog } from "./security/index.js";
 
 /**
  * Register tool handlers with MCP server
@@ -25,8 +27,10 @@ export function registerTools(
 	serverMode: ServerMode,
 	knowledgeRegistry: KnowledgeRegistry,
 ): { assetRegistry: AssetRegistry } {
-	registerTdTools(server, logger, tdClient, serverMode);
+	const auditLog = new ExecAuditLog();
+	registerTdTools(server, logger, tdClient, serverMode, auditLog);
 	registerHealthTools(server, logger, tdClient, serverMode);
+	registerExecLogTools(server, logger, auditLog);
 
 	// Initialize asset registry with discovered paths
 	const assetRegistry = new AssetRegistry(logger);

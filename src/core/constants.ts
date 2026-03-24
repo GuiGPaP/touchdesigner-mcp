@@ -26,6 +26,7 @@ export const TOOL_NAMES = {
 	GET_COMP_EXTENSIONS: "get_comp_extensions",
 	GET_DAT_TABLE_INFO: "get_dat_table_info",
 	GET_DAT_TEXT: "get_dat_text",
+	GET_EXEC_LOG: "get_exec_log",
 	GET_GLSL_PATTERN: "get_glsl_pattern",
 	GET_HEALTH: "get_health",
 	GET_NODE_PARAMETER_SCHEMA: "get_node_parameter_schema",

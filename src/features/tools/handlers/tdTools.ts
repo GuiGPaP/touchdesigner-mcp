@@ -74,6 +74,9 @@ import {
 	formatValidateGlslDat,
 	formatValidateJsonDat,
 } from "../presenter/index.js";
+import type { ExecAuditLog } from "../security/index.js";
+import { analyzeScript } from "../security/index.js";
+import type { ExecMode } from "../security/types.js";
 import { withLiveGuard } from "../toolGuards.js";
 import {
 	detailOnlyFormattingSchema,
@@ -81,9 +84,21 @@ import {
 	formattingOptionsSchema,
 } from "../types.js";
 
-const execPythonScriptToolSchema = ExecPythonScriptBody.extend(
-	detailOnlyFormattingSchema.shape,
-);
+const execPythonScriptToolSchema = ExecPythonScriptBody.extend({
+	...detailOnlyFormattingSchema.shape,
+	mode: z
+		.enum(["read-only", "safe-write", "full-exec"])
+		.describe(
+			"Execution mode: read-only (no writes), safe-write (no deletes/filesystem), full-exec (unrestricted). Default: full-exec",
+		)
+		.optional(),
+	preview: z
+		.boolean()
+		.describe(
+			"If true, analyze the script without executing. Returns mode classification and detected patterns.",
+		)
+		.optional(),
+});
 type ExecPythonScriptToolParams = z.input<typeof execPythonScriptToolSchema>;
 
 const tdInfoToolSchema = detailOnlyFormattingSchema;
@@ -248,6 +263,7 @@ export function registerTdTools(
 	logger: ILogger,
 	tdClient: TouchDesignerClient,
 	serverMode: ServerMode,
+	auditLog?: ExecAuditLog,
 ): void {
 	const toolMetadataEntries = getTouchDesignerToolMetadata();
 
@@ -391,17 +407,98 @@ export function registerTdTools(
 
 	server.tool(
 		TOOL_NAMES.EXECUTE_PYTHON_SCRIPT,
-		"Execute a Python script in TouchDesigner (detailLevel=minimal|summary|detailed, responseFormat=json|yaml|markdown)",
+		"Execute a Python script in TouchDesigner. Supports mode (read-only/safe-write/full-exec) and preview (analyze without executing).",
 		execPythonScriptToolSchema.strict().shape,
 		withLiveGuard(
 			TOOL_NAMES.EXECUTE_PYTHON_SCRIPT,
 			serverMode,
 			tdClient,
 			async (params: ExecPythonScriptToolParams) => {
+				const {
+					detailLevel,
+					mode: rawMode,
+					preview = false,
+					responseFormat,
+					...scriptParams
+				} = params;
+				const mode: ExecMode = rawMode ?? "full-exec";
+				const startMs = Date.now();
+
+				// Analyze script against requested mode
+				const analysis = analyzeScript(scriptParams.script, mode);
+
+				// Preview mode: return analysis without executing
+				if (preview) {
+					auditLog?.append({
+						allowed: analysis.allowed,
+						durationMs: Date.now() - startMs,
+						mode,
+						outcome: "previewed",
+						preview: true,
+						script: scriptParams.script,
+						violations: analysis.violations,
+					});
+
+					const lines = [
+						`Script preview (mode: ${mode})`,
+						"",
+						`Status: ${analysis.allowed ? "ALLOWED" : `BLOCKED (requires ${analysis.requiredMode})`}`,
+						`Confidence: ${analysis.confidence}`,
+					];
+					if (analysis.violations.length > 0) {
+						lines.push("", "Detected patterns:");
+						for (const v of analysis.violations) {
+							lines.push(
+								`  L${v.line}: ${v.snippet} [${v.category}] — ${v.description}`,
+							);
+						}
+					}
+					if (!analysis.allowed) {
+						lines.push(
+							"",
+							`Use mode="${analysis.requiredMode}" or mode="full-exec" to allow this script.`,
+						);
+					}
+					return {
+						content: [{ text: lines.join("\n"), type: "text" as const }],
+					};
+				}
+
+				// Mode guard: block if analysis says not allowed
+				if (!analysis.allowed) {
+					auditLog?.append({
+						allowed: false,
+						durationMs: Date.now() - startMs,
+						mode,
+						outcome: "blocked",
+						preview: false,
+						script: scriptParams.script,
+						violations: analysis.violations,
+					});
+
+					const lines = [
+						`execute_python_script: Script blocked by ${mode} mode.`,
+						"",
+						`Required mode: ${analysis.requiredMode}`,
+						"Violations:",
+					];
+					for (const v of analysis.violations) {
+						lines.push(`  L${v.line}: ${v.snippet} — ${v.description}`);
+					}
+					lines.push(
+						"",
+						`Use mode="${analysis.requiredMode}" or mode="full-exec" to allow this script.`,
+					);
+					return {
+						content: [{ text: lines.join("\n"), type: "text" as const }],
+						isError: true,
+					};
+				}
+
+				// Execute
 				try {
-					const { detailLevel, responseFormat, ...scriptParams } = params;
 					logger.sendLog({
-						data: `Executing script: ${scriptParams.script}`,
+						data: `Executing script (mode=${mode}): ${scriptParams.script}`,
 						level: "debug",
 					});
 
@@ -410,7 +507,15 @@ export function registerTdTools(
 						throw result.error;
 					}
 
-					// Use formatter for token-optimized response
+					auditLog?.append({
+						allowed: true,
+						durationMs: Date.now() - startMs,
+						mode,
+						outcome: "executed",
+						preview: false,
+						script: scriptParams.script,
+					});
+
 					const formattedText = formatScriptResult(
 						result,
 						scriptParams.script,
@@ -422,6 +527,16 @@ export function registerTdTools(
 
 					return createToolResult(tdClient, formattedText);
 				} catch (error) {
+					auditLog?.append({
+						allowed: true,
+						durationMs: Date.now() - startMs,
+						error: error instanceof Error ? error.message : String(error),
+						mode,
+						outcome: "error",
+						preview: false,
+						script: scriptParams.script,
+					});
+
 					return handleToolError(
 						error,
 						logger,
