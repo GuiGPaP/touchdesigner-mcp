@@ -122,9 +122,17 @@ const getNodeErrorsToolSchema = GetNodeErrorsQueryParams.extend(
 );
 type GetNodeErrorsToolParams = z.input<typeof getNodeErrorsToolSchema>;
 
-const createNodeToolSchema = CreateNodeBody.extend(
-	detailOnlyFormattingSchema.shape,
-);
+const createNodeToolSchema = CreateNodeBody.extend({
+	...detailOnlyFormattingSchema.shape,
+	x: z
+		.number()
+		.describe("Node X position (auto-positioned to the right of siblings if omitted)")
+		.optional(),
+	y: z
+		.number()
+		.describe("Node Y position (aligned with first sibling if omitted)")
+		.optional(),
+});
 type CreateNodeToolParams = z.input<typeof createNodeToolSchema>;
 
 const updateNodeToolSchema = UpdateNodeBody.extend(
