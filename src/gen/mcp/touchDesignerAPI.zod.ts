@@ -683,8 +683,11 @@ This endpoint allows you to interact with TouchDesigner nodes programmatically.
 
  * @summary Execute python code on the server
  */
+export const execPythonScriptBodyModeDefault = `safe-write`;
+
 export const ExecPythonScriptBody = zod.object({
-  "script": zod.string().describe('e.g., \"op(\'\/project1\/text_over_image\').outputConnectors[0].connect(op(\'\/project1\/out1\'))\"')
+  "script": zod.string().describe('e.g., \"op(\'\/project1\/text_over_image\').outputConnectors[0].connect(op(\'\/project1\/out1\'))\"'),
+  "mode": zod.enum(['read-only', 'safe-write', 'full-exec']).default(execPythonScriptBodyModeDefault).describe('Execution mode that restricts which operations the script may perform.  read-only blocks all writes; safe-write blocks destructive \/ system-level operations; full-exec is unrestricted.\n')
 })
 
 export const ExecPythonScriptResponse = zod.object({

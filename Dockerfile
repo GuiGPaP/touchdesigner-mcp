@@ -19,4 +19,8 @@ RUN npm run build
 # Prepare startup helper for stdio/http selection
 RUN chmod +x docker/start.sh
 
+# Run as non-root user
+RUN addgroup --system app && adduser --system --ingroup app app
+USER app
+
 CMD ["./docker/start.sh"]

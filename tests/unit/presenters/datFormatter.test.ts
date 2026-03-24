@@ -5,27 +5,32 @@ import {
 	formatValidateGlslDat,
 	formatValidateJsonDat,
 } from "../../../src/features/tools/presenter/datFormatter.js";
-import type { LintDat200Data, LintDats200Data, ValidateGlslDat200Data, ValidateJsonDat200Data } from "../../../src/gen/endpoints/TouchDesignerAPI.js";
+import type {
+	LintDat200Data,
+	LintDats200Data,
+	ValidateGlslDat200Data,
+	ValidateJsonDat200Data,
+} from "../../../src/gen/endpoints/TouchDesignerAPI.js";
 
 describe("datFormatter", () => {
 	describe("formatLintDat", () => {
 		it("should show diff for dry-run", () => {
 			const data: LintDat200Data = {
-				path: "/project1/script1",
-				name: "script1",
+				applied: false,
 				diagnosticCount: 1,
 				diagnostics: [
 					{
 						code: "F401",
-						message: "unused import",
-						line: 1,
 						column: 1,
 						fixable: true,
+						line: 1,
+						message: "unused import",
 					},
 				],
-				fixed: true,
-				applied: false,
 				diff: "--- /project1/script1 (original)\n+++ /project1/script1 (fixed)\n@@ -1 +0,0 @@\n-import os\n",
+				fixed: true,
+				name: "script1",
+				path: "/project1/script1",
 				remainingDiagnosticCount: 0,
 				remainingDiagnostics: [],
 			};
@@ -39,35 +44,35 @@ describe("datFormatter", () => {
 
 		it("should show remaining diagnostics after fix", () => {
 			const data: LintDat200Data = {
-				path: "/project1/script1",
-				name: "script1",
+				applied: true,
 				diagnosticCount: 2,
 				diagnostics: [
 					{
 						code: "F401",
-						message: "unused import",
-						line: 1,
 						column: 1,
 						fixable: true,
+						line: 1,
+						message: "unused import",
 					},
 					{
 						code: "E711",
-						message: "comparison to None",
-						line: 3,
 						column: 5,
 						fixable: false,
+						line: 3,
+						message: "comparison to None",
 					},
 				],
 				fixed: true,
-				applied: true,
+				name: "script1",
+				path: "/project1/script1",
 				remainingDiagnosticCount: 1,
 				remainingDiagnostics: [
 					{
 						code: "E711",
-						message: "comparison to None",
-						line: 3,
 						column: 5,
 						fixable: false,
+						line: 3,
+						message: "comparison to None",
 					},
 				],
 			};
@@ -81,20 +86,20 @@ describe("datFormatter", () => {
 
 		it("should show applied fix with zero remaining", () => {
 			const data: LintDat200Data = {
-				path: "/project1/script1",
-				name: "script1",
+				applied: true,
 				diagnosticCount: 1,
 				diagnostics: [
 					{
 						code: "F401",
-						message: "unused import",
-						line: 1,
 						column: 1,
 						fixable: true,
+						line: 1,
+						message: "unused import",
 					},
 				],
 				fixed: true,
-				applied: true,
+				name: "script1",
+				path: "/project1/script1",
 				remainingDiagnosticCount: 0,
 				remainingDiagnostics: [],
 			};
@@ -110,11 +115,11 @@ describe("datFormatter", () => {
 	describe("formatValidateJsonDat", () => {
 		it("should show valid JSON", () => {
 			const data: ValidateJsonDat200Data = {
-				path: "/project1/data1",
-				name: "data1",
-				format: "json",
-				valid: true,
 				diagnostics: [],
+				format: "json",
+				name: "data1",
+				path: "/project1/data1",
+				valid: true,
 			};
 
 			const result = formatValidateJsonDat(data);
@@ -124,13 +129,11 @@ describe("datFormatter", () => {
 
 		it("should show diagnostics for invalid content", () => {
 			const data: ValidateJsonDat200Data = {
-				path: "/project1/data1",
-				name: "data1",
+				diagnostics: [{ column: 9, line: 1, message: "Expecting value" }],
 				format: "unknown",
+				name: "data1",
+				path: "/project1/data1",
 				valid: false,
-				diagnostics: [
-					{ line: 1, column: 9, message: "Expecting value" },
-				],
 			};
 
 			const result = formatValidateJsonDat(data);
@@ -148,11 +151,11 @@ describe("datFormatter", () => {
 	describe("formatValidateGlslDat", () => {
 		it("should show valid GLSL", () => {
 			const data: ValidateGlslDat200Data = {
-				path: "/project1/shader_pixel",
+				diagnostics: [],
 				name: "shader_pixel",
+				path: "/project1/shader_pixel",
 				shaderType: "pixel",
 				valid: true,
-				diagnostics: [],
 				validationMethod: "td_errors",
 			};
 
@@ -165,13 +168,18 @@ describe("datFormatter", () => {
 
 		it("should show diagnostics for invalid GLSL", () => {
 			const data: ValidateGlslDat200Data = {
-				path: "/project1/shader_pixel",
+				diagnostics: [
+					{
+						column: 1,
+						line: 5,
+						message: "undeclared identifier 'bad'",
+						severity: "error",
+					},
+				],
 				name: "shader_pixel",
+				path: "/project1/shader_pixel",
 				shaderType: "pixel",
 				valid: false,
-				diagnostics: [
-					{ line: 5, column: 1, message: "undeclared identifier 'bad'", severity: "error" },
-				],
 				validationMethod: "td_errors",
 			};
 
@@ -189,11 +197,11 @@ describe("datFormatter", () => {
 
 		it("should show validation method none", () => {
 			const data: ValidateGlslDat200Data = {
-				path: "/project1/shader_pixel",
+				diagnostics: [],
 				name: "shader_pixel",
+				path: "/project1/shader_pixel",
 				shaderType: "unknown",
 				valid: true,
-				diagnostics: [],
 				validationMethod: "none",
 			};
 
@@ -206,41 +214,47 @@ describe("datFormatter", () => {
 		it("should show summary for batch lint with multiple DATs", () => {
 			const data: LintDats200Data = {
 				parentPath: "/project1",
-				summary: {
-					totalDatsScanned: 3,
-					datsWithErrors: 2,
-					datsClean: 1,
-					totalIssues: 5,
-					fixableCount: 3,
-					manualCount: 2,
-					bySeverity: { error: 2, warning: 1, info: 2 },
-					worstOffenders: [
-						{ path: "/project1/script1", name: "script1", diagnosticCount: 3 },
-						{ path: "/project1/script2", name: "script2", diagnosticCount: 2 },
-					],
-				},
 				results: [
 					{
-						path: "/project1/script1",
-						name: "script1",
 						diagnosticCount: 3,
 						diagnostics: [
-							{ code: "F401", message: "unused import", line: 1, column: 1, fixable: true },
+							{
+								code: "F401",
+								column: 1,
+								fixable: true,
+								line: 1,
+								message: "unused import",
+							},
 						],
+						name: "script1",
+						path: "/project1/script1",
 					},
 					{
-						path: "/project1/script2",
-						name: "script2",
 						diagnosticCount: 2,
 						diagnostics: [],
+						name: "script2",
+						path: "/project1/script2",
 					},
 					{
-						path: "/project1/script3",
-						name: "script3",
 						diagnosticCount: 0,
 						diagnostics: [],
+						name: "script3",
+						path: "/project1/script3",
 					},
 				],
+				summary: {
+					bySeverity: { error: 2, info: 2, warning: 1 },
+					datsClean: 1,
+					datsWithErrors: 2,
+					fixableCount: 3,
+					manualCount: 2,
+					totalDatsScanned: 3,
+					totalIssues: 5,
+					worstOffenders: [
+						{ diagnosticCount: 3, name: "script1", path: "/project1/script1" },
+						{ diagnosticCount: 2, name: "script2", path: "/project1/script2" },
+					],
+				},
 			};
 
 			const result = formatLintDats(data, { detailLevel: "summary" });
@@ -261,32 +275,38 @@ describe("datFormatter", () => {
 		it("should show detailed per-DAT breakdown in YAML for detailed mode", () => {
 			const data: LintDats200Data = {
 				parentPath: "/project1",
-				summary: {
-					totalDatsScanned: 2,
-					datsWithErrors: 1,
-					datsClean: 1,
-					totalIssues: 1,
-					fixableCount: 1,
-					manualCount: 0,
-					bySeverity: { error: 0, warning: 0, info: 1 },
-					worstOffenders: [],
-				},
 				results: [
 					{
-						path: "/project1/script1",
-						name: "script1",
 						diagnosticCount: 1,
 						diagnostics: [
-							{ code: "F401", message: "unused import", line: 1, column: 1, fixable: true },
+							{
+								code: "F401",
+								column: 1,
+								fixable: true,
+								line: 1,
+								message: "unused import",
+							},
 						],
+						name: "script1",
+						path: "/project1/script1",
 					},
 					{
-						path: "/project1/script2",
-						name: "script2",
 						diagnosticCount: 0,
 						diagnostics: [],
+						name: "script2",
+						path: "/project1/script2",
 					},
 				],
+				summary: {
+					bySeverity: { error: 0, info: 1, warning: 0 },
+					datsClean: 1,
+					datsWithErrors: 1,
+					fixableCount: 1,
+					manualCount: 0,
+					totalDatsScanned: 2,
+					totalIssues: 1,
+					worstOffenders: [],
+				},
 			};
 
 			const result = formatLintDats(data, { detailLevel: "detailed" });

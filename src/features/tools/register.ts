@@ -16,6 +16,8 @@ import { registerAssetTools } from "./handlers/assetTools.js";
 import { registerExecLogTools } from "./handlers/execLogTools.js";
 import { registerGlslPatternTools } from "./handlers/glslPatternTools.js";
 import { registerHealthTools } from "./handlers/healthTools.js";
+import { registerLessonTools } from "./handlers/lessonTools.js";
+import { resolveKnowledgePath } from "../resources/paths.js";
 import { registerProjectCatalogTools } from "./handlers/projectCatalogTools.js";
 import { registerSearchTools } from "./handlers/searchTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
@@ -83,6 +85,10 @@ export function registerTools(
 			serverMode,
 		);
 	}
+
+	// Register lesson tools (offline, no TD needed)
+	const knowledgePath = resolveKnowledgePath(import.meta.url);
+	registerLessonTools(server, logger, knowledgeRegistry, serverMode, knowledgePath, tdClient);
 
 	// Register project catalog tools
 	registerProjectCatalogTools(server, logger, tdClient, serverMode, auditLog);

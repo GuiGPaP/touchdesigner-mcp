@@ -24,3 +24,4 @@ export interface ProjectEntry {
 }
 
 export const CATALOG_SIDECAR_SUFFIX = ".td-catalog";
+export const LESSONS_SIDECAR_SUFFIX = ".td-lessons";

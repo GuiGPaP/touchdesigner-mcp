@@ -65,9 +65,7 @@ describe("ProjectCatalogRegistry", () => {
 	it("search returns empty for no match", () => {
 		const reg = new ProjectCatalogRegistry();
 		(reg as unknown as { entries: Map<string, ProjectEntry> }).entries =
-			new Map([
-				["/a/a.toe", makeEntry("proj1", ["glsl"])],
-			]);
+			new Map([["/a/a.toe", makeEntry("proj1", ["glsl"])]]);
 
 		expect(reg.search("nonexistent")).toHaveLength(0);
 	});

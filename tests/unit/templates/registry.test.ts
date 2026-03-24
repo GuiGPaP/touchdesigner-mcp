@@ -77,9 +77,9 @@ describe("AssetRegistry", () => {
 		it("searches by query in aliases", () => {
 			const registry = createRegistry();
 			const results = registry.search({ query: "fps overlay" });
-			expect(
-				results.some((a) => a.manifest.id === "resolution-monitor"),
-			).toBe(true);
+			expect(results.some((a) => a.manifest.id === "resolution-monitor")).toBe(
+				true,
+			);
 		});
 
 		it("filters by tags", () => {

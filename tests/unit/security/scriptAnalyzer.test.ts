@@ -17,10 +17,7 @@ describe("scriptAnalyzer", () => {
 		});
 
 		it("allows print and introspection", () => {
-			const result = analyzeScript(
-				"print(len(op('/').children))",
-				"read-only",
-			);
+			const result = analyzeScript("print(len(op('/').children))", "read-only");
 			expect(result.allowed).toBe(true);
 		});
 
@@ -158,18 +155,12 @@ describe("scriptAnalyzer", () => {
 		});
 
 		it("blocks from os import", () => {
-			const result = analyzeScript(
-				"from os import path",
-				"safe-write",
-			);
+			const result = analyzeScript("from os import path", "safe-write");
 			expect(result.allowed).toBe(false);
 		});
 
 		it("blocks open with write mode", () => {
-			const result = analyzeScript(
-				"open('/tmp/f', 'w')",
-				"safe-write",
-			);
+			const result = analyzeScript("open('/tmp/f', 'w')", "safe-write");
 			expect(result.allowed).toBe(false);
 		});
 

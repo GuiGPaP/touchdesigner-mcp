@@ -89,7 +89,7 @@ const execPythonScriptToolSchema = ExecPythonScriptBody.extend({
 	mode: z
 		.enum(["read-only", "safe-write", "full-exec"])
 		.describe(
-			"Execution mode: read-only (no writes), safe-write (no deletes/filesystem), full-exec (unrestricted). Default: full-exec",
+			"Execution mode: read-only (no writes), safe-write (no deletes/filesystem), full-exec (unrestricted). Default: safe-write",
 		)
 		.optional(),
 	preview: z
@@ -126,7 +126,9 @@ const createNodeToolSchema = CreateNodeBody.extend({
 	...detailOnlyFormattingSchema.shape,
 	x: z
 		.number()
-		.describe("Node X position (auto-positioned to the right of siblings if omitted)")
+		.describe(
+			"Node X position (auto-positioned to the right of siblings if omitted)",
+		)
 		.optional(),
 	y: z
 		.number()
@@ -429,7 +431,7 @@ export function registerTdTools(
 					responseFormat,
 					...scriptParams
 				} = params;
-				const mode: ExecMode = rawMode ?? "full-exec";
+				const mode: ExecMode = rawMode ?? "safe-write";
 				const startMs = Date.now();
 
 				// Analyze script against requested mode
@@ -510,7 +512,10 @@ export function registerTdTools(
 						level: "debug",
 					});
 
-					const result = await tdClient.execPythonScript(scriptParams);
+					const result = await tdClient.execPythonScript({
+						...scriptParams,
+						mode,
+					});
 					if (!result.success) {
 						throw result.error;
 					}

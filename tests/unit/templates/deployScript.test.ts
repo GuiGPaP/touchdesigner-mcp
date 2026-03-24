@@ -63,9 +63,7 @@ describe("generateDeployScript", () => {
 	it("uses externaltox + pulse pattern", () => {
 		const script = generateDeployScript(baseOpts);
 		expect(script).toContain("container.par.externaltox = tox_path");
-		expect(script).toContain(
-			"container.par.enableexternaltoxpulse.pulse()",
-		);
+		expect(script).toContain("container.par.enableexternaltoxpulse.pulse()");
 	});
 
 	it("escapes special characters in paths", () => {

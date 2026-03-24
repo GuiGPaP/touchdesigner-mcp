@@ -15,11 +15,19 @@ describe("formatParameterSchema", () => {
 	it("formats summary with parameters", () => {
 		const text = formatParameterSchema(
 			{
+				count: 1,
 				nodePath: "/p1/noise1",
 				opType: "noiseCHOP",
-				count: 1,
 				parameters: [
-					{ name: "seed", style: "Int", val: 42, min: 0, max: 100, menuNames: [], menuLabels: [] },
+					{
+						max: 100,
+						menuLabels: [],
+						menuNames: [],
+						min: 0,
+						name: "seed",
+						style: "Int",
+						val: 42,
+					},
 				],
 			},
 			{ detailLevel: "summary" },
@@ -31,12 +39,12 @@ describe("formatParameterSchema", () => {
 	it("minimal shows only count", () => {
 		const text = formatParameterSchema(
 			{
+				count: 2,
 				nodePath: "/p1/noise1",
 				opType: "noiseCHOP",
-				count: 2,
 				parameters: [
-					{ name: "a", style: "Float", val: 0, menuNames: [], menuLabels: [] },
-					{ name: "b", style: "Float", val: 1, menuNames: [], menuLabels: [] },
+					{ menuLabels: [], menuNames: [], name: "a", style: "Float", val: 0 },
+					{ menuLabels: [], menuNames: [], name: "b", style: "Float", val: 1 },
 				],
 			},
 			{ detailLevel: "minimal" },
@@ -50,10 +58,10 @@ describe("formatCompleteOpPaths", () => {
 	it("handles no matches", () => {
 		const text = formatCompleteOpPaths({
 			contextNodePath: "/p1/s1",
-			prefix: "zzz",
 			count: 0,
-			truncated: false,
 			matches: [],
+			prefix: "zzz",
+			truncated: false,
 		});
 		expect(text).toContain("No matches");
 	});
@@ -61,12 +69,18 @@ describe("formatCompleteOpPaths", () => {
 	it("formats matches", () => {
 		const text = formatCompleteOpPaths({
 			contextNodePath: "/p1/s1",
-			prefix: "noise",
 			count: 1,
-			truncated: false,
 			matches: [
-				{ path: "/p1/noise1", name: "noise1", opType: "noiseCHOP", family: "CHOP", relativeRef: "noise1" },
+				{
+					family: "CHOP",
+					name: "noise1",
+					opType: "noiseCHOP",
+					path: "/p1/noise1",
+					relativeRef: "noise1",
+				},
 			],
+			prefix: "noise",
+			truncated: false,
 		});
 		expect(text).toContain("noise1");
 	});
@@ -75,11 +89,11 @@ describe("formatCompleteOpPaths", () => {
 describe("formatChopChannels", () => {
 	it("formats channel list", () => {
 		const text = formatChopChannels({
+			channels: [{ name: "tx" }, { name: "ty" }],
 			nodePath: "/p1/noise1",
 			numChannels: 2,
 			numSamples: 100,
 			sampleRate: 60,
-			channels: [{ name: "tx" }, { name: "ty" }],
 			truncated: false,
 		});
 		expect(text).toContain("tx");
@@ -91,12 +105,15 @@ describe("formatDatTableInfo", () => {
 	it("formats table dimensions", () => {
 		const text = formatDatTableInfo({
 			nodePath: "/p1/table1",
-			numRows: 3,
 			numCols: 2,
-			sampleData: [["a", "b"], ["1", "2"]],
-			truncatedRows: false,
-			truncatedCols: false,
+			numRows: 3,
+			sampleData: [
+				["a", "b"],
+				["1", "2"],
+			],
 			truncatedCells: false,
+			truncatedCols: false,
+			truncatedRows: false,
 		});
 		expect(text).toContain("3 rows");
 		expect(text).toContain("2 cols");
@@ -117,11 +134,11 @@ describe("formatCompExtensions", () => {
 			compPath: "/p1/base1",
 			extensions: [
 				{
-					name: "MyExt",
 					methodCount: 3,
-					propertyCount: 1,
 					methods: [{ name: "doStuff", signature: "(x: int)" }],
+					name: "MyExt",
 					properties: [{ name: "color", type: "str" }],
+					propertyCount: 1,
 				},
 			],
 		});

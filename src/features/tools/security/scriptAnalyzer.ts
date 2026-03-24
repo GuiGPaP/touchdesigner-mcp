@@ -169,6 +169,18 @@ const FULL_EXEC_PATTERNS: PatternRule[] = [
 		minMode: "full-exec",
 		pattern: /\bfrom\s+(os|subprocess|shutil|pathlib|tempfile)\b/,
 	},
+	{
+		category: "exec",
+		description: "importlib usage requires full-exec mode",
+		minMode: "full-exec",
+		pattern: /\bimportlib\b/,
+	},
+	{
+		category: "exec",
+		description: "getattr on __builtins__ requires full-exec mode",
+		minMode: "full-exec",
+		pattern: /getattr\s*\(\s*__builtins__/,
+	},
 ];
 
 const ALL_PATTERNS = [...SAFE_WRITE_PATTERNS, ...FULL_EXEC_PATTERNS];

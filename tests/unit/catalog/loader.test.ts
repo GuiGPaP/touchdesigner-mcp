@@ -41,26 +41,20 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-	rmSync(TMP, { recursive: true, force: true });
+	rmSync(TMP, { force: true, recursive: true });
 });
 
 describe("path helpers", () => {
 	it("manifestPathFor", () => {
-		expect(manifestPathFor("/a/b/foo.toe")).toMatch(
-			/foo\.td-catalog\.json$/,
-		);
+		expect(manifestPathFor("/a/b/foo.toe")).toMatch(/foo\.td-catalog\.json$/);
 	});
 
 	it("markdownPathFor", () => {
-		expect(markdownPathFor("/a/b/foo.toe")).toMatch(
-			/foo\.td-catalog\.md$/,
-		);
+		expect(markdownPathFor("/a/b/foo.toe")).toMatch(/foo\.td-catalog\.md$/);
 	});
 
 	it("thumbnailPathFor", () => {
-		expect(thumbnailPathFor("/a/b/foo.toe")).toMatch(
-			/foo\.td-catalog\.png$/,
-		);
+		expect(thumbnailPathFor("/a/b/foo.toe")).toMatch(/foo\.td-catalog\.png$/);
 	});
 });
 

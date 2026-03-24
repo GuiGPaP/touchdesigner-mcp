@@ -105,7 +105,7 @@ export function formatTdContext(
 	}
 
 	return finalizeFormattedText(lines.join("\n"), opts, {
-		context: { title: "Node Context", nodePath },
+		context: { nodePath, title: "Node Context" },
 		structured: data,
 		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
 	});

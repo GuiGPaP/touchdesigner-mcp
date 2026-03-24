@@ -21,9 +21,9 @@ vi.mock("../../src/gen/endpoints/TouchDesignerAPI", async () => {
 		createNode: vi.fn(),
 		deleteNode: vi.fn(),
 		discoverDatCandidates: vi.fn(),
-		formatDat: vi.fn(),
 		execNodeMethod: vi.fn(),
 		execPythonScript: vi.fn(),
+		formatDat: vi.fn(),
 		getCapabilities: vi.fn(),
 		getChopChannels: vi.fn(),
 		getCompExtensions: vi.fn(),
@@ -34,18 +34,18 @@ vi.mock("../../src/gen/endpoints/TouchDesignerAPI", async () => {
 		getNodeErrors: vi.fn(),
 		getNodeParameterSchema: vi.fn(),
 		getNodes: vi.fn(),
+		getTdContext: vi.fn(),
 		getTdInfo: vi.fn(),
 		getTdPythonClassDetails: vi.fn(),
 		getTdPythonClasses: vi.fn(),
+		indexTdProject: vi.fn(),
 		lintDat: vi.fn(),
 		lintDats: vi.fn(),
-		validateGlslDat: vi.fn(),
-		validateJsonDat: vi.fn(),
 		setDatText: vi.fn(),
 		typecheckDat: vi.fn(),
 		updateNode: vi.fn(),
-		indexTdProject: vi.fn(),
-		getTdContext: vi.fn(),
+		validateGlslDat: vi.fn(),
+		validateJsonDat: vi.fn(),
 	};
 });
 
@@ -1150,31 +1150,53 @@ describe("TouchDesignerClient with mocks", () => {
 	describe("Introspection tools", () => {
 		test("getNodeParameterSchema should handle successful response", async () => {
 			vi.mocked(touchDesignerAPI.getNodeParameterSchema).mockResolvedValue({
-				success: true,
-				data: { nodePath: "/project1/noise1", opType: "noiseCHOP", count: 1, parameters: [] },
+				data: {
+					count: 1,
+					nodePath: "/project1/noise1",
+					opType: "noiseCHOP",
+					parameters: [],
+				},
 				error: null,
+				success: true,
 			});
 			const client = new TouchDesignerClient({ logger: nullLogger });
-			const result = await client.getNodeParameterSchema({ nodePath: "/project1/noise1" });
+			const result = await client.getNodeParameterSchema({
+				nodePath: "/project1/noise1",
+			});
 			expect(result.success).toBe(true);
 		});
 
 		test("completeOpPaths should handle successful response", async () => {
 			vi.mocked(touchDesignerAPI.completeOpPaths).mockResolvedValue({
-				success: true,
-				data: { contextNodePath: "/p1/s1", prefix: "noise", count: 1, truncated: false, matches: [] },
+				data: {
+					contextNodePath: "/p1/s1",
+					count: 1,
+					matches: [],
+					prefix: "noise",
+					truncated: false,
+				},
 				error: null,
+				success: true,
 			});
 			const client = new TouchDesignerClient({ logger: nullLogger });
-			const result = await client.completeOpPaths({ contextNodePath: "/p1/s1" });
+			const result = await client.completeOpPaths({
+				contextNodePath: "/p1/s1",
+			});
 			expect(result.success).toBe(true);
 		});
 
 		test("getChopChannels should handle successful response", async () => {
 			vi.mocked(touchDesignerAPI.getChopChannels).mockResolvedValue({
-				success: true,
-				data: { nodePath: "/p1/noise1", numChannels: 2, numSamples: 100, sampleRate: 60, channels: [], truncated: false },
+				data: {
+					channels: [],
+					nodePath: "/p1/noise1",
+					numChannels: 2,
+					numSamples: 100,
+					sampleRate: 60,
+					truncated: false,
+				},
 				error: null,
+				success: true,
 			});
 			const client = new TouchDesignerClient({ logger: nullLogger });
 			const result = await client.getChopChannels({ nodePath: "/p1/noise1" });
@@ -1183,9 +1205,17 @@ describe("TouchDesignerClient with mocks", () => {
 
 		test("getDatTableInfo should handle successful response", async () => {
 			vi.mocked(touchDesignerAPI.getDatTableInfo).mockResolvedValue({
-				success: true,
-				data: { nodePath: "/p1/table1", numRows: 3, numCols: 2, sampleData: [], truncatedRows: false, truncatedCols: false, truncatedCells: false },
+				data: {
+					nodePath: "/p1/table1",
+					numCols: 2,
+					numRows: 3,
+					sampleData: [],
+					truncatedCells: false,
+					truncatedCols: false,
+					truncatedRows: false,
+				},
 				error: null,
+				success: true,
 			});
 			const client = new TouchDesignerClient({ logger: nullLogger });
 			const result = await client.getDatTableInfo({ nodePath: "/p1/table1" });
@@ -1194,9 +1224,9 @@ describe("TouchDesignerClient with mocks", () => {
 
 		test("getCompExtensions should handle successful response", async () => {
 			vi.mocked(touchDesignerAPI.getCompExtensions).mockResolvedValue({
-				success: true,
 				data: { compPath: "/p1/base1", extensions: [] },
 				error: null,
+				success: true,
 			});
 			const client = new TouchDesignerClient({ logger: nullLogger });
 			const result = await client.getCompExtensions({ compPath: "/p1/base1" });
@@ -1205,14 +1235,19 @@ describe("TouchDesignerClient with mocks", () => {
 
 		test("indexTdProject should handle successful response", async () => {
 			vi.mocked(touchDesignerAPI.indexTdProject).mockResolvedValue({
-				success: true,
 				data: {
 					markdown: "# Project\nops here",
-					stats: { opCount: 10, compCount: 2, extensionCount: 1, warningCount: 0 },
+					stats: {
+						compCount: 2,
+						extensionCount: 1,
+						opCount: 10,
+						warningCount: 0,
+					},
 					truncated: false,
 					warnings: [],
 				},
 				error: null,
+				success: true,
 			});
 			const client = new TouchDesignerClient({ logger: nullLogger });
 			const result = await client.indexTdProject({ rootPath: "/project1" });
@@ -1225,9 +1260,9 @@ describe("TouchDesignerClient with mocks", () => {
 
 		test("indexTdProject should handle error response", async () => {
 			vi.mocked(touchDesignerAPI.indexTdProject).mockResolvedValue({
-				success: false,
 				data: undefined,
 				error: "Scan failed",
+				success: false,
 			});
 			const client = new TouchDesignerClient({ logger: nullLogger });
 			const result = await client.indexTdProject();
@@ -1236,13 +1271,13 @@ describe("TouchDesignerClient with mocks", () => {
 
 		test("getTdContext should handle successful response", async () => {
 			vi.mocked(touchDesignerAPI.getTdContext).mockResolvedValue({
-				success: true,
 				data: {
+					facets: { errors: { errors: [] }, parameters: { count: 3 } },
 					nodePath: "/project1/geo1",
-					facets: { parameters: { count: 3 }, errors: { errors: [] } },
 					warnings: [],
 				},
 				error: null,
+				success: true,
 			});
 			const client = new TouchDesignerClient({ logger: nullLogger });
 			const result = await client.getTdContext({ nodePath: "/project1/geo1" });
@@ -1255,18 +1290,18 @@ describe("TouchDesignerClient with mocks", () => {
 
 		test("getTdContext should handle partial failure with warnings", async () => {
 			vi.mocked(touchDesignerAPI.getTdContext).mockResolvedValue({
-				success: true,
 				data: {
-					nodePath: "/project1/geo1",
 					facets: { parameters: { count: 3 } },
+					nodePath: "/project1/geo1",
 					warnings: ["channels failed: not a CHOP"],
 				},
 				error: null,
+				success: true,
 			});
 			const client = new TouchDesignerClient({ logger: nullLogger });
 			const result = await client.getTdContext({
-				nodePath: "/project1/geo1",
 				include: ["parameters", "channels"],
+				nodePath: "/project1/geo1",
 			});
 			expect(result.success).toBe(true);
 			if (result.success) {
@@ -1278,7 +1313,10 @@ describe("TouchDesignerClient with mocks", () => {
 	describe("ServerMode transitions", () => {
 		test("AxiosError → docs-only", async () => {
 			const serverMode = new ServerMode();
-			const axiosError = new AxiosError("connect ECONNREFUSED 127.0.0.1:9981", "ECONNREFUSED");
+			const axiosError = new AxiosError(
+				"connect ECONNREFUSED 127.0.0.1:9981",
+				"ECONNREFUSED",
+			);
 
 			const mockHttpClient = {
 				getTdInfo: vi.fn().mockRejectedValue(axiosError),
@@ -1290,7 +1328,9 @@ describe("TouchDesignerClient with mocks", () => {
 				serverMode,
 			});
 
-			await expect(client.getTdInfo()).rejects.toThrow(/TouchDesigner Connection Failed/);
+			await expect(client.getTdInfo()).rejects.toThrow(
+				/TouchDesigner Connection Failed/,
+			);
 			expect(serverMode.mode).toBe("docs-only");
 			expect(serverMode.tdBuild).toBeNull();
 		});
@@ -1380,9 +1420,11 @@ describe("TouchDesignerClient with mocks", () => {
 				const serverMode = new ServerMode();
 				const axiosError = new AxiosError("ECONNREFUSED", "ECONNREFUSED");
 
-				const mockGetTdInfo = vi.fn()
+				const mockGetTdInfo = vi
+					.fn()
 					.mockRejectedValueOnce(axiosError) // Initial probe fails
-					.mockResolvedValueOnce({            // invalidateAndProbe succeeds
+					.mockResolvedValueOnce({
+						// invalidateAndProbe succeeds
 						data: {
 							mcpApiVersion: "1.3.1",
 							osName: "macOS",
@@ -1411,7 +1453,11 @@ describe("TouchDesignerClient with mocks", () => {
 
 				// First call fails → cached error
 				await expect(
-					client.createNode({ nodeName: "t", nodeType: "null", parentPath: "/" }),
+					client.createNode({
+						nodeName: "t",
+						nodeType: "null",
+						parentPath: "/",
+					}),
 				).rejects.toThrow();
 				expect(serverMode.mode).toBe("docs-only");
 
@@ -1428,7 +1474,8 @@ describe("TouchDesignerClient with mocks", () => {
 			const serverMode = new ServerMode();
 			const axiosError = new AxiosError("ECONNREFUSED", "ECONNREFUSED");
 
-			const mockGetTdInfo = vi.fn()
+			const mockGetTdInfo = vi
+				.fn()
 				.mockRejectedValueOnce(axiosError)
 				.mockResolvedValueOnce({
 					data: {
@@ -1443,7 +1490,9 @@ describe("TouchDesignerClient with mocks", () => {
 				});
 
 			const client = new TouchDesignerClient({
-				httpClient: { getTdInfo: mockGetTdInfo } as unknown as ITouchDesignerApi,
+				httpClient: {
+					getTdInfo: mockGetTdInfo,
+				} as unknown as ITouchDesignerApi,
 				logger: nullLogger,
 				serverMode,
 			});
@@ -1516,9 +1565,9 @@ describe("TouchDesignerClient with mocks", () => {
 
 		test("transitions offline on AxiosError", async () => {
 			const serverMode = new ServerMode();
-			const mockGetTdInfo = vi.fn().mockRejectedValue(
-				new AxiosError("connect ECONNREFUSED"),
-			);
+			const mockGetTdInfo = vi
+				.fn()
+				.mockRejectedValue(new AxiosError("connect ECONNREFUSED"));
 
 			const client = new TouchDesignerClient({
 				httpClient: {
@@ -1537,9 +1586,9 @@ describe("TouchDesignerClient with mocks", () => {
 		});
 
 		test("propagates non-Axios errors", async () => {
-			const mockGetTdInfo = vi.fn().mockRejectedValue(
-				new TypeError("Cannot read property of undefined"),
-			);
+			const mockGetTdInfo = vi
+				.fn()
+				.mockRejectedValue(new TypeError("Cannot read property of undefined"));
 
 			const client = new TouchDesignerClient({
 				httpClient: {

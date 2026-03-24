@@ -144,6 +144,62 @@ const glslPatternEntrySchema = knowledgeEntryBaseSchema.extend({
 	payload: glslPatternPayloadSchema,
 });
 
+// ── Lesson schemas ─────────────────────────────────────────────────
+
+const lessonExampleSchema = z.object({
+	code: z.string().optional(),
+	description: z.string(),
+	language: z.enum(["python", "glsl", "tscript"]).optional(),
+});
+
+const lessonRecipeSchema = z.object({
+	description: z.string(),
+	example: lessonExampleSchema.optional(),
+	steps: z.array(z.string()).optional(),
+});
+
+const lessonOperatorSchema = z.object({
+	family: z.string(),
+	opType: z.string(),
+	role: z.string().optional(),
+});
+
+const skillUpdateProposalSchema = z.object({
+	proposedAddition: z.string(),
+	section: z.string(),
+	status: z.enum(["proposed", "approved", "applied", "rejected"]),
+	targetFile: z.string(),
+});
+
+const lessonProvenanceSchema = provenanceSchema.extend({
+	discoveredAt: z.string().optional(),
+	discoveredIn: z.string().optional(),
+	source: z.enum(["skills-reference", "td-docs", "manual", "auto-scan"]),
+	validatedIn: z.array(z.string()).optional(),
+	validationCount: z.number().int().min(0).default(0),
+});
+
+const lessonPayloadSchema = z.object({
+	category: z.enum(["pattern", "pitfall"]),
+	cause: z.string().optional(),
+	difficulty: z
+		.enum(["beginner", "intermediate", "advanced"])
+		.optional(),
+	fix: z.string().optional(),
+	operatorChain: z.array(lessonOperatorSchema).optional(),
+	recipe: lessonRecipeSchema.optional(),
+	relatedPatternIds: z.array(z.string()).optional(),
+	skillUpdateProposal: skillUpdateProposalSchema.optional(),
+	symptom: z.string().optional(),
+	tags: z.array(z.string()),
+});
+
+const lessonEntrySchema = knowledgeEntryBaseSchema.extend({
+	kind: z.literal("lesson"),
+	payload: lessonPayloadSchema,
+	provenance: lessonProvenanceSchema,
+});
+
 // ── Enriched operator schemas (post-merge with live data) ───────────
 
 export const enrichedStaticOperatorParamSchema =
@@ -187,6 +243,7 @@ export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
 	pythonModuleEntrySchema,
 	operatorEntrySchema,
 	glslPatternEntrySchema,
+	lessonEntrySchema,
 ]);
 
 // ── Exported types ──────────────────────────────────────────────────
@@ -195,6 +252,7 @@ export type TDKnowledgeEntry = z.infer<typeof knowledgeEntrySchema>;
 export type TDPythonModuleEntry = z.infer<typeof pythonModuleEntrySchema>;
 export type TDOperatorEntry = z.infer<typeof operatorEntrySchema>;
 export type TDGlslPatternEntry = z.infer<typeof glslPatternEntrySchema>;
+export type TDLessonEntry = z.infer<typeof lessonEntrySchema>;
 export type EnrichmentMeta = z.infer<typeof enrichmentMetaSchema>;
 export type EnrichedStaticOperatorParam = z.infer<
 	typeof enrichedStaticOperatorParamSchema

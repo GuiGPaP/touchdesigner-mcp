@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-	VersionManifest,
 	normalizeTdVersion,
+	VersionManifest,
 } from "../../../src/features/resources/versionManifest.js";
 
 describe("normalizeTdVersion", () => {
@@ -65,24 +65,18 @@ describe("VersionManifest", () => {
 		});
 
 		it("returns unknown when no TD version", () => {
-			expect(
-				m.checkCompatibility({ addedIn: "2020" }, null),
-			).toEqual({ level: "unknown" });
+			expect(m.checkCompatibility({ addedIn: "2020" }, null)).toEqual({
+				level: "unknown",
+			});
 		});
 
 		it("returns compatible when addedIn <= tdVersion", () => {
-			const result = m.checkCompatibility(
-				{ addedIn: "2020" },
-				"2023",
-			);
+			const result = m.checkCompatibility({ addedIn: "2020" }, "2023");
 			expect(result.level).toBe("compatible");
 		});
 
 		it("returns unavailable when addedIn > tdVersion", () => {
-			const result = m.checkCompatibility(
-				{ addedIn: "2024" },
-				"2023",
-			);
+			const result = m.checkCompatibility({ addedIn: "2024" }, "2023");
 			expect(result.level).toBe("unavailable");
 			expect(result.reason).toContain("2024");
 		});

@@ -13,7 +13,12 @@ describe("formatProjectIndex", () => {
 		const text = formatProjectIndex(
 			{
 				markdown: "# Project\nsome content",
-				stats: { opCount: 10, compCount: 3, extensionCount: 1, warningCount: 0 },
+				stats: {
+					compCount: 3,
+					extensionCount: 1,
+					opCount: 10,
+					warningCount: 0,
+				},
 				truncated: false,
 				warnings: [],
 			},
@@ -71,8 +76,8 @@ describe("formatTdContext", () => {
 	it("formats minimal with facet names", () => {
 		const text = formatTdContext(
 			{
+				facets: { errors: { errors: [] }, parameters: { pars: [] } },
 				nodePath: "/project1/geo1",
-				facets: { parameters: { pars: [] }, errors: { errors: [] } },
 				warnings: [],
 			},
 			{ detailLevel: "minimal" },
@@ -86,10 +91,10 @@ describe("formatTdContext", () => {
 	it("summary renders facet sections", () => {
 		const text = formatTdContext(
 			{
-				nodePath: "/project1/noise1",
 				facets: {
 					parameters: { count: 3, pars: ["seed", "amp", "period"] },
 				},
+				nodePath: "/project1/noise1",
 				warnings: [],
 			},
 			{ detailLevel: "summary" },
@@ -102,8 +107,8 @@ describe("formatTdContext", () => {
 	it("renders warnings section", () => {
 		const text = formatTdContext(
 			{
-				nodePath: "/project1/geo1",
 				facets: {},
+				nodePath: "/project1/geo1",
 				warnings: ["channels failed: not a CHOP"],
 			},
 			{ detailLevel: "summary" },
@@ -115,8 +120,8 @@ describe("formatTdContext", () => {
 	it("handles empty facets", () => {
 		const text = formatTdContext(
 			{
-				nodePath: "/project1/geo1",
 				facets: {},
+				nodePath: "/project1/geo1",
 				warnings: [],
 			},
 			{ detailLevel: "summary" },

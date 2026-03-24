@@ -25,6 +25,10 @@ export {
 	formatGlslPatternSearchResults,
 } from "./glslPatternFormatter.js";
 export {
+	formatLessonDetail,
+	formatLessonSearchResults,
+} from "./lessonFormatter.js";
+export {
 	formatConfigureInstancing,
 	formatCreateFeedbackLoop,
 	formatCreateGeometryComp,

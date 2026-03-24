@@ -2215,6 +2215,17 @@ components:
           description: "e.g., \"op('/project1/text_over_image').outputConnectors[0].connect(op('/project1/out1'))\""
           title: script
           type: string
+        mode:
+          default: safe-write
+          description: "Execution mode that restricts which operations the script may\
+            \ perform.  read-only blocks all writes; safe-write blocks destructive /\
+            \ system-level operations; full-exec is unrestricted.\n"
+          enum:
+          - read-only
+          - safe-write
+          - full-exec
+          title: mode
+          type: string
       required:
       - script
       title: exec_python_script_request

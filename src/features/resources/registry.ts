@@ -117,6 +117,33 @@ export class KnowledgeRegistry {
 			.filter((e) => e.kind === "glsl-pattern")
 			.map((e) => ({ id: e.id, kind: e.kind, title: e.title }));
 	}
+
+	/**
+	 * Return a lightweight index filtered to lesson entries.
+	 */
+	getLessonIndex(): Array<{
+		id: string;
+		title: string;
+		kind: string;
+	}> {
+		return [...this.entries.values()]
+			.filter((e) => e.kind === "lesson")
+			.map((e) => ({ id: e.id, kind: e.kind, title: e.title }));
+	}
+
+	/**
+	 * Hot-add a single entry to the registry (for capture workflow).
+	 */
+	addEntry(entry: TDKnowledgeEntry): boolean {
+		if (this.entries.has(entry.id)) {
+			return false;
+		}
+		this.entries.set(entry.id, entry);
+		if (entry.kind === "operator") {
+			this.opTypeIndex.set(entry.payload.opType.toLowerCase(), entry);
+		}
+		return true;
+	}
 }
 
 function matchesQuery(entry: TDKnowledgeEntry, query: string): boolean {
@@ -144,6 +171,18 @@ function matchesQuery(entry: TDKnowledgeEntry, query: string): boolean {
 		haystacks.push(entry.payload.difficulty);
 		if (entry.payload.tags) {
 			haystacks.push(...entry.payload.tags);
+		}
+	} else if (entry.kind === "lesson") {
+		haystacks.push(entry.payload.category);
+		haystacks.push(...entry.payload.tags);
+		if (entry.payload.symptom) haystacks.push(entry.payload.symptom);
+		if (entry.payload.cause) haystacks.push(entry.payload.cause);
+		if (entry.payload.fix) haystacks.push(entry.payload.fix);
+		if (entry.payload.recipe) haystacks.push(entry.payload.recipe.description);
+		if (entry.payload.operatorChain) {
+			for (const op of entry.payload.operatorChain) {
+				haystacks.push(op.opType, op.family);
+			}
 		}
 	}
 

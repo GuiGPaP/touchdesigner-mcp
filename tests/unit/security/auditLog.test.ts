@@ -12,19 +12,13 @@ describe("redactSecrets", () => {
 	});
 
 	it("redacts tokens and secrets", () => {
-		expect(redactSecrets('api_key = "sk-1234abc"')).toBe(
-			'api_key = "***"',
-		);
+		expect(redactSecrets('api_key = "sk-1234abc"')).toBe('api_key = "***"');
 		expect(redactSecrets("token: 'mytoken123'")).toBe("token: '***'");
-		expect(redactSecrets('PASSWORD = "hunter2"')).toBe(
-			'PASSWORD = "***"',
-		);
+		expect(redactSecrets('PASSWORD = "hunter2"')).toBe('PASSWORD = "***"');
 	});
 
 	it("leaves normal text unchanged", () => {
-		expect(redactSecrets("op('/project1').name")).toBe(
-			"op('/project1').name",
-		);
+		expect(redactSecrets("op('/project1').name")).toBe("op('/project1').name");
 	});
 });
 
@@ -126,7 +120,7 @@ describe("ExecAuditLog", () => {
 	it("redacts scripts on storage", () => {
 		const log = new ExecAuditLog();
 		const entry = log.append(
-			makeEntry({ script: 'C:\\Users\\guillaume\\file.py' }),
+			makeEntry({ script: "C:\\Users\\guillaume\\file.py" }),
 		);
 		expect(entry.script).toContain("***");
 		expect(entry.script).not.toContain("guillaume");
@@ -144,7 +138,7 @@ describe("ExecAuditLog", () => {
 		const log = new ExecAuditLog();
 		const entry = log.append(
 			makeEntry({
-				error: 'Failed at C:\\Users\\admin\\script.py',
+				error: "Failed at C:\\Users\\admin\\script.py",
 				outcome: "error",
 			}),
 		);

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -38,9 +38,7 @@ describe("asset loader", () => {
 
 				const toxPath = join(builtInDir, dir, "asset.tox");
 				const toxData = readFileSync(toxPath);
-				const actualHash = createHash("sha256")
-					.update(toxData)
-					.digest("hex");
+				const actualHash = createHash("sha256").update(toxData).digest("hex");
 				expect(actualHash).toBe(manifest.sha256);
 			});
 		}
@@ -84,10 +82,7 @@ describe("asset loader", () => {
 
 	describe("loadAssetFromDir", () => {
 		it("loads a valid asset directory", () => {
-			const asset = loadAssetFromDir(
-				join(builtInDir, "null-debug"),
-				"builtin",
-			);
+			const asset = loadAssetFromDir(join(builtInDir, "null-debug"), "builtin");
 			expect(asset).toBeDefined();
 			expect(asset?.manifest.id).toBe("null-debug");
 			expect(asset?.manifest.kind).toBe("tox-asset");
@@ -113,10 +108,7 @@ describe("asset loader", () => {
 				assetDirs
 					.map((d) => {
 						const m = JSON.parse(
-							readFileSync(
-								join(builtInDir, d, "manifest.json"),
-								"utf-8",
-							),
+							readFileSync(join(builtInDir, d, "manifest.json"), "utf-8"),
 						);
 						return m.id;
 					})

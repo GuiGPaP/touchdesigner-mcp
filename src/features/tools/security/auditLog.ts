@@ -14,7 +14,10 @@ export function redactSecrets(text: string): string {
 		.replace(
 			/((?:key|token|secret|password|api_key|apikey)\s*[=:]\s*['"])[^'"]+(['"])/gi,
 			"$1***$2",
-		);
+		)
+		.replace(/(Bearer\s+)\S+/gi, "$1***")
+		.replace(/(Basic\s+)\S+/gi, "$1***")
+		.replace(/:\/\/[^@/\s]+:[^@/\s]+@/g, "://***:***@");
 }
 
 function truncateScript(script: string): string {

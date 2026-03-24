@@ -118,9 +118,7 @@ export function formatLintDat(
 			for (const d of data.remainingDiagnostics) {
 				const loc = `L${d.line ?? "?"}:${d.column ?? "?"}`;
 				const fixable = d.fixable ? " (fixable)" : "";
-				lines.push(
-					`  ${loc} ${d.code ?? ""} ${d.message ?? ""}${fixable}`,
-				);
+				lines.push(`  ${loc} ${d.code ?? ""} ${d.message ?? ""}${fixable}`);
 			}
 		}
 	} else if (
@@ -285,9 +283,7 @@ export function formatLintDats(
 				for (const d of r.diagnostics) {
 					const loc = `L${d.line ?? "?"}:${d.column ?? "?"}`;
 					const fixable = d.fixable ? " (fixable)" : "";
-					lines.push(
-						`    ${loc} ${d.code ?? ""} ${d.message ?? ""}${fixable}`,
-					);
+					lines.push(`    ${loc} ${d.code ?? ""} ${d.message ?? ""}${fixable}`);
 				}
 			}
 		}
@@ -360,7 +356,9 @@ export function formatValidateGlslDat(
 		});
 	}
 
-	const lines: string[] = [`${path}: invalid GLSL (${shaderType}, via ${method})`];
+	const lines: string[] = [
+		`${path}: invalid GLSL (${shaderType}, via ${method})`,
+	];
 	if (data.diagnostics && opts.detailLevel !== "minimal") {
 		for (const d of data.diagnostics) {
 			const loc = `L${d.line ?? "?"}:${d.column ?? "?"}`;

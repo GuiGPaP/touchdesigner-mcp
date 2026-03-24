@@ -487,9 +487,25 @@ export interface ExecNodeMethod200Response {
   error: string | null;
 }
 
+/**
+ * Execution mode that restricts which operations the script may perform.  read-only blocks all writes; safe-write blocks destructive / system-level operations; full-exec is unrestricted.
+
+ */
+export type ExecPythonScriptRequestMode = typeof ExecPythonScriptRequestMode[keyof typeof ExecPythonScriptRequestMode];
+
+
+export const ExecPythonScriptRequestMode = {
+  'read-only': 'read-only',
+  'safe-write': 'safe-write',
+  'full-exec': 'full-exec',
+} as const;
+
 export interface ExecPythonScriptRequest {
   /** e.g., "op('/project1/text_over_image').outputConnectors[0].connect(op('/project1/out1'))" */
   script: string;
+  /** Execution mode that restricts which operations the script may perform.  read-only blocks all writes; safe-write blocks destructive / system-level operations; full-exec is unrestricted.
+ */
+  mode?: ExecPythonScriptRequestMode;
 }
 
 /**

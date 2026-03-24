@@ -1,7 +1,10 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import type { TDLessonEntry } from "../resources/types.js";
+import { knowledgeEntrySchema } from "../resources/types.js";
 import {
 	CATALOG_SIDECAR_SUFFIX,
+	LESSONS_SIDECAR_SUFFIX,
 	type ProjectEntry,
 	type ProjectManifest,
 	projectManifestSchema,
@@ -48,6 +51,40 @@ export function loadManifest(toePath: string): ProjectManifest | null {
 		return result.data;
 	} catch {
 		return null;
+	}
+}
+
+/**
+ * Derive the sidecar lessons path from a .toe file path.
+ * Example: /path/to/foo.toe → /path/to/foo.td-lessons.json
+ */
+export function lessonsPathFor(toePath: string): string {
+	const name = basename(toePath, ".toe");
+	return join(dirname(toePath), `${name}${LESSONS_SIDECAR_SUFFIX}.json`);
+}
+
+/**
+ * Load lesson entries from a sidecar file next to a .toe file.
+ * Returns empty array if the sidecar doesn't exist or is invalid.
+ */
+export function loadLessons(toePath: string): TDLessonEntry[] {
+	const lPath = lessonsPathFor(toePath);
+	if (!existsSync(lPath)) return [];
+
+	try {
+		const raw = readFileSync(lPath, "utf-8");
+		const parsed = JSON.parse(raw);
+		const entries = Array.isArray(parsed) ? parsed : [parsed];
+		const valid: TDLessonEntry[] = [];
+		for (const entry of entries) {
+			const result = knowledgeEntrySchema.safeParse(entry);
+			if (result.success && result.data.kind === "lesson") {
+				valid.push(result.data as TDLessonEntry);
+			}
+		}
+		return valid;
+	} catch {
+		return [];
 	}
 }
 

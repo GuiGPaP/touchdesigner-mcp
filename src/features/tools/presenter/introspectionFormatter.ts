@@ -28,11 +28,9 @@ export function formatParameterSchema(
 	const count = data.count ?? 0;
 
 	if (count === 0) {
-		return finalizeFormattedText(
-			`${path}: no parameters match`,
-			opts,
-			{ context: { title: "Parameter Schema" } },
-		);
+		return finalizeFormattedText(`${path}: no parameters match`, opts, {
+			context: { title: "Parameter Schema" },
+		});
 	}
 
 	const lines = [`${path} (${data.opType ?? "?"}) — ${count} parameter(s)`];
@@ -82,7 +80,9 @@ export function formatCompleteOpPaths(
 	const lines = [`${count} match(es) for "${data.prefix ?? "*"}"`];
 	if (data.matches && opts.detailLevel !== "minimal") {
 		for (const m of data.matches) {
-			lines.push(`  ${m.relativeRef ?? m.path ?? m.name ?? "?"} (${m.opType ?? "?"})`);
+			lines.push(
+				`  ${m.relativeRef ?? m.path ?? m.name ?? "?"} (${m.opType ?? "?"})`,
+			);
 		}
 	}
 	if (data.truncated) {
@@ -148,7 +148,9 @@ export function formatDatTableInfo(
 	}
 
 	const path = data.nodePath ?? "(unknown)";
-	const lines = [`${path} — ${data.numRows ?? 0} rows × ${data.numCols ?? 0} cols`];
+	const lines = [
+		`${path} — ${data.numRows ?? 0} rows × ${data.numCols ?? 0} cols`,
+	];
 
 	if (data.sampleData && opts.detailLevel !== "minimal") {
 		for (const row of data.sampleData) {
