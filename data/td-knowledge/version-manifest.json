@@ -1,0 +1,42 @@
+{
+	"schemaVersion": "1.0",
+	"currentStable": "2025",
+	"versions": [
+		{
+			"id": "2020",
+			"label": "TouchDesigner 2020",
+			"pythonVersion": "3.7",
+			"supportStatus": "legacy"
+		},
+		{
+			"id": "2021",
+			"label": "TouchDesigner 2021",
+			"pythonVersion": "3.9",
+			"supportStatus": "legacy"
+		},
+		{
+			"id": "2022",
+			"label": "TouchDesigner 2022",
+			"pythonVersion": "3.9",
+			"supportStatus": "legacy"
+		},
+		{
+			"id": "2023",
+			"label": "TouchDesigner 2023",
+			"pythonVersion": "3.11",
+			"supportStatus": "maintenance"
+		},
+		{
+			"id": "2024",
+			"label": "TouchDesigner 2024",
+			"pythonVersion": "3.11",
+			"supportStatus": "active"
+		},
+		{
+			"id": "2025",
+			"label": "TouchDesigner 2025",
+			"pythonVersion": "3.11",
+			"supportStatus": "current"
+		}
+	]
+}

@@ -138,7 +138,7 @@ export class TouchDesignerServer {
 	 */
 	private registerAllFeatures(): { assets: number; knowledge: number } {
 		registerPrompts(this.server, this.logger);
-		const knowledgeRegistry = registerResources(
+		const { fusionService, registry, versionManifest } = registerResources(
 			this.server,
 			this.logger,
 			this.tdClient,
@@ -149,11 +149,12 @@ export class TouchDesignerServer {
 			this.logger,
 			this.tdClient,
 			this.serverMode,
-			knowledgeRegistry,
+			registry,
+			{ fusionService, versionManifest },
 		);
 		return {
 			assets: assetRegistry.size,
-			knowledge: knowledgeRegistry.size,
+			knowledge: registry.size,
 		};
 	}
 

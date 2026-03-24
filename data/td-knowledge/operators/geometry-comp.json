@@ -1,0 +1,43 @@
+{
+	"id": "geometry-comp",
+	"title": "Geometry COMP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"geometry",
+		"3d",
+		"render",
+		"mesh",
+		"instancing",
+		"material"
+	],
+	"content": {
+		"summary": "Renders 3D geometry. Contains SOPs and MATs. Supports instancing."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "geometryCOMP",
+		"opFamily": "COMP",
+		"parameters": [
+			{
+				"name": "material"
+			},
+			{
+				"name": "rendermode"
+			},
+			{
+				"name": "instanceop"
+			},
+			{
+				"name": "instancing"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

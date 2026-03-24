@@ -1,0 +1,42 @@
+{
+	"id": "constant-chop",
+	"title": "Constant CHOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"constant",
+		"value",
+		"static",
+		"parameter",
+		"default"
+	],
+	"content": {
+		"summary": "Outputs channels with constant values. Useful for parameters, defaults, and static data."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "constantCHOP",
+		"opFamily": "CHOP",
+		"parameters": [
+			{
+				"name": "name0"
+			},
+			{
+				"name": "value0"
+			},
+			{
+				"name": "name1"
+			},
+			{
+				"name": "value1"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

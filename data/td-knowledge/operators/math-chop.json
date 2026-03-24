@@ -1,0 +1,50 @@
+{
+	"id": "math-chop",
+	"title": "Math CHOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"math",
+		"combine",
+		"add",
+		"multiply",
+		"scale",
+		"range",
+		"clamp"
+	],
+	"content": {
+		"summary": "Performs mathematical operations on channels: combine, scale, range, clamp, apply functions."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "mathCHOP",
+		"opFamily": "CHOP",
+		"parameters": [
+			{
+				"name": "preoff"
+			},
+			{
+				"name": "gain"
+			},
+			{
+				"name": "postoff"
+			},
+			{
+				"name": "channelop"
+			},
+			{
+				"name": "combine"
+			},
+			{
+				"name": "integer"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

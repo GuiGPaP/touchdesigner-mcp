@@ -1,0 +1,53 @@
+{
+	"id": "line-sop",
+	"title": "Line SOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"line",
+		"geometry",
+		"primitive",
+		"wireframe"
+	],
+	"content": {
+		"summary": "Creates a line primitive between two points."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "lineSOP",
+		"opFamily": "SOP",
+		"parameters": [
+			{
+				"name": "origx"
+			},
+			{
+				"name": "origy"
+			},
+			{
+				"name": "origz"
+			},
+			{
+				"name": "dirx"
+			},
+			{
+				"name": "diry"
+			},
+			{
+				"name": "dirz"
+			},
+			{
+				"name": "length"
+			},
+			{
+				"name": "points"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

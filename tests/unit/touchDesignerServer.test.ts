@@ -7,9 +7,16 @@ vi.mock("../../src/features/prompts/index.js", () => ({
 	registerPrompts: vi.fn(),
 }));
 
-const sentinelRegistry = { _sentinel: true };
+const sentinelRegistry = { _sentinel: true, size: 0 };
+const sentinelFusionService = { _sentinel: true };
+const sentinelVersionManifest = { _sentinel: true, size: 0 };
+const sentinelResourceServices = {
+	fusionService: sentinelFusionService,
+	registry: sentinelRegistry,
+	versionManifest: sentinelVersionManifest,
+};
 vi.mock("../../src/features/resources/index.js", () => ({
-	registerResources: vi.fn(() => sentinelRegistry),
+	registerResources: vi.fn(() => sentinelResourceServices),
 }));
 
 vi.mock("../../src/features/tools/index.js", () => ({
@@ -75,18 +82,22 @@ describe("TouchDesignerServer", () => {
 
 		new TouchDesignerServer();
 
-		// registerResources returns the sentinel registry
+		// registerResources returns the sentinel resource services
 		expect(resourcesModule.registerResources).toHaveReturnedWith(
-			sentinelRegistry,
+			sentinelResourceServices,
 		);
 
-		// registerTools receives it as the 5th argument
+		// registerTools receives registry as 5th arg, resource deps as 6th
 		expect(toolsModule.registerTools).toHaveBeenCalledWith(
 			expect.anything(), // server
 			expect.anything(), // logger
 			expect.anything(), // tdClient
 			expect.anything(), // serverMode
-			sentinelRegistry, // knowledgeRegistry
+			sentinelRegistry, // registry
+			expect.objectContaining({
+				fusionService: sentinelFusionService,
+				versionManifest: sentinelVersionManifest,
+			}),
 		);
 	});
 });

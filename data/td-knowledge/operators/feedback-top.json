@@ -1,0 +1,40 @@
+{
+	"id": "feedback-top",
+	"title": "Feedback TOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"feedback",
+		"loop",
+		"trail",
+		"persistence",
+		"motion",
+		"iterative"
+	],
+	"content": {
+		"summary": "Creates a feedback loop by passing the previous frame output back as input. Essential for trails and iterative effects."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "feedbackTOP",
+		"opFamily": "TOP",
+		"parameters": [
+			{
+				"name": "top"
+			},
+			{
+				"name": "resetcondition"
+			},
+			{
+				"name": "resetpulse"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

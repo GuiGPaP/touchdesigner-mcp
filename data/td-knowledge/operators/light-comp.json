@@ -1,0 +1,54 @@
+{
+	"id": "light-comp",
+	"title": "Light COMP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"light",
+		"point",
+		"directional",
+		"cone",
+		"shadow"
+	],
+	"content": {
+		"summary": "Light source for Render TOP scenes. Point, directional, cone, or area."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "lightCOMP",
+		"opFamily": "COMP",
+		"parameters": [
+			{
+				"name": "lighttype"
+			},
+			{
+				"name": "dimmer"
+			},
+			{
+				"name": "colorr"
+			},
+			{
+				"name": "colorg"
+			},
+			{
+				"name": "colorb"
+			},
+			{
+				"name": "tx"
+			},
+			{
+				"name": "ty"
+			},
+			{
+				"name": "tz"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

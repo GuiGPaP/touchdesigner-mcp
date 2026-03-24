@@ -1,0 +1,45 @@
+{
+	"id": "sphere-sop",
+	"title": "Sphere SOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"sphere",
+		"ball",
+		"geometry",
+		"3d",
+		"primitive"
+	],
+	"content": {
+		"summary": "Creates a sphere primitive. Fundamental 3D shape."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "sphereSOP",
+		"opFamily": "SOP",
+		"parameters": [
+			{
+				"name": "type"
+			},
+			{
+				"name": "radius"
+			},
+			{
+				"name": "orient"
+			},
+			{
+				"name": "rows"
+			},
+			{
+				"name": "columns"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

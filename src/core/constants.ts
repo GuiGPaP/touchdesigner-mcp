@@ -8,6 +8,7 @@ export const TD_PYTHON_CLASS_REFERENCE_INDEX_URL = `${TD_PYTHON_CLASS_REFERENCE_
  * Reference Tool Names for TouchDesigner MCP
  */
 export const TOOL_NAMES = {
+	COMPARE_OPERATORS: "compare_operators",
 	COMPLETE_OP_PATHS: "complete_op_paths",
 	CONFIGURE_INSTANCING: "configure_instancing",
 	CREATE_FEEDBACK_LOOP: "create_feedback_loop",
@@ -43,6 +44,7 @@ export const TOOL_NAMES = {
 	LINT_DAT: "lint_dat",
 	LINT_DATS: "lint_dats",
 	SEARCH_GLSL_PATTERNS: "search_glsl_patterns",
+	SEARCH_OPERATORS: "search_operators",
 	SEARCH_TD_ASSETS: "search_td_assets",
 	SET_DAT_TEXT: "set_dat_text",
 	TYPECHECK_DAT: "typecheck_dat",

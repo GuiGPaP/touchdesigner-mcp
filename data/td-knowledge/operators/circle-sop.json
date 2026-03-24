@@ -1,0 +1,45 @@
+{
+	"id": "circle-sop",
+	"title": "Circle SOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"circle",
+		"arc",
+		"ellipse",
+		"ring",
+		"geometry"
+	],
+	"content": {
+		"summary": "Creates circle, arc, or ellipse geometry."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "circleSOP",
+		"opFamily": "SOP",
+		"parameters": [
+			{
+				"name": "type"
+			},
+			{
+				"name": "radius"
+			},
+			{
+				"name": "orient"
+			},
+			{
+				"name": "arc"
+			},
+			{
+				"name": "divisions"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

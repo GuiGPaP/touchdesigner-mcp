@@ -1,0 +1,52 @@
+{
+	"id": "level-top",
+	"title": "Level TOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"level",
+		"brightness",
+		"contrast",
+		"gamma",
+		"color",
+		"correction"
+	],
+	"content": {
+		"summary": "Adjusts brightness, contrast, gamma, and color range. Core color correction tool."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "levelTOP",
+		"opFamily": "TOP",
+		"parameters": [
+			{
+				"name": "brightness1"
+			},
+			{
+				"name": "contrast"
+			},
+			{
+				"name": "gamma1"
+			},
+			{
+				"name": "black"
+			},
+			{
+				"name": "bright"
+			},
+			{
+				"name": "invert"
+			},
+			{
+				"name": "opacity"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

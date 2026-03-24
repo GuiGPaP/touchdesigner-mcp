@@ -1,0 +1,40 @@
+{
+	"id": "ramp-top",
+	"title": "Ramp TOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"ramp",
+		"gradient",
+		"linear",
+		"radial",
+		"circular",
+		"mask"
+	],
+	"content": {
+		"summary": "Generates gradient ramps (linear, radial, circular) for masks, lookups, and color mapping."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "rampTOP",
+		"opFamily": "TOP",
+		"parameters": [
+			{
+				"name": "type"
+			},
+			{
+				"name": "phase"
+			},
+			{
+				"name": "period"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

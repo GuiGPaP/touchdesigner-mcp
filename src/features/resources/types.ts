@@ -68,10 +68,22 @@ const staticOperatorParamSchema = z.object({
 	style: z.string().optional(),
 });
 
+const operatorVersionSchema = z
+	.object({
+		addedIn: z.string().optional(),
+		changedIn: z.array(z.string()).optional(),
+		deprecated: z.boolean().optional(),
+		deprecatedSince: z.string().optional(),
+		removedIn: z.string().optional(),
+		suggestedReplacement: z.string().optional(),
+	})
+	.optional();
+
 const operatorPayloadSchema = z.object({
 	opFamily: z.string(),
 	opType: z.string(),
 	parameters: z.array(staticOperatorParamSchema),
+	versions: operatorVersionSchema,
 });
 
 const operatorEntrySchema = knowledgeEntryBaseSchema.extend({

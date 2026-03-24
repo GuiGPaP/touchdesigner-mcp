@@ -1,0 +1,38 @@
+{
+	"id": "table-dat",
+	"title": "Table DAT",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"table",
+		"data",
+		"rows",
+		"columns",
+		"spreadsheet",
+		"lookup",
+		"dat"
+	],
+	"content": {
+		"summary": "Stores tabular data (rows/columns). Lookup tables, parameter lists, CSV."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "tableDAT",
+		"opFamily": "DAT",
+		"parameters": [
+			{
+				"name": "file"
+			},
+			{
+				"name": "loadonstartpulse"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

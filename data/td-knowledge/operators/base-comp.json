@@ -1,0 +1,29 @@
+{
+	"id": "base-comp",
+	"title": "Base COMP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"base",
+		"container",
+		"component",
+		"extension",
+		"python"
+	],
+	"content": {
+		"summary": "General-purpose container component with extension support for Python classes."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "baseCOMP",
+		"opFamily": "COMP",
+		"parameters": [],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

@@ -1,0 +1,60 @@
+{
+	"id": "camera-comp",
+	"title": "Camera COMP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"camera",
+		"view",
+		"perspective",
+		"orthographic",
+		"projection"
+	],
+	"content": {
+		"summary": "Virtual camera for Render TOP. Controls view, projection, FOV."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "cameraCOMP",
+		"opFamily": "COMP",
+		"parameters": [
+			{
+				"name": "tx"
+			},
+			{
+				"name": "ty"
+			},
+			{
+				"name": "tz"
+			},
+			{
+				"name": "rx"
+			},
+			{
+				"name": "ry"
+			},
+			{
+				"name": "rz"
+			},
+			{
+				"name": "projection"
+			},
+			{
+				"name": "fov"
+			},
+			{
+				"name": "near"
+			},
+			{
+				"name": "far"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

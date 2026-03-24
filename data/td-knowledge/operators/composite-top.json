@@ -1,0 +1,38 @@
+{
+	"id": "composite-top",
+	"title": "Composite TOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"composite",
+		"blend",
+		"layer",
+		"mix",
+		"over",
+		"add",
+		"multiply"
+	],
+	"content": {
+		"summary": "Composites multiple input images using blend operations (over, add, multiply, screen)."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "compositeTOP",
+		"opFamily": "TOP",
+		"parameters": [
+			{
+				"name": "operand"
+			},
+			{
+				"name": "chanmask"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

@@ -1,0 +1,36 @@
+{
+	"id": "select-chop",
+	"title": "Select CHOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"select",
+		"reference",
+		"route",
+		"channel",
+		"pick"
+	],
+	"content": {
+		"summary": "References channels from another CHOP without a wire connection."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "selectCHOP",
+		"opFamily": "CHOP",
+		"parameters": [
+			{
+				"name": "chop"
+			},
+			{
+				"name": "channames"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"id": "render-top",
+	"title": "Render TOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"render",
+		"3d",
+		"camera",
+		"light",
+		"geometry",
+		"scene"
+	],
+	"content": {
+		"summary": "Renders 3D geometry from Geometry COMPs, cameras, and lights into a 2D image."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "renderTOP",
+		"opFamily": "TOP",
+		"parameters": [
+			{
+				"name": "camera"
+			},
+			{
+				"name": "geometry"
+			},
+			{
+				"name": "lights"
+			},
+			{
+				"name": "outputresolution"
+			},
+			{
+				"name": "antialiasing"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

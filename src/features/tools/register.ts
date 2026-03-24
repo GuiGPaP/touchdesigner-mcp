@@ -2,7 +2,9 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ILogger } from "../../core/logger.js";
 import type { ServerMode } from "../../core/serverMode.js";
 import type { TouchDesignerClient } from "../../tdClient/index.js";
+import type { FusionService } from "../resources/fusionService.js";
 import type { KnowledgeRegistry } from "../resources/registry.js";
+import type { VersionManifest } from "../resources/versionManifest.js";
 import {
 	resolveBuiltinAssetsPath,
 	resolveProjectAssetsPath,
@@ -14,8 +16,14 @@ import { registerAssetTools } from "./handlers/assetTools.js";
 import { registerExecLogTools } from "./handlers/execLogTools.js";
 import { registerGlslPatternTools } from "./handlers/glslPatternTools.js";
 import { registerHealthTools } from "./handlers/healthTools.js";
+import { registerSearchTools } from "./handlers/searchTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
 import { ExecAuditLog } from "./security/index.js";
+
+export interface ResourceDeps {
+	fusionService: FusionService;
+	versionManifest: VersionManifest;
+}
 
 /**
  * Register tool handlers with MCP server
@@ -26,6 +34,7 @@ export function registerTools(
 	tdClient: TouchDesignerClient,
 	serverMode: ServerMode,
 	knowledgeRegistry: KnowledgeRegistry,
+	resourceDeps?: ResourceDeps,
 ): { assetRegistry: AssetRegistry } {
 	const auditLog = new ExecAuditLog();
 	registerTdTools(server, logger, tdClient, serverMode, auditLog);
@@ -61,6 +70,18 @@ export function registerTools(
 		knowledgeRegistry,
 		serverMode,
 	);
+
+	// Register search/compare tools if resource dependencies available
+	if (resourceDeps) {
+		registerSearchTools(
+			server,
+			logger,
+			knowledgeRegistry,
+			resourceDeps.versionManifest,
+			resourceDeps.fusionService,
+			serverMode,
+		);
+	}
 
 	return { assetRegistry };
 }

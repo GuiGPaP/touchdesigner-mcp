@@ -1,0 +1,55 @@
+{
+	"id": "noise-top",
+	"title": "Noise TOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"noise",
+		"random",
+		"perlin",
+		"simplex",
+		"procedural",
+		"texture"
+	],
+	"content": {
+		"summary": "Generates procedural noise textures (Perlin, Simplex, etc.) for displacement, masks, or animated backgrounds."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "noiseTOP",
+		"opFamily": "TOP",
+		"parameters": [
+			{
+				"name": "type"
+			},
+			{
+				"name": "monochrome"
+			},
+			{
+				"name": "period"
+			},
+			{
+				"name": "harmonics"
+			},
+			{
+				"name": "roughness"
+			},
+			{
+				"name": "amplitude"
+			},
+			{
+				"name": "offset"
+			},
+			{
+				"name": "seed"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

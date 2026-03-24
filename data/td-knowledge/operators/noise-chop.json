@@ -1,0 +1,52 @@
+{
+	"id": "noise-chop",
+	"title": "Noise CHOP",
+	"kind": "operator",
+	"aliases": [],
+	"searchKeywords": [
+		"noise",
+		"random",
+		"animation",
+		"modulation",
+		"procedural",
+		"channel"
+	],
+	"content": {
+		"summary": "Generates smooth random channel data. Commonly used for animation, modulation, and procedural control."
+	},
+	"provenance": {
+		"source": "td-docs",
+		"confidence": "medium",
+		"license": "MIT"
+	},
+	"payload": {
+		"opType": "noiseCHOP",
+		"opFamily": "CHOP",
+		"parameters": [
+			{
+				"name": "type"
+			},
+			{
+				"name": "roughness"
+			},
+			{
+				"name": "period"
+			},
+			{
+				"name": "amplitude"
+			},
+			{
+				"name": "offset"
+			},
+			{
+				"name": "seed"
+			},
+			{
+				"name": "channels"
+			}
+		],
+		"versions": {
+			"addedIn": "2020"
+		}
+	}
+}

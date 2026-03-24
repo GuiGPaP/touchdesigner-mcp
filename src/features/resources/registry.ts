@@ -8,6 +8,7 @@ import type { TDKnowledgeEntry } from "./types.js";
  */
 export class KnowledgeRegistry {
 	private readonly entries = new Map<string, TDKnowledgeEntry>();
+	private readonly opTypeIndex = new Map<string, TDKnowledgeEntry>();
 	private readonly logger?: ILogger;
 
 	constructor(logger?: ILogger) {
@@ -34,6 +35,10 @@ export class KnowledgeRegistry {
 				continue;
 			}
 			this.entries.set(entry.id, entry);
+			// Build secondary index for operator lookups by opType
+			if (entry.kind === "operator") {
+				this.opTypeIndex.set(entry.payload.opType.toLowerCase(), entry);
+			}
 		}
 		this.logger?.sendLog({
 			data: `Knowledge registry loaded: ${this.entries.size} entry/entries`,
@@ -44,6 +49,14 @@ export class KnowledgeRegistry {
 
 	getById(id: string): TDKnowledgeEntry | undefined {
 		return this.entries.get(id);
+	}
+
+	/**
+	 * Look up an operator entry by opType (case-insensitive).
+	 * Uses secondary index built at load time.
+	 */
+	getByOpType(opType: string): TDKnowledgeEntry | undefined {
+		return this.opTypeIndex.get(opType.toLowerCase());
 	}
 
 	getByKind(kind: string): TDKnowledgeEntry[] {
