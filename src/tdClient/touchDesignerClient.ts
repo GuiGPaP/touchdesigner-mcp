@@ -179,7 +179,7 @@ export type SuccessResult<T> = { success: true; data: NonNullable<T> };
 
 export type Result<T, E = Error> = SuccessResult<T> | ErrorResult<E>;
 
-export const ERROR_CACHE_TTL_MS = 60 * 1000; // 60 seconds
+export const ERROR_CACHE_TTL_MS = 10 * 1000; // 10 seconds (fast reconnection)
 export const SUCCESS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
@@ -238,6 +238,8 @@ export class TouchDesignerClient {
 	private errorCacheTimestamp: number | null;
 	private successCacheTimestamp: number | null;
 	private compatibilityNotice: CompatibilityNotice | null;
+	private _lastSeen: string | null;
+	private _lastBuild: string | null;
 
 	/**
 	 * Initialize TouchDesigner client with optional dependencies
@@ -257,6 +259,16 @@ export class TouchDesignerClient {
 		this.errorCacheTimestamp = null;
 		this.successCacheTimestamp = null;
 		this.compatibilityNotice = null;
+		this._lastSeen = null;
+		this._lastBuild = null;
+	}
+
+	get lastSeen(): string | null {
+		return this._lastSeen;
+	}
+
+	get lastBuild(): string | null {
+		return this._lastBuild;
 	}
 
 	/**
@@ -836,6 +848,74 @@ export class TouchDesignerClient {
 		await this.verifyCompatibility();
 	}
 
+	/**
+	 * Lightweight health probe — calls getTdInfo directly with a short timeout.
+	 * Bypasses the compatibility cache. Updates lastSeen/lastBuild and serverMode.
+	 * Only catches AxiosError (network failures); programming errors propagate.
+	 */
+	async healthProbe(timeoutMs = 2000): Promise<{
+		online: boolean;
+		build: string | null;
+		lastSeen: string | null;
+		latencyMs: number;
+		compatible: boolean | null;
+		error: string | null;
+	}> {
+		const start = Date.now();
+		try {
+			const result = await this.api.getTdInfo({ timeout: timeoutMs });
+			const latencyMs = Date.now() - start;
+			// Any HTTP response = TD is reachable = online
+			const build = result.data?.version ?? null;
+			this._lastSeen = new Date().toISOString();
+			this._lastBuild = build;
+			this.serverMode?.transitionOnline(build ?? undefined);
+
+			if (!result.success) {
+				return {
+					build,
+					compatible: null,
+					error: result.error ?? null,
+					lastSeen: this._lastSeen,
+					latencyMs,
+					online: true,
+				};
+			}
+
+			// Check version compatibility
+			const apiVersion = result.data?.mcpApiVersion?.trim() || "";
+			const compat = this.checkVersionCompatibility(
+				MCP_SERVER_VERSION,
+				apiVersion,
+			);
+			const compatible = compat.level !== "error";
+
+			return {
+				build,
+				compatible,
+				error: compatible ? null : compat.message,
+				lastSeen: this._lastSeen,
+				latencyMs,
+				online: true,
+			};
+		} catch (error) {
+			// Only catch AxiosError (network/HTTP). Propagate programming errors.
+			if (!axios.isAxiosError(error)) {
+				throw error;
+			}
+			const latencyMs = Date.now() - start;
+			this.serverMode?.transitionOffline();
+			return {
+				build: this._lastBuild,
+				compatible: null,
+				error: this.formatConnectionError(error.message),
+				lastSeen: this._lastSeen,
+				latencyMs,
+				online: false,
+			};
+		}
+	}
+
 	async verifyVersionCompatibility() {
 		let tdInfoResult: Awaited<ReturnType<ITouchDesignerApi["getTdInfo"]>>;
 		try {
@@ -877,6 +957,8 @@ export class TouchDesignerClient {
 
 		// HTTP responded (even if success:false) → TD is REACHABLE → ONLINE
 		const tdBuild = tdInfoResult.data?.version ?? null;
+		this._lastSeen = new Date().toISOString();
+		this._lastBuild = tdBuild;
 		this.serverMode?.transitionOnline(tdBuild ?? undefined);
 
 		if (!tdInfoResult.success) {

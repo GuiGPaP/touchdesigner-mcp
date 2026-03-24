@@ -85,6 +85,40 @@ console.log(caps.lint_dat, caps.tools.ruff.version);`,
 		tool: TOOL_NAMES.GET_CAPABILITIES,
 	},
 	{
+		category: "system",
+		description:
+			"Check TouchDesigner connection health. Returns online status, build, latency, and compatibility. Works without a live TD connection.",
+		example: `const health = await getHealth();
+console.log(health.online, health.latencyMs);`,
+		functionName: "getHealth",
+		modulePath: `${MODULE_ROOT}/healthTools.ts`,
+		parameters: [],
+		returns:
+			"Health status object: { online, build, lastSeen, latencyMs, compatible, error }.",
+		tool: TOOL_NAMES.GET_HEALTH,
+	},
+	{
+		category: "system",
+		description:
+			"Wait for TouchDesigner to become available. Polls periodically until TD responds or timeout is reached.",
+		example: `const result = await waitForTd({ timeoutSeconds: 30 });
+console.log(result.online, result.ready, result.timedOut);`,
+		functionName: "waitForTd",
+		modulePath: `${MODULE_ROOT}/healthTools.ts`,
+		parameters: [
+			{
+				description:
+					"Maximum seconds to wait for TD connection (1–120, default 30).",
+				name: "timeoutSeconds",
+				required: false,
+				type: "number",
+			},
+		],
+		returns:
+			"Health status with { online, ready, timedOut, build, compatible, error }.",
+		tool: TOOL_NAMES.WAIT_FOR_TD,
+	},
+	{
 		category: "python",
 		description: "Execute arbitrary Python against the TouchDesigner session",
 		example: `import { executePythonScript } from './servers/touchdesigner/executePythonScript';

@@ -1458,4 +1458,135 @@ describe("TouchDesignerClient with mocks", () => {
 			expect(serverMode.tdBuild).toBe("2023.12345");
 		});
 	});
+
+	describe("healthProbe", () => {
+		test("transitions online when TD responds with success", async () => {
+			const serverMode = new ServerMode();
+			const mockGetTdInfo = vi.fn().mockResolvedValue({
+				data: {
+					mcpApiVersion: "1.3.1",
+					version: "2023.11050",
+				},
+				error: null,
+				success: true,
+			});
+
+			const client = new TouchDesignerClient({
+				httpClient: {
+					getTdInfo: mockGetTdInfo,
+				} as unknown as ITouchDesignerApi,
+				logger: nullLogger,
+				serverMode,
+			});
+
+			const health = await client.healthProbe(2000);
+
+			expect(health.online).toBe(true);
+			expect(health.build).toBe("2023.11050");
+			expect(health.compatible).toBe(true);
+			expect(health.error).toBeNull();
+			expect(health.lastSeen).toBeTruthy();
+			expect(health.latencyMs).toBeGreaterThanOrEqual(0);
+			expect(serverMode.mode).toBe("live");
+		});
+
+		test("transitions online with compatible=null when success is false", async () => {
+			const serverMode = new ServerMode();
+			const mockGetTdInfo = vi.fn().mockResolvedValue({
+				data: { version: "2023.11050" },
+				error: "some API error",
+				success: false,
+			});
+
+			const client = new TouchDesignerClient({
+				httpClient: {
+					getTdInfo: mockGetTdInfo,
+				} as unknown as ITouchDesignerApi,
+				logger: nullLogger,
+				serverMode,
+			});
+
+			const health = await client.healthProbe(2000);
+
+			expect(health.online).toBe(true);
+			expect(health.compatible).toBeNull();
+			expect(health.error).toBe("some API error");
+			expect(serverMode.mode).toBe("live");
+		});
+
+		test("transitions offline on AxiosError", async () => {
+			const serverMode = new ServerMode();
+			const mockGetTdInfo = vi.fn().mockRejectedValue(
+				new AxiosError("connect ECONNREFUSED"),
+			);
+
+			const client = new TouchDesignerClient({
+				httpClient: {
+					getTdInfo: mockGetTdInfo,
+				} as unknown as ITouchDesignerApi,
+				logger: nullLogger,
+				serverMode,
+			});
+
+			const health = await client.healthProbe(2000);
+
+			expect(health.online).toBe(false);
+			expect(health.compatible).toBeNull();
+			expect(health.error).toBeTruthy();
+			expect(serverMode.mode).toBe("docs-only");
+		});
+
+		test("propagates non-Axios errors", async () => {
+			const mockGetTdInfo = vi.fn().mockRejectedValue(
+				new TypeError("Cannot read property of undefined"),
+			);
+
+			const client = new TouchDesignerClient({
+				httpClient: {
+					getTdInfo: mockGetTdInfo,
+				} as unknown as ITouchDesignerApi,
+				logger: nullLogger,
+			});
+
+			await expect(client.healthProbe(2000)).rejects.toThrow(TypeError);
+		});
+
+		test("lastSeen persists after subsequent failure", async () => {
+			const serverMode = new ServerMode();
+			const mockGetTdInfo = vi
+				.fn()
+				.mockResolvedValueOnce({
+					data: { mcpApiVersion: "1.3.1", version: "2023.11050" },
+					error: null,
+					success: true,
+				})
+				.mockRejectedValueOnce(new AxiosError("connect ECONNREFUSED"));
+
+			const client = new TouchDesignerClient({
+				httpClient: {
+					getTdInfo: mockGetTdInfo,
+				} as unknown as ITouchDesignerApi,
+				logger: nullLogger,
+				serverMode,
+			});
+
+			// First probe succeeds
+			const first = await client.healthProbe(2000);
+			expect(first.online).toBe(true);
+			expect(first.lastSeen).toBeTruthy();
+			const savedLastSeen = first.lastSeen;
+
+			// Second probe fails but lastSeen persists
+			const second = await client.healthProbe(2000);
+			expect(second.online).toBe(false);
+			expect(second.lastSeen).toBe(savedLastSeen);
+			expect(second.build).toBe("2023.11050"); // lastBuild also persists
+		});
+	});
+
+	describe("ERROR_CACHE_TTL_MS", () => {
+		test("should be 10 seconds for fast reconnection", () => {
+			expect(ERROR_CACHE_TTL_MS).toBe(10 * 1000);
+		});
+	});
 });

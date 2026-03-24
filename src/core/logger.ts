@@ -17,16 +17,27 @@ export class McpLogger implements ILogger {
 
 	sendLog(args: LoggingMessageNotification["params"]) {
 		try {
-			this.server.server.sendLoggingMessage({
-				...args,
-			});
+			void this.server.server
+				.sendLoggingMessage({ ...args })
+				.catch((error: unknown) => {
+					if (error instanceof Error && error.message === "Not connected") {
+						return;
+					}
+					console.error(
+						"CRITICAL: Failed to send log to MCP server. Logging system may be compromised.",
+						{
+							error: error instanceof Error ? error.message : String(error),
+							originalLogger: args.logger,
+							originalLogLevel: args.level,
+							stack: error instanceof Error ? error.stack : undefined,
+						},
+					);
+				});
 		} catch (error) {
-			// Only swallow the expected "Not connected" error during startup/shutdown
+			// Sync throw from SDK or mock
 			if (error instanceof Error && error.message === "Not connected") {
 				return;
 			}
-
-			// For all other errors, log detailed information to help diagnose logging system failures
 			console.error(
 				"CRITICAL: Failed to send log to MCP server. Logging system may be compromised.",
 				{

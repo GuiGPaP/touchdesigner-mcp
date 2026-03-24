@@ -27,6 +27,7 @@ export const TOOL_NAMES = {
 	GET_DAT_TABLE_INFO: "get_dat_table_info",
 	GET_DAT_TEXT: "get_dat_text",
 	GET_GLSL_PATTERN: "get_glsl_pattern",
+	GET_HEALTH: "get_health",
 	GET_NODE_PARAMETER_SCHEMA: "get_node_parameter_schema",
 	GET_TD_ASSET: "get_td_asset",
 	GET_TD_CLASS_DETAILS: "get_td_class_details",
@@ -47,6 +48,7 @@ export const TOOL_NAMES = {
 	UPDATE_TD_NODE_PARAMETERS: "update_td_node_parameters",
 	VALIDATE_GLSL_DAT: "validate_glsl_dat",
 	VALIDATE_JSON_DAT: "validate_json_dat",
+	WAIT_FOR_TD: "wait_for_td",
 } as const;
 
 export const REFERENCE_COMMENT = `Check reference resources: ${TD_PYTHON_CLASS_REFERENCE_INDEX_URL}`;
