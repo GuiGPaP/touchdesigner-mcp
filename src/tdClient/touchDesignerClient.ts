@@ -15,6 +15,8 @@ import {
 import {
 	completeOpPaths as apiCompleteOpPaths,
 	configureInstancing as apiConfigureInstancing,
+	connectNodes as apiConnectNodes,
+	copyNode as apiCopyNode,
 	createFeedbackLoop as apiCreateFeedbackLoop,
 	createGeometryComp as apiCreateGeometryComp,
 	createNode as apiCreateNode,
@@ -48,6 +50,8 @@ import {
 	type CompleteOpPaths200Data,
 	type CompleteOpPathsParams,
 	type ConfigureInstancingRequest,
+	type ConnectNodesRequest,
+	type CopyNodeRequest,
 	type CreateFeedbackLoopRequest,
 	type CreateGeometryCompRequest,
 	type CreateNodeRequest,
@@ -98,6 +102,8 @@ import {
 export interface ITouchDesignerApi {
 	completeOpPaths: typeof apiCompleteOpPaths;
 	configureInstancing: typeof apiConfigureInstancing;
+	connectNodes: typeof apiConnectNodes;
+	copyNode: typeof apiCopyNode;
 	getCapabilities: typeof apiGetCapabilities;
 	createFeedbackLoop: typeof apiCreateFeedbackLoop;
 	createGeometryComp: typeof apiCreateGeometryComp;
@@ -136,6 +142,8 @@ export interface ITouchDesignerApi {
 const defaultApiClient: ITouchDesignerApi = {
 	completeOpPaths: apiCompleteOpPaths,
 	configureInstancing: apiConfigureInstancing,
+	connectNodes: apiConnectNodes,
+	copyNode: apiCopyNode,
 	createFeedbackLoop: apiCreateFeedbackLoop,
 	createGeometryComp: apiCreateGeometryComp,
 	createNode: apiCreateNode,
@@ -547,6 +555,30 @@ export class TouchDesignerClient {
 		return this.apiCall("Deleting node", () => this.api.deleteNode(params), {
 			nodePath: params.nodePath,
 		});
+	}
+
+	/**
+	 * Copy a node to a new location
+	 */
+	async copyNode(params: CopyNodeRequest) {
+		return this.apiCall("Copying node", () => this.api.copyNode(params), {
+			sourcePath: params.sourcePath,
+			targetParentPath: params.targetParentPath,
+		});
+	}
+
+	/**
+	 * Connect two nodes
+	 */
+	async connectNodes(params: ConnectNodesRequest) {
+		return this.apiCall(
+			"Connecting nodes",
+			() => this.api.connectNodes(params),
+			{
+				fromPath: params.fromPath,
+				toPath: params.toPath,
+			},
+		);
 	}
 
 	/**

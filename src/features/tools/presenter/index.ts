@@ -25,10 +25,6 @@ export {
 	formatGlslPatternSearchResults,
 } from "./glslPatternFormatter.js";
 export {
-	formatLessonDetail,
-	formatLessonSearchResults,
-} from "./lessonFormatter.js";
-export {
 	formatConfigureInstancing,
 	formatCreateFeedbackLoop,
 	formatCreateGeometryComp,
@@ -40,12 +36,11 @@ export {
 	formatDatTableInfo,
 	formatParameterSchema,
 } from "./introspectionFormatter.js";
-export { formatModuleHelp } from "./moduleHelpFormatter.js";
 export {
-	formatIndexResult,
-	formatLoadResult,
-	formatPaletteSearchResults,
-} from "./paletteFormatter.js";
+	formatLessonDetail,
+	formatLessonSearchResults,
+} from "./lessonFormatter.js";
+export { formatModuleHelp } from "./moduleHelpFormatter.js";
 export type { NodeDetailsData } from "./nodeDetailsFormatter.js";
 export { formatNodeDetails } from "./nodeDetailsFormatter.js";
 export type { NodeErrorReportData } from "./nodeErrorsFormatter.js";
@@ -53,12 +48,19 @@ export { formatNodeErrors } from "./nodeErrorsFormatter.js";
 export type { NodeListData } from "./nodeListFormatter.js";
 export { formatNodeList } from "./nodeListFormatter.js";
 export {
+	formatConnectNodesResult,
+	formatCopyNodeResult,
 	formatCreateNodeResult,
 	formatDeleteNodeResult,
 	formatExecNodeMethodResult,
 	formatTdInfo,
 	formatUpdateNodeResult,
 } from "./operationFormatter.js";
+export {
+	formatIndexResult,
+	formatLoadResult,
+	formatPaletteSearchResults,
+} from "./paletteFormatter.js";
 export type { ScriptResultData } from "./scriptResultFormatter.js";
 export { formatScriptResult } from "./scriptResultFormatter.js";
 export {
@@ -66,4 +68,10 @@ export {
 	formatAssetSearchResults,
 	formatDeployResult,
 } from "./templateFormatter.js";
+export type { DetectedToolkit } from "./toolkitFormatter.js";
+export {
+	formatDetectResult,
+	formatToolkitDetail,
+	formatToolkitSearchResults,
+} from "./toolkitFormatter.js";
 export { formatToolMetadata } from "./toolMetadataFormatter.js";

@@ -1,5 +1,7 @@
 import { MCP_SERVER_VERSION } from "../../../core/version.js";
 import type {
+	ConnectNodes200ResponseData,
+	CopyNode200ResponseData,
 	CreateNode200ResponseData,
 	DeleteNode200ResponseData,
 	ExecNodeMethod200ResponseData,
@@ -162,6 +164,71 @@ function buildCallSignature(params: {
 		: [];
 	const joinedArgs = [...argPart.map(stringifyValue), ...kwPart].join(", ");
 	return `op('${params.nodePath}').${params.method}(${joinedArgs})`;
+}
+
+export function formatCopyNodeResult(
+	data: CopyNode200ResponseData,
+	options?: FormatterOpts,
+): string {
+	const opts = mergeFormatterOptions(options);
+	const node = data?.result;
+	if (!node) {
+		return finalizeFormattedText(
+			"Node copied but no metadata returned.",
+			opts,
+			{
+				context: { title: "Copy Node" },
+				structured: data,
+			},
+		);
+	}
+
+	const name = node.name ?? "(unknown)";
+	const path = node.path ?? "(path unknown)";
+	const opType = node.opType ?? "unknown";
+	const base = `✓ Copied node '${name}' (${opType}) to ${path}`;
+	const propCount = Object.keys(node.properties ?? {}).length;
+	const text =
+		opts.detailLevel === "minimal"
+			? base
+			: `${base}\nProperties detected: ${propCount}`;
+
+	return finalizeFormattedText(text, opts, {
+		context: { opType, path, title: "Copy Node" },
+		structured: data,
+		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
+	});
+}
+
+export function formatConnectNodesResult(
+	data: ConnectNodes200ResponseData,
+	options?: FormatterOpts,
+): string {
+	const opts = mergeFormatterOptions(options);
+	if (!data) {
+		return finalizeFormattedText(
+			"Nodes connected but no metadata returned.",
+			opts,
+			{
+				context: { title: "Connect Nodes" },
+			},
+		);
+	}
+
+	const from = data.from ?? "(unknown)";
+	const to = data.to ?? "(unknown)";
+	const family = data.family ?? "unknown";
+	const base = `✓ Connected ${from} → ${to} (${family})`;
+	const text =
+		opts.detailLevel === "minimal"
+			? base
+			: `${base}\nOutput: ${data.fromOutput ?? 0} → Input: ${data.toInput ?? 0}`;
+
+	return finalizeFormattedText(text, opts, {
+		context: { family, from, title: "Connect Nodes", to },
+		structured: data,
+		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
+	});
 }
 
 function summarizeValue(value: unknown): string {

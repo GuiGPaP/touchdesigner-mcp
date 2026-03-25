@@ -3,7 +3,7 @@
  * Do not edit manually.
  * TouchDesigner API
  * OpenAPI schema for generating TouchDesigner API client code
- * OpenAPI spec version: 1.5.0
+ * OpenAPI spec version: 1.6.0
  */
 import * as zod from 'zod';
 
@@ -882,6 +882,58 @@ export const IndexTdProjectResponse = zod.object({
   "warnings": zod.array(zod.string()).optional()
 }).optional(),
   "error": zod.string().nullish()
+})
+
+
+/**
+ * @summary Copy a node to a new location
+ */
+export const CopyNodeBody = zod.object({
+  "sourcePath": zod.string().describe('Path to the source operator (e.g., \/project1\/geo1)'),
+  "targetParentPath": zod.string().describe('Path to the target parent COMP (e.g., \/project1\/container1)'),
+  "name": zod.string().optional().describe('Optional name for the copy (auto-generated if omitted)'),
+  "nodeX": zod.number().optional().describe('Optional X position for the copied node'),
+  "nodeY": zod.number().optional().describe('Optional Y position for the copied node')
+})
+
+export const CopyNodeResponse = zod.object({
+  "success": zod.boolean().describe('Whether the operation was successful'),
+  "data": zod.object({
+  "result": zod.object({
+  "id": zod.number(),
+  "opType": zod.string(),
+  "name": zod.string(),
+  "path": zod.string(),
+  "properties": zod.record(zod.string(), zod.unknown())
+}).optional().describe('Information about a TouchDesigner node')
+}).nullable(),
+  "error": zod.string().nullable().describe('Error message if the operation was not successful')
+})
+
+
+/**
+ * @summary Connect two nodes
+ */
+export const connectNodesBodyFromOutputDefault = 0;
+export const connectNodesBodyToInputDefault = 0;
+
+export const ConnectNodesBody = zod.object({
+  "fromPath": zod.string().describe('Path to the source operator'),
+  "toPath": zod.string().describe('Path to the destination operator'),
+  "fromOutput": zod.number().default(connectNodesBodyFromOutputDefault).describe('Output connector index (default 0)'),
+  "toInput": zod.number().default(connectNodesBodyToInputDefault).describe('Input connector index (default 0)')
+})
+
+export const ConnectNodesResponse = zod.object({
+  "success": zod.boolean().describe('Whether the operation was successful'),
+  "data": zod.object({
+  "from": zod.string().optional().describe('Path of the source node'),
+  "to": zod.string().optional().describe('Path of the destination node'),
+  "fromOutput": zod.number().optional().describe('Output connector index used'),
+  "toInput": zod.number().optional().describe('Input connector index used'),
+  "family": zod.string().optional().describe('Operator family of the connected nodes')
+}).nullable(),
+  "error": zod.string().nullable().describe('Error message if the operation was not successful')
 })
 
 

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * TouchDesigner API
  * OpenAPI schema for generating TouchDesigner API client code
- * OpenAPI spec version: 1.5.0
+ * OpenAPI spec version: 1.6.0
  */
 import { customInstance } from '../../api/customInstance.js';
 import type { BodyType } from '../../api/customInstance.js';
@@ -294,6 +294,75 @@ export interface GetNodes200Response {
   /** Whether the operation was successful */
   success: boolean;
   data: GetNodes200ResponseData | null;
+  /**
+   * Error message if the operation was not successful
+   * @nullable
+   */
+  error: string | null;
+}
+
+export interface CopyNodeRequest {
+  /** Path to the source operator (e.g., /project1/geo1) */
+  sourcePath: string;
+  /** Path to the target parent COMP (e.g., /project1/container1) */
+  targetParentPath: string;
+  /** Optional name for the copy (auto-generated if omitted) */
+  name?: string;
+  /** Optional X position for the copied node */
+  nodeX?: number;
+  /** Optional Y position for the copied node */
+  nodeY?: number;
+}
+
+/**
+ * @nullable
+ */
+export type CopyNode200ResponseData = {
+  result?: TdNode;
+} | null;
+
+export interface CopyNode200Response {
+  /** Whether the operation was successful */
+  success: boolean;
+  data: CopyNode200ResponseData | null;
+  /**
+   * Error message if the operation was not successful
+   * @nullable
+   */
+  error: string | null;
+}
+
+export interface ConnectNodesRequest {
+  /** Path to the source operator */
+  fromPath: string;
+  /** Path to the destination operator */
+  toPath: string;
+  /** Output connector index (default 0) */
+  fromOutput?: number;
+  /** Input connector index (default 0) */
+  toInput?: number;
+}
+
+/**
+ * @nullable
+ */
+export type ConnectNodes200ResponseData = {
+  /** Path of the source node */
+  from?: string;
+  /** Path of the destination node */
+  to?: string;
+  /** Output connector index used */
+  fromOutput?: number;
+  /** Input connector index used */
+  toInput?: number;
+  /** Operator family of the connected nodes */
+  family?: string;
+} | null;
+
+export interface ConnectNodes200Response {
+  /** Whether the operation was successful */
+  success: boolean;
+  data: ConnectNodes200ResponseData | null;
   /**
    * Error message if the operation was not successful
    * @nullable
@@ -1768,6 +1837,34 @@ export const indexTdProject = (
     }
   
 /**
+ * @summary Copy a node to a new location
+ */
+export const copyNode = (
+    copyNodeRequest: BodyType<CopyNodeRequest>,
+ options?: SecondParameter<typeof customInstance<CopyNode200Response>>,) => {
+      return customInstance<CopyNode200Response>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/copy`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: copyNodeRequest
+    },
+      options);
+    }
+  
+/**
+ * @summary Connect two nodes
+ */
+export const connectNodes = (
+    connectNodesRequest: BodyType<ConnectNodesRequest>,
+ options?: SecondParameter<typeof customInstance<ConnectNodes200Response>>,) => {
+      return customInstance<ConnectNodes200Response>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/connect`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: connectNodesRequest
+    },
+      options);
+    }
+  
+/**
  * Aggregate contextual information for a single node. Fetches multiple
 facets (parameters, channels, extensions, errors, etc.) in one call.
 Use include to select specific facets; omit for all.
@@ -1816,4 +1913,6 @@ export type CreateGeometryCompResult = NonNullable<Awaited<ReturnType<typeof cre
 export type CreateFeedbackLoopResult = NonNullable<Awaited<ReturnType<typeof createFeedbackLoop>>>
 export type ConfigureInstancingResult = NonNullable<Awaited<ReturnType<typeof configureInstancing>>>
 export type IndexTdProjectResult = NonNullable<Awaited<ReturnType<typeof indexTdProject>>>
+export type CopyNodeResult = NonNullable<Awaited<ReturnType<typeof copyNode>>>
+export type ConnectNodesResult = NonNullable<Awaited<ReturnType<typeof connectNodes>>>
 export type GetTdContextResult = NonNullable<Awaited<ReturnType<typeof getTdContext>>>

@@ -8,6 +8,8 @@ import type { ServerMode } from "../../../core/serverMode.js";
 import {
 	CompleteOpPathsQueryParams,
 	ConfigureInstancingBody,
+	ConnectNodesBody,
+	CopyNodeBody,
 	CreateFeedbackLoopBody,
 	CreateGeometryCompBody,
 	CreateNodeBody,
@@ -47,6 +49,8 @@ import {
 	formatCompExtensions,
 	formatCompleteOpPaths,
 	formatConfigureInstancing,
+	formatConnectNodesResult,
+	formatCopyNodeResult,
 	formatCreateFeedbackLoop,
 	formatCreateGeometryComp,
 	formatCreateNodeResult,
@@ -136,6 +140,16 @@ const createNodeToolSchema = CreateNodeBody.extend({
 		.optional(),
 });
 type CreateNodeToolParams = z.input<typeof createNodeToolSchema>;
+
+const copyNodeToolSchema = CopyNodeBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type CopyNodeToolParams = z.input<typeof copyNodeToolSchema>;
+
+const connectNodesToolSchema = ConnectNodesBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type ConnectNodesToolParams = z.input<typeof connectNodesToolSchema>;
 
 const updateNodeToolSchema = UpdateNodeBody.extend(
 	detailOnlyFormattingSchema.shape,
@@ -620,6 +634,72 @@ export function registerTdTools(
 						error,
 						logger,
 						TOOL_NAMES.DELETE_TD_NODE,
+						REFERENCE_COMMENT,
+						serverMode,
+					);
+				}
+			},
+		),
+	);
+
+	server.tool(
+		TOOL_NAMES.COPY_NODE,
+		"Copy a node to a new location in TouchDesigner",
+		copyNodeToolSchema.strict().shape,
+		withLiveGuard(
+			TOOL_NAMES.COPY_NODE,
+			serverMode,
+			tdClient,
+			async (params: CopyNodeToolParams) => {
+				try {
+					const { detailLevel, responseFormat, ...copyParams } = params;
+					const result = await tdClient.copyNode(copyParams);
+					if (!result.success) {
+						throw result.error;
+					}
+					const formattedText = formatCopyNodeResult(result.data, {
+						detailLevel: detailLevel ?? "summary",
+						responseFormat,
+					});
+					return createToolResult(tdClient, formattedText);
+				} catch (error) {
+					return handleToolError(
+						error,
+						logger,
+						TOOL_NAMES.COPY_NODE,
+						REFERENCE_COMMENT,
+						serverMode,
+					);
+				}
+			},
+		),
+	);
+
+	server.tool(
+		TOOL_NAMES.CONNECT_NODES,
+		"Connect two operators in TouchDesigner (same family required)",
+		connectNodesToolSchema.strict().shape,
+		withLiveGuard(
+			TOOL_NAMES.CONNECT_NODES,
+			serverMode,
+			tdClient,
+			async (params: ConnectNodesToolParams) => {
+				try {
+					const { detailLevel, responseFormat, ...connectParams } = params;
+					const result = await tdClient.connectNodes(connectParams);
+					if (!result.success) {
+						throw result.error;
+					}
+					const formattedText = formatConnectNodesResult(result.data, {
+						detailLevel: detailLevel ?? "summary",
+						responseFormat,
+					});
+					return createToolResult(tdClient, formattedText);
+				} catch (error) {
+					return handleToolError(
+						error,
+						logger,
+						TOOL_NAMES.CONNECT_NODES,
 						REFERENCE_COMMENT,
 						serverMode,
 					);
