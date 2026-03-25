@@ -76,3 +76,8 @@ export {
 	formatToolkitSearchResults,
 } from "./toolkitFormatter.js";
 export { formatToolMetadata } from "./toolMetadataFormatter.js";
+export {
+	formatSuggestWorkflow,
+	formatWorkflowDetail,
+	formatWorkflowSearchResults,
+} from "./workflowFormatter.js";

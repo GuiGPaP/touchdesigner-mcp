@@ -3,6 +3,7 @@ import type { ILogger } from "../../core/logger.js";
 import type { ServerMode } from "../../core/serverMode.js";
 import type { TouchDesignerClient } from "../../tdClient/index.js";
 import type { FusionService } from "../resources/fusionService.js";
+import { resolveKnowledgePath } from "../resources/paths.js";
 import type { KnowledgeRegistry } from "../resources/registry.js";
 import type { VersionManifest } from "../resources/versionManifest.js";
 import {
@@ -17,11 +18,12 @@ import { registerExecLogTools } from "./handlers/execLogTools.js";
 import { registerGlslPatternTools } from "./handlers/glslPatternTools.js";
 import { registerHealthTools } from "./handlers/healthTools.js";
 import { registerLessonTools } from "./handlers/lessonTools.js";
-import { resolveKnowledgePath } from "../resources/paths.js";
 import { registerPaletteTools } from "./handlers/paletteTools.js";
 import { registerProjectCatalogTools } from "./handlers/projectCatalogTools.js";
 import { registerSearchTools } from "./handlers/searchTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
+import { registerToolkitTools } from "./handlers/toolkitTools.js";
+import { registerWorkflowTools } from "./handlers/workflowTools.js";
 import { ExecAuditLog } from "./security/index.js";
 
 export interface ResourceDeps {
@@ -89,7 +91,26 @@ export function registerTools(
 
 	// Register lesson tools (offline, no TD needed)
 	const knowledgePath = resolveKnowledgePath(import.meta.url);
-	registerLessonTools(server, logger, knowledgeRegistry, serverMode, knowledgePath, tdClient);
+	registerLessonTools(
+		server,
+		logger,
+		knowledgeRegistry,
+		serverMode,
+		knowledgePath,
+		tdClient,
+	);
+
+	// Register toolkit tools (search/get offline, detect live)
+	registerToolkitTools(server, logger, knowledgeRegistry, serverMode, tdClient);
+
+	// Register workflow tools (offline, no TD needed)
+	registerWorkflowTools(
+		server,
+		logger,
+		knowledgeRegistry,
+		serverMode,
+		knowledgePath,
+	);
 
 	// Register project catalog tools
 	registerProjectCatalogTools(server, logger, tdClient, serverMode, auditLog);

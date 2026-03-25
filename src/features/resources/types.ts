@@ -182,9 +182,7 @@ const lessonProvenanceSchema = provenanceSchema.extend({
 const lessonPayloadSchema = z.object({
 	category: z.enum(["pattern", "pitfall"]),
 	cause: z.string().optional(),
-	difficulty: z
-		.enum(["beginner", "intermediate", "advanced"])
-		.optional(),
+	difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
 	fix: z.string().optional(),
 	operatorChain: z.array(lessonOperatorSchema).optional(),
 	recipe: lessonRecipeSchema.optional(),
@@ -237,6 +235,52 @@ export const enrichmentMetaSchema = z.object({
 	tdBuild: z.string().nullable().optional(),
 });
 
+// ── Toolkit schemas ───────────────────────────────────────────────
+
+const toolkitPayloadSchema = z.object({
+	dependencies: z.array(z.string()).optional(),
+	detectionPaths: z.array(z.string()).optional(),
+	installHint: z.string().optional(),
+	name: z.string(),
+	opFamilyPrefix: z.string(),
+	url: z.string().url().optional(),
+	vendor: z.string(),
+	version: z.string().optional(),
+});
+
+const toolkitEntrySchema = knowledgeEntryBaseSchema.extend({
+	kind: z.literal("toolkit"),
+	payload: toolkitPayloadSchema,
+});
+
+// ── Workflow pattern schemas ────────────────────────────────────────
+
+const workflowOperatorSchema = z.object({
+	family: z.string(),
+	opType: z.string(),
+	role: z.string().optional(),
+});
+
+const workflowConnectionSchema = z.object({
+	from: z.string(),
+	fromOutput: z.number().int().default(0),
+	to: z.string(),
+	toInput: z.number().int().default(0),
+});
+
+const workflowPatternPayloadSchema = z.object({
+	category: z.string(),
+	connections: z.array(workflowConnectionSchema),
+	difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
+	operators: z.array(workflowOperatorSchema),
+	tags: z.array(z.string()).optional(),
+});
+
+const workflowPatternEntrySchema = knowledgeEntryBaseSchema.extend({
+	kind: z.literal("workflow"),
+	payload: workflowPatternPayloadSchema,
+});
+
 // ── Discriminated union ─────────────────────────────────────────────
 
 export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
@@ -244,6 +288,8 @@ export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
 	operatorEntrySchema,
 	glslPatternEntrySchema,
 	lessonEntrySchema,
+	toolkitEntrySchema,
+	workflowPatternEntrySchema,
 ]);
 
 // ── Exported types ──────────────────────────────────────────────────
@@ -253,6 +299,8 @@ export type TDPythonModuleEntry = z.infer<typeof pythonModuleEntrySchema>;
 export type TDOperatorEntry = z.infer<typeof operatorEntrySchema>;
 export type TDGlslPatternEntry = z.infer<typeof glslPatternEntrySchema>;
 export type TDLessonEntry = z.infer<typeof lessonEntrySchema>;
+export type TDToolkitEntry = z.infer<typeof toolkitEntrySchema>;
+export type TDWorkflowPatternEntry = z.infer<typeof workflowPatternEntrySchema>;
 export type EnrichmentMeta = z.infer<typeof enrichmentMetaSchema>;
 export type EnrichedStaticOperatorParam = z.infer<
 	typeof enrichedStaticOperatorParamSchema
