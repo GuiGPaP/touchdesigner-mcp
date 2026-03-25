@@ -281,6 +281,41 @@ const workflowPatternEntrySchema = knowledgeEntryBaseSchema.extend({
 	payload: workflowPatternPayloadSchema,
 });
 
+// ── Network template schemas ───────────────────────────────────────
+
+const templateOperatorSchema = z.object({
+	family: z.string(),
+	name: z.string(),
+	opType: z.string(),
+	role: z.string().optional(),
+	x: z.number().optional(),
+	y: z.number().optional(),
+});
+
+const templateConnectionSchema = z.object({
+	from: z.string(),
+	fromOutput: z.number().int().default(0),
+	note: z.string().optional(),
+	to: z.string(),
+	toInput: z.number().int().default(0),
+});
+
+const templatePayloadSchema = z.object({
+	category: z.string(),
+	connections: z.array(templateConnectionSchema),
+	difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
+	operators: z.array(templateOperatorSchema),
+	parameters: z
+		.record(z.string(), z.record(z.string(), z.unknown()))
+		.optional(),
+	tags: z.array(z.string()).optional(),
+});
+
+const templateEntrySchema = knowledgeEntryBaseSchema.extend({
+	kind: z.literal("template"),
+	payload: templatePayloadSchema,
+});
+
 // ── Discriminated union ─────────────────────────────────────────────
 
 export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
@@ -290,6 +325,7 @@ export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
 	lessonEntrySchema,
 	toolkitEntrySchema,
 	workflowPatternEntrySchema,
+	templateEntrySchema,
 ]);
 
 // ── Exported types ──────────────────────────────────────────────────
@@ -301,6 +337,7 @@ export type TDGlslPatternEntry = z.infer<typeof glslPatternEntrySchema>;
 export type TDLessonEntry = z.infer<typeof lessonEntrySchema>;
 export type TDToolkitEntry = z.infer<typeof toolkitEntrySchema>;
 export type TDWorkflowPatternEntry = z.infer<typeof workflowPatternEntrySchema>;
+export type TDTemplateEntry = z.infer<typeof templateEntrySchema>;
 export type EnrichmentMeta = z.infer<typeof enrichmentMetaSchema>;
 export type EnrichedStaticOperatorParam = z.infer<
 	typeof enrichedStaticOperatorParamSchema

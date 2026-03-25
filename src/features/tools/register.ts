@@ -14,10 +14,12 @@ import {
 import { AssetRegistry } from "../templates/registry.js";
 import type { AssetSource } from "../templates/types.js";
 import { registerAssetTools } from "./handlers/assetTools.js";
+import { registerBuildTools } from "./handlers/buildTools.js";
 import { registerExecLogTools } from "./handlers/execLogTools.js";
 import { registerGlslPatternTools } from "./handlers/glslPatternTools.js";
 import { registerHealthTools } from "./handlers/healthTools.js";
 import { registerLessonTools } from "./handlers/lessonTools.js";
+import { registerNetworkTemplateTools } from "./handlers/networkTemplateTools.js";
 import { registerPaletteTools } from "./handlers/paletteTools.js";
 import { registerProjectCatalogTools } from "./handlers/projectCatalogTools.js";
 import { registerSearchTools } from "./handlers/searchTools.js";
@@ -111,6 +113,24 @@ export function registerTools(
 		serverMode,
 		knowledgePath,
 	);
+
+	// Register network template tools (search/get offline, deploy live)
+	registerNetworkTemplateTools(
+		server,
+		logger,
+		knowledgeRegistry,
+		serverMode,
+		tdClient,
+	);
+
+	// Register build tracking tools (offline)
+	if (knowledgePath) {
+		registerBuildTools(
+			server,
+			logger,
+			knowledgePath.replace(/[/\\]td-knowledge$/, ""),
+		);
+	}
 
 	// Register project catalog tools
 	registerProjectCatalogTools(server, logger, tdClient, serverMode, auditLog);

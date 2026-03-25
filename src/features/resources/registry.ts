@@ -147,6 +147,16 @@ export class KnowledgeRegistry {
 	/**
 	 * Return a lightweight index filtered to workflow pattern entries.
 	 */
+	getTemplateIndex(): Array<{
+		id: string;
+		title: string;
+		kind: string;
+	}> {
+		return [...this.entries.values()]
+			.filter((e) => e.kind === "template")
+			.map((e) => ({ id: e.id, kind: e.kind, title: e.title }));
+	}
+
 	getWorkflowIndex(): Array<{
 		id: string;
 		title: string;
@@ -203,6 +213,14 @@ function matchesQuery(entry: TDKnowledgeEntry, query: string): boolean {
 		haystacks.push(entry.payload.vendor);
 		haystacks.push(entry.payload.opFamilyPrefix);
 		if (entry.payload.version) haystacks.push(entry.payload.version);
+	} else if (entry.kind === "template") {
+		haystacks.push(entry.payload.category);
+		if (entry.payload.difficulty) haystacks.push(entry.payload.difficulty);
+		if (entry.payload.tags) haystacks.push(...entry.payload.tags);
+		for (const op of entry.payload.operators) {
+			haystacks.push(op.opType, op.family, op.name);
+			if (op.role) haystacks.push(op.role);
+		}
 	} else if (entry.kind === "workflow") {
 		haystacks.push(entry.payload.category);
 		if (entry.payload.difficulty) haystacks.push(entry.payload.difficulty);

@@ -4,6 +4,7 @@
  * Central export point for all response formatters
  */
 
+export { formatBuildDetail, formatBuildList } from "./buildFormatter.js";
 export { formatCapabilities } from "./capabilitiesFormatter.js";
 export type { ClassDetailsData, ClassListData } from "./classListFormatter.js";
 export { formatClassDetails, formatClassList } from "./classListFormatter.js";
@@ -41,6 +42,11 @@ export {
 	formatLessonSearchResults,
 } from "./lessonFormatter.js";
 export { formatModuleHelp } from "./moduleHelpFormatter.js";
+export {
+	formatDeployTemplateResult,
+	formatTemplateDetail,
+	formatTemplateSearchResults,
+} from "./networkTemplateFormatter.js";
 export type { NodeDetailsData } from "./nodeDetailsFormatter.js";
 export { formatNodeDetails } from "./nodeDetailsFormatter.js";
 export type { NodeErrorReportData } from "./nodeErrorsFormatter.js";
