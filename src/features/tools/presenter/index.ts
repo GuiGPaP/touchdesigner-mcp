@@ -41,6 +41,11 @@ export {
 	formatParameterSchema,
 } from "./introspectionFormatter.js";
 export { formatModuleHelp } from "./moduleHelpFormatter.js";
+export {
+	formatIndexResult,
+	formatLoadResult,
+	formatPaletteSearchResults,
+} from "./paletteFormatter.js";
 export type { NodeDetailsData } from "./nodeDetailsFormatter.js";
 export { formatNodeDetails } from "./nodeDetailsFormatter.js";
 export type { NodeErrorReportData } from "./nodeErrorsFormatter.js";

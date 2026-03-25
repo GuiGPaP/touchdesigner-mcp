@@ -18,6 +18,7 @@ import { registerGlslPatternTools } from "./handlers/glslPatternTools.js";
 import { registerHealthTools } from "./handlers/healthTools.js";
 import { registerLessonTools } from "./handlers/lessonTools.js";
 import { resolveKnowledgePath } from "../resources/paths.js";
+import { registerPaletteTools } from "./handlers/paletteTools.js";
 import { registerProjectCatalogTools } from "./handlers/projectCatalogTools.js";
 import { registerSearchTools } from "./handlers/searchTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
@@ -92,6 +93,9 @@ export function registerTools(
 
 	// Register project catalog tools
 	registerProjectCatalogTools(server, logger, tdClient, serverMode, auditLog);
+
+	// Register palette tools (index, search, load)
+	registerPaletteTools(server, logger, tdClient, serverMode, auditLog);
 
 	return { assetRegistry };
 }
