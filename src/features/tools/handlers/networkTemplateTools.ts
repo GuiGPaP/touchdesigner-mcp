@@ -271,7 +271,7 @@ export function registerNetworkTemplateTools(
 
 					const script = scriptLines.join("\n");
 					const execResult = await tdClient.execPythonScript({
-						mode: "safe-write",
+						mode: "full-exec",
 						script,
 					});
 

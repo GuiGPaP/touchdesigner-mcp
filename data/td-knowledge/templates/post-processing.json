@@ -18,7 +18,7 @@
       { "name": "render1", "opType": "renderTOP", "family": "TOP", "role": "generator", "x": 0, "y": 0 },
       { "name": "bloom1", "opType": "bloomTOP", "family": "TOP", "role": "filter", "x": 200, "y": 0 },
       { "name": "level1", "opType": "levelTOP", "family": "TOP", "role": "filter", "x": 400, "y": 0 },
-      { "name": "hsv1", "opType": "hsvAdjustTOP", "family": "TOP", "role": "filter", "x": 600, "y": 0 },
+      { "name": "hsv1", "opType": "hsvadjustTOP", "family": "TOP", "role": "filter", "x": 600, "y": 0 },
       { "name": "out1", "opType": "nullTOP", "family": "TOP", "role": "output", "x": 800, "y": 0 }
     ],
     "connections": [
