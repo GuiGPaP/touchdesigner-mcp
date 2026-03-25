@@ -48,6 +48,7 @@ export const TOOL_NAMES = {
 	GET_TOOLKIT: "get_toolkit",
 	INDEX_PALETTE: "index_palette",
 	INDEX_TD_PROJECT: "index_td_project",
+	LAYOUT_NODES: "layout_nodes",
 	LINT_DAT: "lint_dat",
 	LINT_DATS: "lint_dats",
 	LOAD_PALETTE_COMPONENT: "load_palette_component",

@@ -18,6 +18,7 @@ vi.mock("../../src/gen/endpoints/TouchDesignerAPI", async () => {
 		configureInstancing: vi.fn(),
 		connectNodes: vi.fn(),
 		copyNode: vi.fn(),
+		layoutNodes: vi.fn(),
 		createFeedbackLoop: vi.fn(),
 		createGeometryComp: vi.fn(),
 		createNode: vi.fn(),

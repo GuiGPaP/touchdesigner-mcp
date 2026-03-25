@@ -30,6 +30,7 @@ import {
 	GetTdContextQueryParams,
 	GetTdPythonClassDetailsParams,
 	IndexTdProjectQueryParams,
+	LayoutNodesBody,
 	LintDatBody,
 	LintDatsBody,
 	SetDatTextBody,
@@ -60,6 +61,7 @@ import {
 	formatDiscoverDatCandidates,
 	formatExecNodeMethodResult,
 	formatFormatDat,
+	formatLayoutNodesResult,
 	formatLintDat,
 	formatLintDats,
 	formatModuleHelp,
@@ -150,6 +152,11 @@ const connectNodesToolSchema = ConnectNodesBody.extend(
 	detailOnlyFormattingSchema.shape,
 );
 type ConnectNodesToolParams = z.input<typeof connectNodesToolSchema>;
+
+const layoutNodesToolSchema = LayoutNodesBody.extend(
+	detailOnlyFormattingSchema.shape,
+);
+type LayoutNodesToolParams = z.input<typeof layoutNodesToolSchema>;
 
 const updateNodeToolSchema = UpdateNodeBody.extend(
 	detailOnlyFormattingSchema.shape,
@@ -700,6 +707,39 @@ export function registerTdTools(
 						error,
 						logger,
 						TOOL_NAMES.CONNECT_NODES,
+						REFERENCE_COMMENT,
+						serverMode,
+					);
+				}
+			},
+		),
+	);
+
+	server.tool(
+		TOOL_NAMES.LAYOUT_NODES,
+		"Reorganize nodes using a layout algorithm (horizontal, vertical, or grid)",
+		layoutNodesToolSchema.strict().shape,
+		withLiveGuard(
+			TOOL_NAMES.LAYOUT_NODES,
+			serverMode,
+			tdClient,
+			async (params: LayoutNodesToolParams) => {
+				try {
+					const { detailLevel, responseFormat, ...layoutParams } = params;
+					const result = await tdClient.layoutNodes(layoutParams);
+					if (!result.success) {
+						throw result.error;
+					}
+					const formattedText = formatLayoutNodesResult(result.data, {
+						detailLevel: detailLevel ?? "summary",
+						responseFormat,
+					});
+					return createToolResult(tdClient, formattedText);
+				} catch (error) {
+					return handleToolError(
+						error,
+						logger,
+						TOOL_NAMES.LAYOUT_NODES,
 						REFERENCE_COMMENT,
 						serverMode,
 					);

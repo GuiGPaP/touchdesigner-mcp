@@ -6,6 +6,7 @@ import type {
 	DeleteNode200ResponseData,
 	ExecNodeMethod200ResponseData,
 	GetTdInfo200ResponseData,
+	LayoutNodes200ResponseData,
 	UpdateNode200ResponseData,
 } from "../../../gen/endpoints/TouchDesignerAPI.js";
 import type { FormatterOptions } from "./responseFormatter.js";
@@ -195,6 +196,40 @@ export function formatCopyNodeResult(
 
 	return finalizeFormattedText(text, opts, {
 		context: { opType, path, title: "Copy Node" },
+		structured: data,
+		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
+	});
+}
+
+export function formatLayoutNodesResult(
+	data: LayoutNodes200ResponseData,
+	options?: FormatterOpts,
+): string {
+	const opts = mergeFormatterOptions(options);
+	if (!data) {
+		return finalizeFormattedText(
+			"Nodes repositioned but no metadata returned.",
+			opts,
+			{ context: { title: "Layout Nodes" } },
+		);
+	}
+
+	const nodes = data.nodes ?? [];
+	const mode = data.mode ?? "unknown";
+	const spacing = data.spacing ?? 0;
+	const base = `✓ Laid out ${nodes.length} node(s) — mode: ${mode}, spacing: ${spacing}px`;
+	const lines =
+		opts.detailLevel === "minimal"
+			? [base]
+			: [
+					base,
+					...nodes.map(
+						(n) => `  ${n.path ?? "?"} → (${n.nodeX ?? 0}, ${n.nodeY ?? 0})`,
+					),
+				];
+
+	return finalizeFormattedText(lines.join("\n"), opts, {
+		context: { mode, title: "Layout Nodes" },
 		structured: data,
 		template: opts.detailLevel === "detailed" ? "detailedPayload" : "default",
 	});

@@ -40,6 +40,7 @@ import {
 	getTdPythonClassDetails as apiGetTdPythonClassDetails,
 	getTdPythonClasses as apiGetTdPythonClasses,
 	indexTdProject as apiIndexTdProject,
+	layoutNodes as apiLayoutNodes,
 	lintDat as apiLintDat,
 	lintDats as apiLintDats,
 	setDatText as apiSetDatText,
@@ -81,6 +82,7 @@ import {
 	type GetTdContextParams,
 	type IndexTdProject200Data,
 	type IndexTdProjectParams,
+	type LayoutNodesRequest,
 	type LintDat200Data,
 	type LintDatBody,
 	type LintDats200Data,
@@ -104,6 +106,7 @@ export interface ITouchDesignerApi {
 	configureInstancing: typeof apiConfigureInstancing;
 	connectNodes: typeof apiConnectNodes;
 	copyNode: typeof apiCopyNode;
+	layoutNodes: typeof apiLayoutNodes;
 	getCapabilities: typeof apiGetCapabilities;
 	createFeedbackLoop: typeof apiCreateFeedbackLoop;
 	createGeometryComp: typeof apiCreateGeometryComp;
@@ -167,6 +170,7 @@ const defaultApiClient: ITouchDesignerApi = {
 	getTdPythonClassDetails: apiGetTdPythonClassDetails,
 	getTdPythonClasses: apiGetTdPythonClasses,
 	indexTdProject: apiIndexTdProject,
+	layoutNodes: apiLayoutNodes,
 	lintDat: apiLintDat,
 	lintDats: apiLintDats,
 	setDatText: apiSetDatText,
@@ -577,6 +581,20 @@ export class TouchDesignerClient {
 			{
 				fromPath: params.fromPath,
 				toPath: params.toPath,
+			},
+		);
+	}
+
+	/**
+	 * Reorganize nodes using a layout algorithm
+	 */
+	async layoutNodes(params: LayoutNodesRequest) {
+		return this.apiCall(
+			"Laying out nodes",
+			() => this.api.layoutNodes(params),
+			{
+				mode: params.mode,
+				paths: params.paths,
 			},
 		);
 	}
