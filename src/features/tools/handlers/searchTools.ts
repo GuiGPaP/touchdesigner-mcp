@@ -21,8 +21,11 @@ import { detailOnlyFormattingSchema } from "../types.js";
 const searchOperatorsSchema = z.object({
 	...detailOnlyFormattingSchema.shape,
 	family: z
-		.enum(["TOP", "CHOP", "SOP", "COMP", "DAT", "MAT"])
-		.describe("Filter by operator family")
+		.string()
+		.toUpperCase()
+		.describe(
+			"Filter by operator family (TOP, CHOP, SOP, COMP, DAT, MAT, or third-party prefixes like T3D, LOP, POPx)",
+		)
 		.optional(),
 	maxResults: z
 		.number()

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * TouchDesigner API
  * OpenAPI schema for generating TouchDesigner API client code
- * OpenAPI spec version: 1.6.0
+ * OpenAPI spec version: 1.7.0
  */
 import * as zod from 'zod';
 
@@ -932,6 +932,34 @@ export const ConnectNodesResponse = zod.object({
   "fromOutput": zod.number().optional().describe('Output connector index used'),
   "toInput": zod.number().optional().describe('Input connector index used'),
   "family": zod.string().optional().describe('Operator family of the connected nodes')
+}).nullable(),
+  "error": zod.string().nullable().describe('Error message if the operation was not successful')
+})
+
+
+/**
+ * @summary Reorganize nodes using a layout algorithm
+ */
+export const layoutNodesBodyModeDefault = `horizontal`;
+
+export const LayoutNodesBody = zod.object({
+  "paths": zod.array(zod.string()).describe('Node paths to lay out (minimum 2)'),
+  "mode": zod.enum(['horizontal', 'vertical', 'grid']).default(layoutNodesBodyModeDefault).describe('Layout mode: horizontal, vertical, or grid'),
+  "spacing": zod.number().optional().describe('Override spacing in pixels (default depends on mode)'),
+  "startX": zod.number().optional().describe('Anchor X position (default uses leftmost node)'),
+  "startY": zod.number().optional().describe('Anchor Y position (default uses topmost node)')
+})
+
+export const LayoutNodesResponse = zod.object({
+  "success": zod.boolean().describe('Whether the operation was successful'),
+  "data": zod.object({
+  "nodes": zod.array(zod.object({
+  "path": zod.string().optional(),
+  "nodeX": zod.number().optional(),
+  "nodeY": zod.number().optional()
+})).optional(),
+  "mode": zod.string().optional(),
+  "spacing": zod.number().optional()
 }).nullable(),
   "error": zod.string().nullable().describe('Error message if the operation was not successful')
 })

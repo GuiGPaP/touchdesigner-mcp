@@ -3,7 +3,7 @@
  * Do not edit manually.
  * TouchDesigner API
  * OpenAPI schema for generating TouchDesigner API client code
- * OpenAPI spec version: 1.6.0
+ * OpenAPI spec version: 1.7.0
  */
 import { customInstance } from '../../api/customInstance.js';
 import type { BodyType } from '../../api/customInstance.js';
@@ -294,6 +294,57 @@ export interface GetNodes200Response {
   /** Whether the operation was successful */
   success: boolean;
   data: GetNodes200ResponseData | null;
+  /**
+   * Error message if the operation was not successful
+   * @nullable
+   */
+  error: string | null;
+}
+
+/**
+ * Layout mode: horizontal, vertical, or grid
+ */
+export type LayoutNodesRequestMode = typeof LayoutNodesRequestMode[keyof typeof LayoutNodesRequestMode];
+
+
+export const LayoutNodesRequestMode = {
+  horizontal: 'horizontal',
+  vertical: 'vertical',
+  grid: 'grid',
+} as const;
+
+export interface LayoutNodesRequest {
+  /** Node paths to lay out (minimum 2) */
+  paths: string[];
+  /** Layout mode: horizontal, vertical, or grid */
+  mode?: LayoutNodesRequestMode;
+  /** Override spacing in pixels (default depends on mode) */
+  spacing?: number;
+  /** Anchor X position (default uses leftmost node) */
+  startX?: number;
+  /** Anchor Y position (default uses topmost node) */
+  startY?: number;
+}
+
+export interface LayoutNodes200ResponseNode {
+  path?: string;
+  nodeX?: number;
+  nodeY?: number;
+}
+
+/**
+ * @nullable
+ */
+export type LayoutNodes200ResponseData = {
+  nodes?: LayoutNodes200ResponseNode[];
+  mode?: string;
+  spacing?: number;
+} | null;
+
+export interface LayoutNodes200Response {
+  /** Whether the operation was successful */
+  success: boolean;
+  data: LayoutNodes200ResponseData | null;
   /**
    * Error message if the operation was not successful
    * @nullable
@@ -1865,6 +1916,20 @@ export const connectNodes = (
     }
   
 /**
+ * @summary Reorganize nodes using a layout algorithm
+ */
+export const layoutNodes = (
+    layoutNodesRequest: BodyType<LayoutNodesRequest>,
+ options?: SecondParameter<typeof customInstance<LayoutNodes200Response>>,) => {
+      return customInstance<LayoutNodes200Response>(
+      {url: `${process.env.TD_WEB_SERVER_HOST}:${process.env.TD_WEB_SERVER_PORT}/api/nodes/layout`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: layoutNodesRequest
+    },
+      options);
+    }
+  
+/**
  * Aggregate contextual information for a single node. Fetches multiple
 facets (parameters, channels, extensions, errors, etc.) in one call.
 Use include to select specific facets; omit for all.
@@ -1915,4 +1980,5 @@ export type ConfigureInstancingResult = NonNullable<Awaited<ReturnType<typeof co
 export type IndexTdProjectResult = NonNullable<Awaited<ReturnType<typeof indexTdProject>>>
 export type CopyNodeResult = NonNullable<Awaited<ReturnType<typeof copyNode>>>
 export type ConnectNodesResult = NonNullable<Awaited<ReturnType<typeof connectNodes>>>
+export type LayoutNodesResult = NonNullable<Awaited<ReturnType<typeof layoutNodes>>>
 export type GetTdContextResult = NonNullable<Awaited<ReturnType<typeof getTdContext>>>
