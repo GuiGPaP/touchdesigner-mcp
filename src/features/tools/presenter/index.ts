@@ -83,6 +83,10 @@ export {
 } from "./toolkitFormatter.js";
 export { formatToolMetadata } from "./toolMetadataFormatter.js";
 export {
+	formatVersionDetail,
+	formatVersionList,
+} from "./versionFormatter.js";
+export {
 	formatSuggestWorkflow,
 	formatWorkflowDetail,
 	formatWorkflowSearchResults,

@@ -25,6 +25,7 @@ import { registerProjectCatalogTools } from "./handlers/projectCatalogTools.js";
 import { registerSearchTools } from "./handlers/searchTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
 import { registerToolkitTools } from "./handlers/toolkitTools.js";
+import { registerVersionTools } from "./handlers/versionTools.js";
 import { registerWorkflowTools } from "./handlers/workflowTools.js";
 import { ExecAuditLog } from "./security/index.js";
 
@@ -89,6 +90,9 @@ export function registerTools(
 			resourceDeps.fusionService,
 			serverMode,
 		);
+
+		// Register version history tools (offline)
+		registerVersionTools(server, logger, resourceDeps.versionManifest);
 	}
 
 	// Register lesson tools (offline, no TD needed)

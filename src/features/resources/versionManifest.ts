@@ -4,9 +4,13 @@ import type { ILogger } from "../../core/logger.js";
 import { resolveKnowledgePath } from "./paths.js";
 
 export interface TDVersionInfo {
+	breakingChanges?: string[];
+	highlights?: string[];
 	id: string;
 	label?: string;
+	newOperators?: string[];
 	pythonVersion: string;
+	releaseYear?: number;
 	supportStatus: "active" | "current" | "legacy" | "maintenance";
 }
 
