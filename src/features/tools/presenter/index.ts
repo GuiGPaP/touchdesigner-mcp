@@ -79,6 +79,10 @@ export {
 	formatTechniqueDetail,
 	formatTechniqueSearchResults,
 } from "./techniqueFormatter.js";
+export {
+	formatTutorialDetail,
+	formatTutorialSearchResults,
+} from "./tutorialFormatter.js";
 export type { DetectedToolkit } from "./toolkitFormatter.js";
 export {
 	formatDetectResult,

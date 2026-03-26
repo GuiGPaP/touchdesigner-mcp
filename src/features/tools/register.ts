@@ -26,6 +26,7 @@ import { registerSearchTools } from "./handlers/searchTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
 import { registerTechniqueTools } from "./handlers/techniqueTools.js";
 import { registerToolkitTools } from "./handlers/toolkitTools.js";
+import { registerTutorialTools } from "./handlers/tutorialTools.js";
 import { registerVersionTools } from "./handlers/versionTools.js";
 import { registerWorkflowTools } from "./handlers/workflowTools.js";
 import { ExecAuditLog } from "./security/index.js";
@@ -109,6 +110,9 @@ export function registerTools(
 
 	// Register technique tools (offline)
 	registerTechniqueTools(server, logger, knowledgeRegistry, serverMode);
+
+	// Register tutorial tools (offline)
+	registerTutorialTools(server, logger, knowledgeRegistry, serverMode);
 
 	// Register toolkit tools (search/get offline, detect live)
 	registerToolkitTools(server, logger, knowledgeRegistry, serverMode, tdClient);

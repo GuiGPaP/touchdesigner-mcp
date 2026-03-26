@@ -370,6 +370,28 @@ const techniqueEntrySchema = knowledgeEntryBaseSchema.extend({
 	payload: techniquePayloadSchema,
 });
 
+// ── Tutorial schemas ──────────────────────────────────────────────
+
+const tutorialSectionSchema = z.object({
+	code: z.string().optional(),
+	content: z.string(),
+	title: z.string(),
+});
+
+const tutorialPayloadSchema = z.object({
+	difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+	estimatedTime: z.string(),
+	prerequisites: z.array(z.string()),
+	relatedOperators: z.array(z.string()),
+	sections: z.array(tutorialSectionSchema),
+	tags: z.array(z.string()),
+});
+
+const tutorialEntrySchema = knowledgeEntryBaseSchema.extend({
+	kind: z.literal("tutorial"),
+	payload: tutorialPayloadSchema,
+});
+
 // ── Discriminated union ─────────────────────────────────────────────
 
 export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
@@ -381,6 +403,7 @@ export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
 	workflowPatternEntrySchema,
 	templateEntrySchema,
 	techniqueEntrySchema,
+	tutorialEntrySchema,
 ]);
 
 // ── Exported types ──────────────────────────────────────────────────
@@ -394,6 +417,7 @@ export type TDToolkitEntry = z.infer<typeof toolkitEntrySchema>;
 export type TDWorkflowPatternEntry = z.infer<typeof workflowPatternEntrySchema>;
 export type TDTemplateEntry = z.infer<typeof templateEntrySchema>;
 export type TDTechniqueEntry = z.infer<typeof techniqueEntrySchema>;
+export type TDTutorialEntry = z.infer<typeof tutorialEntrySchema>;
 export type EnrichmentMeta = z.infer<typeof enrichmentMetaSchema>;
 export type EnrichedStaticOperatorParam = z.infer<
 	typeof enrichedStaticOperatorParamSchema
