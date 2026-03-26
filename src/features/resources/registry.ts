@@ -167,6 +167,16 @@ export class KnowledgeRegistry {
 			.map((e) => ({ id: e.id, kind: e.kind, title: e.title }));
 	}
 
+	getTechniqueIndex(): Array<{
+		id: string;
+		title: string;
+		kind: string;
+	}> {
+		return [...this.entries.values()]
+			.filter((e) => e.kind === "technique")
+			.map((e) => ({ id: e.id, kind: e.kind, title: e.title }));
+	}
+
 	/**
 	 * Hot-add a single entry to the registry (for capture workflow).
 	 */
@@ -228,6 +238,15 @@ function matchesQuery(entry: TDKnowledgeEntry, query: string): boolean {
 		for (const op of entry.payload.operators) {
 			haystacks.push(op.opType, op.family);
 			if (op.role) haystacks.push(op.role);
+		}
+	} else if (entry.kind === "technique") {
+		haystacks.push(entry.payload.category);
+		haystacks.push(entry.payload.difficulty);
+		haystacks.push(...entry.payload.tags);
+		if (entry.payload.operatorChain) {
+			for (const op of entry.payload.operatorChain) {
+				haystacks.push(op.opType, op.family);
+			}
 		}
 	} else if (entry.kind === "lesson") {
 		haystacks.push(entry.payload.category);

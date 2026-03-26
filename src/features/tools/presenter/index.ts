@@ -75,6 +75,10 @@ export {
 	formatAssetSearchResults,
 	formatDeployResult,
 } from "./templateFormatter.js";
+export {
+	formatTechniqueDetail,
+	formatTechniqueSearchResults,
+} from "./techniqueFormatter.js";
 export type { DetectedToolkit } from "./toolkitFormatter.js";
 export {
 	formatDetectResult,

@@ -24,6 +24,7 @@ import { registerPaletteTools } from "./handlers/paletteTools.js";
 import { registerProjectCatalogTools } from "./handlers/projectCatalogTools.js";
 import { registerSearchTools } from "./handlers/searchTools.js";
 import { registerTdTools } from "./handlers/tdTools.js";
+import { registerTechniqueTools } from "./handlers/techniqueTools.js";
 import { registerToolkitTools } from "./handlers/toolkitTools.js";
 import { registerVersionTools } from "./handlers/versionTools.js";
 import { registerWorkflowTools } from "./handlers/workflowTools.js";
@@ -105,6 +106,9 @@ export function registerTools(
 		knowledgePath,
 		tdClient,
 	);
+
+	// Register technique tools (offline)
+	registerTechniqueTools(server, logger, knowledgeRegistry, serverMode);
 
 	// Register toolkit tools (search/get offline, detect live)
 	registerToolkitTools(server, logger, knowledgeRegistry, serverMode, tdClient);

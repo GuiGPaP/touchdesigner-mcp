@@ -334,6 +334,42 @@ const templateEntrySchema = knowledgeEntryBaseSchema.extend({
 	payload: templatePayloadSchema,
 });
 
+// ── Technique schemas ─────────────────────────────────────────────
+
+const techniqueCodeSnippetSchema = z.object({
+	code: z.string(),
+	description: z.string().optional(),
+	label: z.string(),
+	language: z.enum(["python", "glsl", "tscript"]).default("python"),
+});
+
+const techniqueOperatorSchema = z.object({
+	family: z.string(),
+	opType: z.string(),
+	role: z.string().optional(),
+});
+
+const techniquePayloadSchema = z.object({
+	category: z.enum([
+		"gpu-compute",
+		"ml",
+		"audio-visual",
+		"networking",
+		"python-advanced",
+		"generative",
+	]),
+	codeSnippets: z.array(techniqueCodeSnippetSchema).optional(),
+	difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+	operatorChain: z.array(techniqueOperatorSchema).optional(),
+	tags: z.array(z.string()),
+	tips: z.array(z.string()).optional(),
+});
+
+const techniqueEntrySchema = knowledgeEntryBaseSchema.extend({
+	kind: z.literal("technique"),
+	payload: techniquePayloadSchema,
+});
+
 // ── Discriminated union ─────────────────────────────────────────────
 
 export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
@@ -344,6 +380,7 @@ export const knowledgeEntrySchema = z.discriminatedUnion("kind", [
 	toolkitEntrySchema,
 	workflowPatternEntrySchema,
 	templateEntrySchema,
+	techniqueEntrySchema,
 ]);
 
 // ── Exported types ──────────────────────────────────────────────────
@@ -356,6 +393,7 @@ export type TDLessonEntry = z.infer<typeof lessonEntrySchema>;
 export type TDToolkitEntry = z.infer<typeof toolkitEntrySchema>;
 export type TDWorkflowPatternEntry = z.infer<typeof workflowPatternEntrySchema>;
 export type TDTemplateEntry = z.infer<typeof templateEntrySchema>;
+export type TDTechniqueEntry = z.infer<typeof techniqueEntrySchema>;
 export type EnrichmentMeta = z.infer<typeof enrichmentMetaSchema>;
 export type EnrichedStaticOperatorParam = z.infer<
 	typeof enrichedStaticOperatorParamSchema
