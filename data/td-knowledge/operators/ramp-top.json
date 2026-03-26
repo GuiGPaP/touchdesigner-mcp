@@ -33,6 +33,29 @@
 				"name": "period"
 			}
 		],
+		"examples": [
+			{
+				"label": "Create radial gradient",
+				"language": "python",
+				"code": "op('ramp1').par.type = 'radial'",
+				"description": "Switch to radial mode for a circular gradient mask.",
+				"context": "textport"
+			},
+			{
+				"label": "Animate ramp phase",
+				"language": "python",
+				"code": "me.time.seconds * 0.2",
+				"description": "Use as a parameter expression on the phase parameter to scroll the gradient.",
+				"context": "parameter-expression"
+			},
+			{
+				"label": "Set ramp period for tiling",
+				"language": "python",
+				"code": "op('ramp1').par.period = 0.25",
+				"description": "Tile the ramp 4 times across the image.",
+				"context": "textport"
+			}
+		],
 		"versions": {
 			"addedIn": "2020"
 		}

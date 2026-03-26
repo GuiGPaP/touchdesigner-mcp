@@ -53,6 +53,34 @@
 				"name": "far"
 			}
 		],
+		"examples": [
+			{
+				"label": "Position camera for top-down view",
+				"language": "python",
+				"code": "c = op('cam1')\nc.par.tx = 0\nc.par.ty = 5\nc.par.tz = 0\nc.par.rx = -90\nc.par.ry = 0\nc.par.rz = 0",
+				"context": "textport"
+			},
+			{
+				"label": "Set field of view",
+				"language": "python",
+				"code": "op('cam1').par.fov = 60",
+				"description": "Set a 60-degree field of view for natural perspective.",
+				"context": "textport"
+			},
+			{
+				"label": "Set clipping planes for large scene",
+				"language": "python",
+				"code": "c = op('cam1')\nc.par.near = 0.01\nc.par.far = 1000",
+				"context": "textport"
+			},
+			{
+				"label": "Orbit camera with time",
+				"language": "python",
+				"code": "math.sin(me.time.seconds * 0.5) * 3",
+				"description": "Use as expression on tx to orbit the camera horizontally.",
+				"context": "parameter-expression"
+			}
+		],
 		"versions": {
 			"addedIn": "2020"
 		}

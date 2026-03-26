@@ -79,7 +79,25 @@ const operatorVersionSchema = z
 	})
 	.optional();
 
+const operatorExampleSchema = z.object({
+	code: z.string(),
+	context: z
+		.enum([
+			"script-chop",
+			"script-dat",
+			"textport",
+			"parameter-expression",
+			"extension",
+			"execute-python-script",
+		])
+		.optional(),
+	description: z.string().optional(),
+	label: z.string(),
+	language: z.enum(["python", "glsl", "tscript"]).default("python"),
+});
+
 const operatorPayloadSchema = z.object({
+	examples: z.array(operatorExampleSchema).optional(),
 	opFamily: z.string(),
 	opType: z.string(),
 	parameters: z.array(staticOperatorParamSchema),

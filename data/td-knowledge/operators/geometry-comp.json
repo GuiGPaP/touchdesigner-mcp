@@ -36,6 +36,28 @@
 				"name": "instancing"
 			}
 		],
+		"examples": [
+			{
+				"label": "Assign a material",
+				"language": "python",
+				"code": "op('geo1').par.material = 'phong1'",
+				"description": "Apply a Phong MAT to the geometry.",
+				"context": "textport"
+			},
+			{
+				"label": "Enable instancing from a CHOP",
+				"language": "python",
+				"code": "g = op('geo1')\ng.par.instancing = True\ng.par.instanceop = 'null_chop1'",
+				"description": "Enable GPU instancing driven by a CHOP.",
+				"context": "textport"
+			},
+			{
+				"label": "Set wireframe render mode",
+				"language": "python",
+				"code": "op('geo1').par.rendermode = 'wireframe'",
+				"context": "textport"
+			}
+		],
 		"versions": {
 			"addedIn": "2020"
 		}

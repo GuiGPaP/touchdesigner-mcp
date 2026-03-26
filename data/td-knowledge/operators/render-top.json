@@ -39,6 +39,28 @@
 				"name": "antialiasing"
 			}
 		],
+		"examples": [
+			{
+				"label": "Assign camera and geometry",
+				"language": "python",
+				"code": "r = op('render1')\nr.par.camera = 'cam1'\nr.par.geometry = 'geo1'",
+				"context": "textport"
+			},
+			{
+				"label": "Set render resolution to 1080p",
+				"language": "python",
+				"code": "r = op('render1')\nr.par.outputresolution = 'custom'\nr.par.antialiasing = '8x'",
+				"description": "Enable 8x antialiasing for smoother edges.",
+				"context": "textport"
+			},
+			{
+				"label": "Assign lights to render",
+				"language": "python",
+				"code": "op('render1').par.lights = 'light*'",
+				"description": "Use a wildcard pattern to include all light COMPs.",
+				"context": "textport"
+			}
+		],
 		"versions": {
 			"addedIn": "2020"
 		}

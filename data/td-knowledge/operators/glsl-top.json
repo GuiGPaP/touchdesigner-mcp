@@ -55,6 +55,26 @@
 				"default": 720,
 				"description": "Output height in pixels"
 			}
+		],
+		"examples": [
+			{
+				"label": "Set output resolution to 1920x1080",
+				"language": "python",
+				"code": "g = op('glsl1')\ng.par.outputresolution = 'usecustomres'\ng.par.resolutionw = 1920\ng.par.resolutionh = 1080",
+				"context": "textport"
+			},
+			{
+				"label": "Match input resolution",
+				"language": "python",
+				"code": "op('glsl1').par.outputresolution = 'useinput'",
+				"context": "textport"
+			},
+			{
+				"label": "Set GLSL version to 3.30",
+				"language": "python",
+				"code": "op('glsl1').par.glslversion = '330'",
+				"context": "textport"
+			}
 		]
 	}
 }

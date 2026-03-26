@@ -12,12 +12,17 @@ export interface ScoredResult {
 	score: number;
 }
 
+export interface OperatorSearchOptions extends FormatterOptions {
+	includeExamples?: boolean;
+}
+
 export function formatOperatorSearchResults(
 	query: string,
 	results: ScoredResult[],
-	options?: FormatterOptions,
+	options?: OperatorSearchOptions,
 ): string {
 	const opts = mergeFormatterOptions(options);
+	const showExamples = options?.includeExamples ?? false;
 
 	if (results.length === 0) {
 		return finalizeFormattedText(
@@ -55,6 +60,22 @@ export function formatOperatorSearchResults(
 					lines.push(`  → Suggested: ${compatibility.suggestedReplacement}`);
 				}
 			}
+			if (
+				showExamples &&
+				entry.kind === "operator" &&
+				entry.payload.examples?.length
+			) {
+				lines.push("  Examples:");
+				for (const ex of entry.payload.examples) {
+					lines.push(`    - ${ex.label} (${ex.language})`);
+					if (ex.description) lines.push(`      ${ex.description}`);
+					lines.push(`      \`\`\`${ex.language}`);
+					for (const codeLine of ex.code.split("\n")) {
+						lines.push(`      ${codeLine}`);
+					}
+					lines.push("      ```");
+				}
+			}
 		}
 	}
 
@@ -69,6 +90,9 @@ export function formatOperatorSearchResults(
 				? {
 						opFamily: r.entry.payload.opFamily,
 						opType: r.entry.payload.opType,
+						...(showExamples && r.entry.payload.examples?.length
+							? { examples: r.entry.payload.examples }
+							: {}),
 					}
 				: {}),
 		})),

@@ -27,6 +27,10 @@ const searchOperatorsSchema = z.object({
 			"Filter by operator family (TOP, CHOP, SOP, COMP, DAT, MAT, or third-party prefixes like T3D, LOP, POPx)",
 		)
 		.optional(),
+	includeExamples: z
+		.boolean()
+		.describe("Include code examples in results (default: false)")
+		.optional(),
 	maxResults: z
 		.number()
 		.int()
@@ -74,6 +78,7 @@ export function registerSearchTools(
 				const {
 					detailLevel,
 					family,
+					includeExamples,
 					maxResults = 10,
 					query,
 					responseFormat,
@@ -157,6 +162,7 @@ export function registerSearchTools(
 					})),
 					{
 						detailLevel: detailLevel ?? "summary",
+						includeExamples: includeExamples ?? false,
 						responseFormat,
 					},
 				);

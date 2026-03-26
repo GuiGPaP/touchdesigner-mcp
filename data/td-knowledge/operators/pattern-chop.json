@@ -46,6 +46,28 @@
 				"name": "channels"
 			}
 		],
+		"examples": [
+			{
+				"label": "Create a sine wave LFO",
+				"language": "python",
+				"code": "p = op('pattern1')\np.par.type = 'sine'\np.par.period = 2\np.par.amplitude = 1",
+				"description": "Generate a sine wave with a 2-second period.",
+				"context": "textport"
+			},
+			{
+				"label": "Create a ramp signal",
+				"language": "python",
+				"code": "p = op('pattern1')\np.par.type = 'ramp'\np.par.phase = 0\np.par.amplitude = 1",
+				"context": "textport"
+			},
+			{
+				"label": "Adjust square wave duty cycle",
+				"language": "python",
+				"code": "p = op('pattern1')\np.par.type = 'square'\np.par.duty = 0.25",
+				"description": "Set a 25% duty cycle for a short pulse pattern.",
+				"context": "textport"
+			}
+		],
 		"versions": {
 			"addedIn": "2020"
 		}

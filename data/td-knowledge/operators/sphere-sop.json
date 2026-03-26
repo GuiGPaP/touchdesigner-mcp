@@ -38,6 +38,28 @@
 				"name": "columns"
 			}
 		],
+		"examples": [
+			{
+				"label": "Create a high-poly sphere",
+				"language": "python",
+				"code": "s = op('sphere1')\ns.par.rows = 50\ns.par.columns = 50",
+				"description": "Increase polygon count for smoother shading.",
+				"context": "textport"
+			},
+			{
+				"label": "Scale sphere radius",
+				"language": "python",
+				"code": "op('sphere1').par.radius = 0.3",
+				"context": "textport"
+			},
+			{
+				"label": "Animate radius with noise",
+				"language": "python",
+				"code": "0.5 + op('noise_chop1')['chan1'] * 0.2",
+				"description": "Use as expression on radius for organic pulsing.",
+				"context": "parameter-expression"
+			}
+		],
 		"versions": {
 			"addedIn": "2020"
 		}

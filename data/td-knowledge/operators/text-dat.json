@@ -31,6 +31,27 @@
 				"name": "loadonstartpulse"
 			}
 		],
+		"examples": [
+			{
+				"label": "Set text content from Python",
+				"language": "python",
+				"code": "op('text1').text = 'Hello, TouchDesigner!'",
+				"context": "textport"
+			},
+			{
+				"label": "Read text content",
+				"language": "python",
+				"code": "content = op('text1').text\nprint(content)",
+				"context": "textport"
+			},
+			{
+				"label": "Load script from external file",
+				"language": "python",
+				"code": "op('text1').par.file = 'scripts/mymodule.py'\nop('text1').par.loadonstartpulse.pulse()",
+				"description": "Point the Text DAT at an external Python file and reload.",
+				"context": "textport"
+			}
+		],
 		"versions": {
 			"addedIn": "2020"
 		}
